@@ -20,84 +20,59 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
 
-/* ═══════════════════════ SPLASH — THE RACE ═══════════════════════ */
-#splash{position:fixed;inset:0;background:#08060a;z-index:1000;overflow:hidden;transition:opacity .8s ease,visibility .8s}
+/* ═══════════════════════ SPLASH ═══════════════════════ */
+#splash{position:fixed;inset:0;background:#08060a;z-index:1000;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;transition:opacity .55s ease,visibility .55s}
 #splash.hide{opacity:0;visibility:hidden}
-.scene{position:absolute;inset:0;opacity:0;will-change:opacity}
-.scene svg{position:absolute;inset:0;width:100%;height:100%}
+#splash::before{content:'';position:absolute;width:62vmax;height:62vmax;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,94,26,.11),transparent 62%);
+  opacity:0;animation:glowIn 2.6s ease-out forwards}
+@keyframes glowIn{0%,18%{opacity:0;transform:scale(.7)}45%{opacity:1;transform:scale(1)}100%{opacity:.85;transform:scale(1.04)}}
 
-/* master timeline 9s, plays once, holds on reveal */
-.s1{animation:sc1 9s ease-in-out forwards}
-.s2{animation:sc2 9s ease-in-out forwards}
-.s3{animation:sc3 9s ease-in-out forwards}
-.s4{animation:sc4 9s ease-in-out forwards}
-.s5{animation:sc5 9s ease-in-out forwards}
-@keyframes sc1{0%{opacity:0}3%{opacity:1}17%{opacity:1}21%{opacity:0}100%{opacity:0}}
-@keyframes sc2{0%,18%{opacity:0}23%{opacity:1}38%{opacity:1}43%{opacity:0}100%{opacity:0}}
-@keyframes sc3{0%,41%{opacity:0}46%{opacity:1}62%{opacity:1}68%{opacity:0}100%{opacity:0}}
-@keyframes sc4{0%,66%{opacity:0}71%{opacity:1}83%{opacity:1}88%{opacity:0}100%{opacity:0}}
-@keyframes sc5{0%,86%{opacity:0}91%{opacity:1}100%{opacity:1}}
+/* streaks that precede the bolt */
+.dashline{position:absolute;height:3px;border-radius:3px;opacity:0;
+  background:linear-gradient(90deg,transparent,#ffc857,transparent)}
+.dashline:nth-of-type(1){width:280px;top:calc(50% - 46px);animation:dashFly 2.6s ease-out forwards}
+.dashline:nth-of-type(2){width:420px;top:calc(50% - 12px);animation:dashFly 2.6s ease-out forwards .04s}
+.dashline:nth-of-type(3){width:330px;top:calc(50% + 26px);animation:dashFly 2.6s ease-out forwards .08s}
+.dashline:nth-of-type(4){width:210px;top:calc(50% + 58px);animation:dashFly 2.6s ease-out forwards .12s}
+@keyframes dashFly{0%{transform:translateX(-56vw);opacity:0}6%{opacity:.9}22%{transform:translateX(46vw);opacity:.55}34%,100%{transform:translateX(60vw);opacity:0}}
 
-/* dive */
-.diver{animation:diveArc 9s cubic-bezier(.4,0,.7,1) forwards}
-@keyframes diveArc{0%,4%{transform:translate(0,0) rotate(0deg)}14%{transform:translate(190px,300px) rotate(155deg)}17%,100%{transform:translate(210px,340px) rotate(180deg);opacity:0}}
-.splashburst{opacity:0;animation:burst 9s ease-out forwards}
-@keyframes burst{0%,13%{opacity:0;transform:scale(.2)}16%{opacity:1;transform:scale(1)}21%,100%{opacity:0;transform:scale(1.7)}}
-.twinkle{animation:tw 2.4s ease-in-out infinite}
-@keyframes tw{0%,100%{opacity:.25}50%{opacity:.9}}
+/* the i bolts in and snaps upright */
+.iwrap{position:absolute;display:flex;flex-direction:column;align-items:center;
+  animation:iBolt 2.6s cubic-bezier(.14,.9,.24,1) forwards}
+@keyframes iBolt{
+  0%   {transform:translateX(-58vw) scaleX(16) scaleY(.28);opacity:0}
+  5%   {opacity:1}
+  20%  {transform:translateX(0) scaleX(2.2) scaleY(.62);opacity:1}
+  30%  {transform:translateX(0) scaleX(1) scaleY(1);opacity:1}
+  40%  {transform:translateX(0) scaleX(1) scaleY(1);opacity:1}
+  100% {transform:translateX(var(--iSlide,-118px)) scaleX(1) scaleY(1);opacity:1}
+}
+.ihead{width:17px;height:17px;border-radius:50%;background:linear-gradient(140deg,#ffd98a,#ff8c2e);
+  box-shadow:0 0 18px rgba(255,140,46,.6)}
+.ibody{width:17px;height:62px;border-radius:8.5px;margin-top:9px;
+  background:linear-gradient(180deg,#ff8c2e,#ff5e1a);box-shadow:0 0 22px rgba(255,94,26,.5)}
 
-/* swim */
-.swimmer-g{animation:swimGlide 9s linear forwards}
-@keyframes swimGlide{0%,20%{transform:translateX(-90px)}43%{transform:translateX(120px)}100%{transform:translateX(120px)}}
-.stroke-arm{transform-origin:center;animation:armCycle 1.3s linear infinite}
-@keyframes armCycle{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.wake{stroke-dasharray:40;animation:wakeFlow 1.4s linear infinite}
-@keyframes wakeFlow{to{stroke-dashoffset:-80}}
-
-/* bike — parallax */
-.pFar{animation:pan 9s linear forwards}
-.pMid{animation:panMid 9s linear forwards}
-.pNear{animation:panNear 9s linear forwards}
-@keyframes pan{0%,42%{transform:translateX(0)}68%{transform:translateX(-70px)}100%{transform:translateX(-70px)}}
-@keyframes panMid{0%,42%{transform:translateX(0)}68%{transform:translateX(-190px)}100%{transform:translateX(-190px)}}
-@keyframes panNear{0%,42%{transform:translateX(0)}68%{transform:translateX(-460px)}100%{transform:translateX(-460px)}}
-.wheelspin{animation:spin .5s linear infinite}
-.cloud{animation:drift 9s linear forwards}
-@keyframes drift{0%,42%{transform:translateX(0)}68%{transform:translateX(-40px)}100%{transform:translateX(-40px)}}
-
-/* run */
-.legR{transform-origin:top center;animation:stride .38s ease-in-out infinite}
-.legL{transform-origin:top center;animation:stride .38s ease-in-out infinite reverse}
-@keyframes stride{0%,100%{transform:rotate(-36deg)}50%{transform:rotate(42deg)}}
-.armR{transform-origin:top center;animation:stride .38s ease-in-out infinite reverse}
-.armL{transform-origin:top center;animation:stride .38s ease-in-out infinite}
-.streak{opacity:0;animation:streakBy .55s linear infinite}
-@keyframes streakBy{0%{transform:translateX(180px);opacity:0}25%{opacity:.85}100%{transform:translateX(-260px);opacity:0}}
-.crowdbob{animation:bob .7s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-
-/* reveal */
-.reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-.wordmark{font-size:clamp(52px,12vw,110px);font-weight:700;letter-spacing:-4px;line-height:1;
-  background:linear-gradient(100deg,#ffd98a,#ff5e1a 48%,#ffa32e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  animation:ignite 9s ease-out forwards}
-@keyframes ignite{0%,87%{opacity:0;transform:scale(.9);filter:blur(14px)}93%{opacity:1;transform:scale(1);filter:blur(0)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
-.tagline{font-family:var(--mono);font-size:clamp(10px,2.4vw,13px);color:#9a9086;letter-spacing:7px;text-transform:uppercase;
-  animation:tagIn 9s ease-out forwards;opacity:0}
-@keyframes tagIn{0%,91%{opacity:0;transform:translateY(8px)}96%,100%{opacity:1;transform:translateY(0)}}
-.emberfield{position:absolute;inset:0;pointer-events:none}
-.ember-p{position:absolute;width:3px;height:3px;border-radius:50%;background:#ffc857;opacity:0;
-  animation:emberRise 3.4s ease-out infinite}
-@keyframes emberRise{0%{opacity:0;transform:translateY(0) scale(1)}12%{opacity:.9}100%{opacity:0;transform:translateY(-160px) scale(.2)}}
-
-/* short (returning users) */
-#splash.quick .scene:not(.s5){display:none}
-#splash.quick .s5{animation:qShow 1.2s ease-out forwards}
-@keyframes qShow{0%{opacity:0}30%{opacity:1}100%{opacity:1}}
-#splash.quick .wordmark{animation:qIgnite 1.2s ease-out forwards}
-@keyframes qIgnite{0%{opacity:0;transform:scale(.94);filter:blur(10px)}55%{opacity:1;transform:scale(1);filter:blur(0)}100%{opacity:1;filter:blur(0)}}
-#splash.quick .tagline{animation:qTag 1.2s ease-out forwards}
-@keyframes qTag{0%,40%{opacity:0}75%,100%{opacity:1}}
+/* letters expand out from the i */
+.reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:none}
+.wm{display:flex;font-size:clamp(50px,12vw,104px);font-weight:700;letter-spacing:-3px;line-height:1}
+.wm span{display:inline-block;opacity:0;
+  background:linear-gradient(100deg,#ffd98a,#ff5e1a 50%,#ffa32e);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  animation:letterOut 2.6s cubic-bezier(.2,1.25,.4,1) forwards}
+@keyframes letterOut{0%,42%{opacity:0;transform:translateX(-64px) scaleX(.12)}
+  62%{opacity:1;transform:translateX(0) scaleX(1)}100%{opacity:1;transform:translateX(0) scaleX(1)}}
+.wm span:nth-child(1){animation-delay:0s}
+.wm span:nth-child(2){animation-delay:.045s}
+.wm span:nth-child(3){animation-delay:.09s}
+.wm span:nth-child(4){animation-delay:.135s}
+.wm span:nth-child(5){animation-delay:.18s}
+.wm span:nth-child(6){animation-delay:.225s}
+.wm span:nth-child(7){animation-delay:.27s}
+.tagline{font-family:var(--mono);font-size:clamp(10px,2.4vw,13px);color:#9a9086;
+  letter-spacing:7px;text-transform:uppercase;opacity:0;animation:tagIn 2.6s ease-out forwards}
+@keyframes tagIn{0%,72%{opacity:0;transform:translateY(9px)}90%,100%{opacity:1;transform:translateY(0)}}
 
 /* ═══════════════════════ AUTH ═══════════════════════ */
 .auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative}
@@ -248,151 +223,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 </head>
 <body>
 
-<!-- ═══════════════════════ SPLASH — THE RACE ═══════════════════════ -->
+<!-- ═══════════════════════ SPLASH ═══════════════════════ -->
 <div id="splash">
-
-<!-- SCENE 1 · THE DIVE — pre-dawn -->
-<div class="scene s1">
-<svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-<defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#0a0618"/><stop offset="0.5" stop-color="#241640"/><stop offset="0.85" stop-color="#5c2a4a"/><stop offset="1" stop-color="#8a3d3a"/></linearGradient></defs>
-<rect width="1200" height="700" fill="url(#g1)"/>
-<g fill="#fff">
-<circle class="twinkle" cx="180" cy="90" r="1.8"/><circle class="twinkle" cx="420" cy="60" r="1.4" style="animation-delay:.5s"/>
-<circle class="twinkle" cx="760" cy="110" r="2" style="animation-delay:1s"/><circle class="twinkle" cx="980" cy="70" r="1.5" style="animation-delay:1.5s"/>
-<circle class="twinkle" cx="1080" cy="150" r="1.6" style="animation-delay:.8s"/><circle class="twinkle" cx="300" cy="170" r="1.3" style="animation-delay:1.8s"/>
-</g>
-<path d="M0 420 L160 330 L300 400 L430 340 L560 410 L700 360 L850 420 L1000 370 L1120 415 L1200 385 L1200 470 L0 470 Z" fill="#150d24"/>
-<rect x="60" y="180" width="150" height="26" rx="4" fill="#0d0714"/>
-<rect x="150" y="200" width="18" height="230" fill="#0d0714"/>
-<g class="diver" style="transform-origin:110px 170px">
-<g fill="#08050c" transform="translate(96,140)">
-<circle cx="14" cy="10" r="11"/><rect x="7" y="20" width="15" height="42" rx="7"/>
-<rect x="2" y="-16" width="8" height="36" rx="4" transform="rotate(-14 6 2)"/>
-<rect x="20" y="-16" width="8" height="36" rx="4" transform="rotate(14 24 2)"/>
-<rect x="7" y="58" width="7" height="40" rx="3.5"/><rect x="16" y="58" width="7" height="40" rx="3.5"/>
-</g></g>
-<rect y="470" width="1200" height="230" fill="#0a0716"/>
-<path d="M0 470 Q150 462 300 470 T600 470 T900 470 T1200 470" stroke="#6b3d5c" stroke-width="3" fill="none" opacity=".55"/>
-<g class="splashburst" style="transform-origin:320px 470px">
-<g fill="#c98fb0">
-<ellipse cx="320" cy="470" rx="72" ry="14" opacity=".7"/>
-<circle cx="266" cy="432" r="7"/><circle cx="298" cy="404" r="9"/><circle cx="342" cy="398" r="8"/><circle cx="378" cy="424" r="7"/>
-<circle cx="246" cy="452" r="5"/><circle cx="396" cy="448" r="5.5"/><circle cx="320" cy="386" r="6"/>
-<circle cx="282" cy="416" r="4"/><circle cx="360" cy="412" r="4.5"/>
-</g></g>
-</svg></div>
-
-<!-- SCENE 2 · THE SWIM — sunrise -->
-<div class="scene s2">
-<svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-<defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#1e1030"/><stop offset="0.42" stop-color="#8a3116"/><stop offset="0.74" stop-color="#ff5e1a"/><stop offset="1" stop-color="#ffc857"/></linearGradient>
-<linearGradient id="w2" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#ff9d3d"/><stop offset="0.35" stop-color="#8a3d12"/><stop offset="1" stop-color="#150c08"/></linearGradient></defs>
-<rect width="1200" height="420" fill="url(#g2)"/>
-<circle cx="840" cy="388" r="72" fill="#ffe1a0"/><circle cx="840" cy="388" r="124" fill="#ffb347" opacity=".2"/>
-<path d="M0 340 L140 258 L250 312 L390 232 L510 322 L620 286 L740 348 L880 296 L1010 356 L1120 306 L1200 348 L1200 420 L0 420 Z" fill="#3a1526" opacity=".9"/>
-<path d="M0 378 L120 336 L250 382 L380 330 L500 384 L640 344 L780 390 L920 348 L1060 392 L1200 356 L1200 420 L0 420 Z" fill="#22101a"/>
-<rect y="420" width="1200" height="280" fill="url(#w2)"/>
-<path d="M560 420 Q640 410 720 420 T880 420 T1040 420" stroke="#ffe1a0" stroke-width="3" fill="none" opacity=".45"/>
-<g class="swimmer-g">
-<path class="wake" d="M330 486 Q400 478 470 486 T610 486" stroke="#ffcf8a" stroke-width="3" fill="none" opacity=".5"/>
-<g fill="#0d0705">
-<ellipse cx="560" cy="482" rx="96" ry="18"/><circle cx="500" cy="470" r="16"/>
-<g class="stroke-arm" style="transform-origin:520px 462px">
-<rect x="512" y="404" width="13" height="62" rx="6.5"/></g>
-<path d="M628 476 Q676 468 712 480 Q722 484 714 492 Q704 498 690 492 Q664 482 626 486 Z"/>
-</g>
-<g fill="#fff1cf" opacity=".8"><ellipse cx="524" cy="480" rx="38" ry="6"/><ellipse cx="606" cy="488" rx="28" ry="5"/></g>
-</g>
-<path d="M0 574 Q140 564 280 574 T560 574 T840 574 T1200 574" stroke="#4a2412" stroke-width="4" fill="none" opacity=".5"/>
-</svg></div>
-
-<!-- SCENE 3 · THE BIKE — midday -->
-<div class="scene s3">
-<svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-<defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#2b7fc4"/><stop offset="0.55" stop-color="#7cc0e8"/><stop offset="1" stop-color="#cfe9f5"/></linearGradient>
-<linearGradient id="mead" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#5d8f3a"/><stop offset="1" stop-color="#2e4a1c"/></linearGradient></defs>
-<rect width="1200" height="470" fill="url(#g3)"/>
-<circle cx="990" cy="110" r="46" fill="#fff6d8"/>
-<g class="cloud" fill="#fff" opacity=".82">
-<ellipse cx="240" cy="120" rx="62" ry="24"/><ellipse cx="296" cy="112" rx="46" ry="20"/><ellipse cx="190" cy="128" rx="40" ry="18"/>
-<ellipse cx="720" cy="86" rx="52" ry="20"/><ellipse cx="768" cy="80" rx="38" ry="16"/>
-</g>
-<g class="pFar">
-<path d="M0 400 L150 250 L280 350 L420 220 L560 340 L700 260 L840 370 L980 280 L1120 366 L1260 300 L1260 470 L0 470 Z" fill="#5f7f9e" opacity=".75"/>
-<path d="M420 220 L468 268 L372 268 Z" fill="#f2f7fb"/><path d="M150 250 L192 296 L108 296 Z" fill="#f2f7fb"/>
-</g>
-<g class="pMid"><path d="M0 418 L180 356 L340 412 L520 350 L700 414 L880 358 L1060 418 L1260 372 L1260 470 L0 470 Z" fill="#3f6a54"/></g>
-<rect y="440" width="1200" height="60" fill="#2f5c78"/>
-<rect y="470" width="1200" height="230" fill="url(#mead)"/>
-<g class="pNear" fill="#22400f">
-<path d="M40 500 q10 -30 20 0z M110 496 q12 -36 24 0z M200 502 q9 -28 18 0z M300 494 q13 -38 26 0z M420 500 q10 -30 20 0z M540 496 q12 -34 24 0z M660 502 q9 -26 18 0z M780 494 q13 -36 26 0z M900 500 q10 -30 20 0z M1020 496 q12 -34 24 0z M1140 500 q10 -30 20 0z M1260 496 q12 -34 24 0z"/>
-</g>
-<rect y="556" width="1200" height="54" fill="#3d3630"/>
-<g fill="#0d0a06" transform="translate(470,436)">
-<g class="wheelspin" style="transform-origin:36px 122px">
-<circle cx="36" cy="122" r="34" fill="none" stroke="#0d0a06" stroke-width="6"/>
-<line x1="36" y1="88" x2="36" y2="156" stroke="#0d0a06" stroke-width="3"/><line x1="2" y1="122" x2="70" y2="122" stroke="#0d0a06" stroke-width="3"/>
-<line x1="12" y1="98" x2="60" y2="146" stroke="#0d0a06" stroke-width="3"/><line x1="60" y1="98" x2="12" y2="146" stroke="#0d0a06" stroke-width="3"/></g>
-<g class="wheelspin" style="transform-origin:172px 122px">
-<circle cx="172" cy="122" r="34" fill="none" stroke="#0d0a06" stroke-width="6"/>
-<line x1="172" y1="88" x2="172" y2="156" stroke="#0d0a06" stroke-width="3"/><line x1="138" y1="122" x2="206" y2="122" stroke="#0d0a06" stroke-width="3"/>
-<line x1="148" y1="98" x2="196" y2="146" stroke="#0d0a06" stroke-width="3"/><line x1="196" y1="98" x2="148" y2="146" stroke="#0d0a06" stroke-width="3"/></g>
-<path d="M36 122 L104 66 L172 122 L36 122 Z" fill="none" stroke="#0d0a06" stroke-width="6"/>
-<line x1="104" y1="66" x2="150" y2="52" stroke="#0d0a06" stroke-width="5"/>
-<circle cx="118" cy="18" r="15"/><path d="M112 32 Q104 52 100 68 L118 74 Q128 52 132 34 Z"/>
-<path d="M122 40 L150 52 L156 44 L128 30 Z"/><path d="M104 70 L92 102 L104 108 L118 78 Z"/>
-</g>
-</svg></div>
-
-<!-- SCENE 4 · THE RUN — golden hour -->
-<div class="scene s4">
-<svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-<defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#5a2a52"/><stop offset="0.45" stop-color="#c4562a"/><stop offset="0.8" stop-color="#ff8c2e"/><stop offset="1" stop-color="#ffd98a"/></linearGradient></defs>
-<rect width="1200" height="700" fill="url(#g4)"/>
-<circle cx="600" cy="470" r="150" fill="#fff0c4" opacity=".55"/>
-<circle cx="600" cy="470" r="86" fill="#fff6dc"/>
-<g fill="#2a1018" opacity=".92">
-<g class="crowdbob"><circle cx="60" cy="440" r="24"/><rect x="40" y="462" width="42" height="120" rx="12"/><rect x="26" y="400" width="11" height="70" rx="5" transform="rotate(-22 32 435)"/></g>
-<g class="crowdbob" style="animation-delay:.2s"><circle cx="140" cy="452" r="22"/><rect x="122" y="472" width="38" height="110" rx="11"/><rect x="160" y="414" width="10" height="64" rx="5" transform="rotate(20 165 446)"/></g>
-<g class="crowdbob" style="animation-delay:.45s"><circle cx="216" cy="444" r="23"/><rect x="197" y="465" width="40" height="116" rx="11"/></g>
-<g class="crowdbob" style="animation-delay:.1s"><circle cx="1140" cy="440" r="24"/><rect x="1120" y="462" width="42" height="120" rx="12"/><rect x="1166" y="400" width="11" height="70" rx="5" transform="rotate(22 1171 435)"/></g>
-<g class="crowdbob" style="animation-delay:.35s"><circle cx="1058" cy="452" r="22"/><rect x="1040" y="472" width="38" height="110" rx="11"/><rect x="1024" y="414" width="10" height="64" rx="5" transform="rotate(-20 1029 446)"/></g>
-<g class="crowdbob" style="animation-delay:.55s"><circle cx="982" cy="444" r="23"/><rect x="963" y="465" width="40" height="116" rx="11"/></g>
-</g>
-<g stroke="#fff2cf" stroke-width="4" stroke-linecap="round" opacity=".8">
-<line class="streak" x1="300" y1="250" x2="440" y2="250"/><line class="streak" x1="260" y1="330" x2="430" y2="330" style="animation-delay:.12s"/>
-<line class="streak" x1="320" y1="410" x2="450" y2="410" style="animation-delay:.24s"/><line class="streak" x1="280" y1="500" x2="420" y2="500" style="animation-delay:.36s"/>
-</g>
-<g fill="#0a0508" transform="translate(524,232)">
-<circle cx="76" cy="42" r="34"/><path d="M58 82 L96 82 L104 210 L50 210 Z"/>
-<g class="legR" style="transform-origin:78px 206px"><rect x="66" y="200" width="26" height="112" rx="13"/><rect x="70" y="300" width="24" height="98" rx="12"/></g>
-<g class="legL" style="transform-origin:78px 206px"><rect x="62" y="200" width="26" height="112" rx="13"/><rect x="58" y="300" width="24" height="98" rx="12"/></g>
-<g class="armR" style="transform-origin:96px 100px"><rect x="88" y="94" width="22" height="96" rx="11"/></g>
-<g class="armL" style="transform-origin:56px 100px"><rect x="44" y="94" width="22" height="96" rx="11"/></g>
-</g>
-<rect y="582" width="1200" height="118" fill="#1c0d10"/>
-</svg></div>
-
-<!-- SCENE 5 · REVEAL — dusk -->
-<div class="scene s5">
-<svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-<defs><radialGradient id="g5" cx="0.5" cy="0.55" r="0.75">
-<stop offset="0" stop-color="#2a1408"/><stop offset="0.55" stop-color="#12090c"/><stop offset="1" stop-color="#08060a"/></radialGradient></defs>
-<rect width="1200" height="700" fill="url(#g5)"/>
-</svg>
-<div class="reveal">
-<div class="wordmark">inertia</div>
-<div class="tagline">Stay in motion</div>
-</div>
-<div class="emberfield" id="emberfield"></div>
-</div>
-
+  <div class="dashline"></div><div class="dashline"></div>
+  <div class="dashline"></div><div class="dashline"></div>
+  <div class="iwrap"><div class="ihead"></div><div class="ibody"></div></div>
+  <div class="reveal">
+    <div class="wm"><span>i</span><span>n</span><span>e</span><span>r</span><span>t</span><span>i</span><span>a</span></div>
+    <div class="tagline">Stay in motion</div>
+  </div>
 </div>
 
 <!-- ═══════════════════════ AUTH ═══════════════════════ -->
@@ -692,15 +531,10 @@ function seedGenSparks() {
     el.appendChild(s);
   }
 }
-seedParticles('emberfield', 18, 'ember-p');
 seedGenSparks();
 
-// ─── SPLASH MODE: full cinematic first visit, quick after ───
-const SEEN_KEY = 'inertia_intro_seen';
-const isReturning = localStorage.getItem(SEEN_KEY) === '1';
-const SPLASH_MS = isReturning ? 1500 : 9300;
-if (isReturning) document.getElementById('splash').classList.add('quick');
-localStorage.setItem(SEEN_KEY, '1');
+// ─── SPLASH: always plays full during build phase ───
+const SPLASH_MS = 2800;
 
 // ─── FORGE QUOTES ───
 const FORGE_QUOTES = [
