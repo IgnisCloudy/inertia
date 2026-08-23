@@ -624,6 +624,11 @@ function startForgeLoop() {
     gs.textContent = GEN_STAGES[si];
   }, 4200);
 }
+function setGenStatus(txt) {
+  const el = document.getElementById('genStatus');
+  if (el) el.textContent = txt;
+}
+
 function stopForgeLoop() {
   clearInterval(quoteTimer); clearInterval(stageTimer);
   quoteTimer = null; stageTimer = null;
@@ -868,7 +873,7 @@ async function onbFinish() {
     if (gErr) throw new Error('Goal save: ' + gErr.message);
 
     // 3. Generate plan via Netlify function
-    document.getElementById('gen-title').textContent = 'Designing your training plan…';
+    setGenStatus('Shaping the plan');
     const planReq = {
       profile: { ...profileUpdate },
       goal: goalRow,
@@ -891,7 +896,7 @@ async function onbFinish() {
     const plan = respData.plan;
     if (!plan || !plan.sessions) throw new Error('Empty plan returned');
 
-    document.getElementById('gen-title').textContent = 'Saving your plan…';
+    setGenStatus('Quenching');
 
     // 4. Save plan
     const { data: planRow, error: plErr } = await sb.from('plans').insert({
