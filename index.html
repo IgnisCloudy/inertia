@@ -84,6 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .field label{display:block;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px}
 .field input{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:13px 15px;border-radius:12px;font-family:var(--font);font-size:15px;transition:border-color .15s}
 .field input:focus{outline:none;border-color:var(--acc)}
+.field select,.onb-select{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:13px 15px;border-radius:12px;font-family:var(--font);font-size:15px}
 .field input::placeholder{color:var(--dim)}
 
 .btn-primary{width:100%;background:var(--acc);color:var(--bg);border:none;padding:14px;border-radius:12px;font-family:var(--font);font-weight:700;font-size:15px;cursor:pointer;transition:transform .1s,opacity .15s;margin-top:6px}
@@ -119,6 +120,69 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .dash-hello span{background:linear-gradient(135deg,var(--acc),var(--swim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .dash-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:24px;margin-bottom:16px}
 .logout-btn{background:none;border:1px solid var(--b2);color:var(--muted);padding:8px 16px;border-radius:10px;font-family:var(--font);font-size:13px;cursor:pointer}
+
+/* ═══════════════════════ ONBOARDING ═══════════════════════ */
+#onboarding{display:none;min-height:100vh;padding:24px;flex-direction:column;max-width:520px;margin:0 auto}
+#onboarding.active{display:flex}
+.onb-progress{display:flex;gap:6px;margin-bottom:32px;margin-top:8px}
+.onb-dot{flex:1;height:4px;border-radius:2px;background:var(--b1);transition:background .3s}
+.onb-dot.active{background:var(--acc)}
+.onb-dot.done{background:var(--acc);opacity:.5}
+.onb-step{display:none;flex-direction:column;flex:1}
+.onb-step.active{display:flex}
+.onb-title{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}
+.onb-title span{background:linear-gradient(135deg,var(--acc),var(--swim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.onb-sub{color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.5}
+.onb-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.onb-row.single{grid-template-columns:1fr}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:10px 16px;border-radius:24px;font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--b3)}
+.chip.selected{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
+.onb-actions{display:flex;gap:10px;margin-top:auto;padding-top:24px}
+.btn-secondary{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:14px;border-radius:12px;font-family:var(--font);font-weight:600;font-size:14px;cursor:pointer}
+.btn-secondary:active{background:var(--s3)}
+.onb-actions .btn-primary{flex:2;margin-top:0}
+.section-label{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;margin-top:4px}
+
+/* Plan generation screen */
+#generating{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:24px}
+#generating.active{display:flex}
+.gen-orb{width:100px;height:100px;position:relative}
+.gen-orb::before,.gen-orb::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--acc);animation:spin 1s linear infinite}
+.gen-orb::after{border-top-color:var(--swim);animation:spin 1.5s linear infinite reverse;inset:8px}
+.gen-title{font-size:20px;font-weight:700;text-align:center}
+.gen-sub{color:var(--muted);font-size:13px;text-align:center;max-width:320px;line-height:1.6}
+
+/* ═══════════════════════ REAL DASHBOARD ═══════════════════════ */
+#dashboard{max-width:520px}
+.dash-hello{font-size:24px;font-weight:700;margin-bottom:4px}
+.dash-day{color:var(--muted);font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:24px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px}
+.stat-label{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+.stat-value{font-size:26px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono)}
+.stat-value.accent{color:var(--acc)}
+.stat-value.swim{color:var(--swim)}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+.next-card{background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--b2);border-radius:18px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+.next-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--acc),var(--swim),var(--indigo))}
+.next-label{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.5px;color:var(--acc);margin-bottom:10px}
+.next-sport{display:inline-block;font-size:11px;padding:4px 10px;border-radius:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.next-sport.run{background:rgba(244,114,182,.15);color:var(--run)}
+.next-sport.bike{background:rgba(251,146,60,.15);color:var(--bike)}
+.next-sport.swim{background:rgba(56,189,248,.15);color:var(--swim)}
+.next-sport.strength{background:rgba(129,140,248,.15);color:var(--indigo)}
+.next-sport.rest{background:var(--s3);color:var(--muted)}
+.next-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.next-meta{display:flex;gap:16px;color:var(--muted);font-size:13px;margin-bottom:14px;font-family:var(--mono)}
+.next-notes{font-size:14px;line-height:1.6;color:var(--text);opacity:.9}
+
+.action-row{display:flex;gap:8px;margin-top:8px}
+.action-btn{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:11px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+.action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+
 </style>
 </head>
 <body>
@@ -276,7 +340,152 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
-<!-- ═══════════════════════ DASHBOARD PLACEHOLDER ═══════════════════════ -->
+<!-- ═══════════════════════ ONBOARDING ═══════════════════════ -->
+<div id="onboarding">
+  <div class="onb-progress">
+    <div class="onb-dot active" data-step="1"></div>
+    <div class="onb-dot" data-step="2"></div>
+    <div class="onb-dot" data-step="3"></div>
+    <div class="onb-dot" data-step="4"></div>
+  </div>
+
+  <!-- Step 1: About you -->
+  <div class="onb-step active" data-step="1">
+    <div class="onb-title">Tell us <span>about you</span></div>
+    <div class="onb-sub">This helps us build a plan that fits your body and lifestyle.</div>
+
+    <div class="onb-row">
+      <div class="field"><label>Age</label><input type="number" id="onb-age" placeholder="28" min="10" max="99"></div>
+      <div class="field"><label>Sex</label>
+        <select id="onb-sex" class="onb-select">
+          <option value="">Select</option>
+          <option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="onb-row">
+      <div class="field"><label>Height (cm)</label><input type="number" id="onb-height" placeholder="175"></div>
+      <div class="field"><label>Weight (kg)</label><input type="number" id="onb-weight" placeholder="70"></div>
+    </div>
+    <div class="onb-row single">
+      <div class="field"><label>Diet</label>
+        <select id="onb-diet" class="onb-select">
+          <option value="omnivore">Omnivore</option>
+          <option value="eggetarian">Eggetarian</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="vegan">Vegan</option>
+          <option value="pescatarian">Pescatarian</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-primary" onclick="onbNext(1)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Your sports -->
+  <div class="onb-step" data-step="2">
+    <div class="onb-title">What do you <span>do</span>?</div>
+    <div class="onb-sub">Pick every sport you train. You can change this later.</div>
+
+    <div class="section-label">Sports</div>
+    <div class="chip-group" id="sport-chips">
+      <div class="chip" data-value="running">🏃 Running</div>
+      <div class="chip" data-value="cycling">🚴 Cycling</div>
+      <div class="chip" data-value="swimming">🏊 Swimming</div>
+      <div class="chip" data-value="walking">🚶 Walking</div>
+      <div class="chip" data-value="strength">💪 Strength</div>
+      <div class="chip" data-value="yoga">🧘 Yoga</div>
+    </div>
+
+    <div class="section-label">Current fitness level</div>
+    <div class="chip-group" id="level-chips">
+      <div class="chip" data-value="beginner">Beginner</div>
+      <div class="chip" data-value="intermediate">Intermediate</div>
+      <div class="chip" data-value="advanced">Advanced</div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-secondary" onclick="onbBack(2)">Back</button>
+      <button class="btn-primary" onclick="onbNext(2)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Your goal -->
+  <div class="onb-step" data-step="3">
+    <div class="onb-title">What's the <span>goal</span>?</div>
+    <div class="onb-sub">Everything we build is aimed at this.</div>
+
+    <div class="section-label">Choose one</div>
+    <div class="chip-group" id="goal-chips">
+      <div class="chip" data-value="5k">5K</div>
+      <div class="chip" data-value="10k">10K</div>
+      <div class="chip" data-value="half_marathon">Half marathon</div>
+      <div class="chip" data-value="marathon">Full marathon</div>
+      <div class="chip" data-value="triathlon">Triathlon</div>
+      <div class="chip" data-value="ironman_703">Ironman 70.3</div>
+      <div class="chip" data-value="ironman">Ironman</div>
+      <div class="chip" data-value="cycling_sportive">Cycling sportive</div>
+      <div class="chip" data-value="healthy">General fitness</div>
+    </div>
+
+    <div id="goal-details" style="display:none">
+      <div class="onb-row single">
+        <div class="field"><label>Race name (optional)</label><input type="text" id="onb-goalname" placeholder="e.g. Ironman 70.3 Goa"></div>
+      </div>
+      <div class="onb-row single">
+        <div class="field"><label>Target date</label><input type="date" id="onb-goaldate"></div>
+      </div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-secondary" onclick="onbBack(3)">Back</button>
+      <button class="btn-primary" onclick="onbNext(3)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Baseline -->
+  <div class="onb-step" data-step="4">
+    <div class="onb-title">Where are you <span>right now</span>?</div>
+    <div class="onb-sub">Honest answers = better plan. No judgement.</div>
+
+    <div class="section-label">Days per week you train now</div>
+    <div class="chip-group" id="days-chips">
+      <div class="chip" data-value="1">1</div>
+      <div class="chip" data-value="2">2</div>
+      <div class="chip" data-value="3">3</div>
+      <div class="chip" data-value="4">4</div>
+      <div class="chip" data-value="5">5</div>
+      <div class="chip" data-value="6">6+</div>
+    </div>
+
+    <div class="onb-row single">
+      <div class="field"><label>Injuries or restrictions</label>
+        <input type="text" id="onb-injuries" placeholder="e.g. left knee, or 'none'">
+      </div>
+    </div>
+    <div class="onb-row single">
+      <div class="field"><label>Anything else we should know</label>
+        <input type="text" id="onb-notes" placeholder="Optional">
+      </div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-secondary" onclick="onbBack(4)">Back</button>
+      <button class="btn-primary" onclick="onbFinish()">Generate my plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ GENERATING SPINNER ═══════════════════════ -->
+<div id="generating">
+  <div class="gen-orb"></div>
+  <div class="gen-title" id="gen-title">Building your plan…</div>
+  <div class="gen-sub" id="gen-sub">Our AI coach is designing a training plan around your goal, current fitness, and schedule. This takes 20-40 seconds.</div>
+</div>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
 <div id="dashboard">
   <div class="dash-top">
     <div class="dash-brand">
@@ -290,15 +499,46 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
     <button class="logout-btn" onclick="handleLogout()">Log out</button>
   </div>
+
   <div class="dash-hello">Hey <span id="dashName">athlete</span> 👋</div>
-  <div style="color:var(--muted);margin-bottom:24px">You're in. This is where your journey begins.</div>
-  <div class="dash-card">
-    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Phase 1 Complete ✓</div>
-    <div style="font-size:15px;line-height:1.7">Real login is live and your account is stored securely in the cloud. Next up: onboarding — we'll ask your age, sport, and goal, then build your personalized plan.</div>
+  <div class="dash-day" id="dashDay">—</div>
+
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-label">Day of plan</div>
+      <div class="stat-value accent" id="statDay">—</div>
+      <div class="stat-sub" id="statPhase">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">To goal</div>
+      <div class="stat-value swim" id="statCountdown">—</div>
+      <div class="stat-sub" id="statGoal">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">This week done</div>
+      <div class="stat-value" id="statWeekDone">—</div>
+      <div class="stat-sub" id="statWeekTotal">of — sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Current phase</div>
+      <div class="stat-value" style="font-size:18px" id="statPhaseName">—</div>
+      <div class="stat-sub" id="statPhaseWeek">—</div>
+    </div>
   </div>
-  <div class="dash-card">
-    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Signed in as</div>
-    <div style="font-size:14px;color:var(--text)" id="dashEmail">—</div>
+
+  <div class="next-card" id="nextCard">
+    <div class="next-label">Next up</div>
+    <div class="next-sport run" id="nextSport">—</div>
+    <div class="next-title" id="nextTitle">—</div>
+    <div class="next-meta">
+      <span id="nextDuration">—</span>
+      <span id="nextIntensity">—</span>
+    </div>
+    <div class="next-notes" id="nextNotes">—</div>
+    <div class="action-row">
+      <button class="action-btn primary" onclick="markSessionDone()">Mark done</button>
+      <button class="action-btn" onclick="alert('Full plan view coming in Phase 3')">Full plan</button>
+    </div>
   </div>
 </div>
 
@@ -332,7 +572,7 @@ window.addEventListener('load', async () => {
     document.getElementById('splash').classList.add('hide');
     setTimeout(() => {
       if (session) {
-        showDashboard(session.user);
+        afterLogin(session.user);
       } else {
         document.getElementById('authScreen').style.display = 'flex';
       }
@@ -414,27 +654,310 @@ async function handleAuth() {
 async function handleGoogle() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin }
+    options: { redirectTo: 'https://tryathelete.netlify.app' }
   });
   if (error) showMsg(error.message, 'error');
 }
 
-function showDashboard(user) {
+// ═══════════════════════ ROUTING (auth → onb or dashboard) ═══════════════════════
+async function afterLogin(user) {
   document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('dashboard').classList.add('active');
-  const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'athlete';
-  document.getElementById('dashName').textContent = name;
-  document.getElementById('dashEmail').textContent = user.email || '—';
+  // Check if onboarding is done
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  if (error) {
+    console.error('Profile fetch error:', error);
+  }
+  currentUser = user;
+  currentProfile = profile;
+  if (!profile || !profile.onboarding_done) {
+    startOnboarding(user);
+  } else {
+    loadDashboard();
+  }
 }
+
+// Keep showDashboard as an alias for backward compat with existing auth handlers
+function showDashboard(user) { afterLogin(user); }
 
 async function handleLogout() {
   await sb.auth.signOut();
   document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('generating').classList.remove('active');
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('email').value = '';
   document.getElementById('password').value = '';
+  currentUser = null; currentProfile = null; currentPlan = null; currentSessions = [];
   clearMsg();
 }
+
+// ═══════════════════════ ONBOARDING ═══════════════════════
+let currentUser = null;
+let currentProfile = null;
+let currentPlan = null;
+let currentSessions = [];
+let onbData = { sports: [], level: null, goal: null, days: null };
+
+function startOnboarding(user) {
+  document.getElementById('onboarding').classList.add('active');
+  goStep(1);
+  // Wire chip groups
+  wireChips('sport-chips', true, v => { onbData.sports = v; });
+  wireChips('level-chips', false, v => { onbData.level = v; });
+  wireChips('goal-chips', false, v => {
+    onbData.goal = v;
+    const details = document.getElementById('goal-details');
+    // Show target date fields for anything except general fitness
+    details.style.display = (v && v !== 'healthy') ? 'block' : 'none';
+  });
+  wireChips('days-chips', false, v => { onbData.days = v; });
+}
+
+function wireChips(containerId, multi, cb) {
+  const chips = document.querySelectorAll('#' + containerId + ' .chip');
+  chips.forEach(chip => {
+    chip.onclick = () => {
+      if (multi) {
+        chip.classList.toggle('selected');
+        const selected = Array.from(chips).filter(c => c.classList.contains('selected')).map(c => c.dataset.value);
+        cb(selected);
+      } else {
+        chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        cb(chip.dataset.value);
+      }
+    };
+  });
+}
+
+function goStep(n) {
+  document.querySelectorAll('.onb-step').forEach(el => el.classList.remove('active'));
+  document.querySelector('.onb-step[data-step="' + n + '"]').classList.add('active');
+  document.querySelectorAll('.onb-dot').forEach(el => {
+    const step = parseInt(el.dataset.step);
+    el.classList.remove('active', 'done');
+    if (step < n) el.classList.add('done');
+    else if (step === n) el.classList.add('active');
+  });
+}
+
+function onbNext(from) {
+  if (from === 1) {
+    const age = document.getElementById('onb-age').value;
+    const sex = document.getElementById('onb-sex').value;
+    const height = document.getElementById('onb-height').value;
+    const weight = document.getElementById('onb-weight').value;
+    if (!age || !height || !weight) { alert('Please fill in age, height, and weight'); return; }
+    onbData.age = parseInt(age);
+    onbData.sex = sex || null;
+    onbData.height_cm = parseFloat(height);
+    onbData.weight_kg = parseFloat(weight);
+    onbData.diet = document.getElementById('onb-diet').value;
+    goStep(2);
+  } else if (from === 2) {
+    if (!onbData.sports || onbData.sports.length === 0) { alert('Pick at least one sport'); return; }
+    if (!onbData.level) { alert('Pick your current fitness level'); return; }
+    goStep(3);
+  } else if (from === 3) {
+    if (!onbData.goal) { alert('Pick a goal'); return; }
+    if (onbData.goal !== 'healthy') {
+      onbData.goal_name = document.getElementById('onb-goalname').value.trim();
+      onbData.goal_date = document.getElementById('onb-goaldate').value;
+      if (!onbData.goal_date) { alert('Please set a target date for your goal'); return; }
+    }
+    goStep(4);
+  }
+}
+function onbBack(from) { goStep(from - 1); }
+
+async function onbFinish() {
+  if (!onbData.days) { alert('Pick how many days per week you train now'); return; }
+  onbData.injuries = document.getElementById('onb-injuries').value.trim() || 'none';
+  onbData.notes = document.getElementById('onb-notes').value.trim();
+
+  // Show generating screen
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('generating').classList.add('active');
+
+  try {
+    // 1. Save profile
+    const profileUpdate = {
+      age: onbData.age, sex: onbData.sex,
+      height_cm: onbData.height_cm, weight_kg: onbData.weight_kg,
+      diet: onbData.diet, fitness_level: onbData.level,
+      sports: onbData.sports, onboarding_done: true, updated_at: new Date().toISOString()
+    };
+    const { error: pErr } = await sb.from('profiles').update(profileUpdate).eq('id', currentUser.id);
+    if (pErr) throw new Error('Profile save: ' + pErr.message);
+
+    // 2. Save goal
+    const goalRow = {
+      user_id: currentUser.id,
+      goal_type: onbData.goal,
+      goal_label: onbData.goal_name || labelForGoal(onbData.goal),
+      target_date: onbData.goal_date || null,
+      is_active: true
+    };
+    const { data: goalData, error: gErr } = await sb.from('goals').insert(goalRow).select().single();
+    if (gErr) throw new Error('Goal save: ' + gErr.message);
+
+    // 3. Generate plan via Netlify function
+    document.getElementById('gen-title').textContent = 'Designing your training plan…';
+    const planReq = {
+      profile: { ...profileUpdate },
+      goal: goalRow,
+      baseline: { days_per_week: onbData.days, injuries: onbData.injuries, notes: onbData.notes }
+    };
+    const resp = await fetch('/.netlify/functions/generate-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(planReq)
+    });
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      throw new Error('Plan generation failed: ' + errBody);
+    }
+    const { plan } = await resp.json();
+    if (!plan || !plan.sessions) throw new Error('Empty plan returned');
+
+    document.getElementById('gen-title').textContent = 'Saving your plan…';
+
+    // 4. Save plan
+    const { data: planRow, error: plErr } = await sb.from('plans').insert({
+      user_id: currentUser.id,
+      goal_id: goalData.id,
+      title: plan.title || 'My training plan',
+      start_date: plan.start_date,
+      end_date: plan.end_date,
+      phases: plan.phases || [],
+      is_active: true
+    }).select().single();
+    if (plErr) throw new Error('Plan save: ' + plErr.message);
+
+    // 5. Save sessions
+    const sessionRows = plan.sessions.map(s => ({
+      user_id: currentUser.id,
+      plan_id: planRow.id,
+      session_date: s.date,
+      sport: s.sport,
+      title: s.title,
+      planned: { duration_min: s.duration_min, intensity: s.intensity, ...(s.planned || {}) },
+      status: 'planned',
+      source: 'plan'
+    }));
+    const { error: sErr } = await sb.from('sessions').insert(sessionRows);
+    if (sErr) throw new Error('Sessions save: ' + sErr.message);
+
+    // 6. Load dashboard
+    document.getElementById('generating').classList.remove('active');
+    await loadDashboard();
+
+  } catch (err) {
+    document.getElementById('generating').classList.remove('active');
+    alert('Something went wrong: ' + err.message + '\n\nYou can try again from your profile.');
+    document.getElementById('onboarding').classList.add('active');
+    goStep(4);
+  }
+}
+
+function labelForGoal(g) {
+  const map = {
+    '5k':'5K','10k':'10K','half_marathon':'Half marathon','marathon':'Marathon',
+    'triathlon':'Triathlon','ironman_703':'Ironman 70.3','ironman':'Ironman',
+    'cycling_sportive':'Cycling sportive','healthy':'General fitness'
+  };
+  return map[g] || g;
+}
+
+// ═══════════════════════ DASHBOARD ═══════════════════════
+async function loadDashboard() {
+  document.getElementById('dashboard').classList.add('active');
+
+  const name = currentProfile?.full_name || currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'athlete';
+  document.getElementById('dashName').textContent = name;
+  const today = new Date();
+  document.getElementById('dashDay').textContent = today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' });
+
+  // Fetch active plan
+  const { data: plan } = await sb.from('plans').select('*').eq('user_id', currentUser.id).eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  currentPlan = plan;
+  if (!plan) return;
+
+  // Fetch goal
+  const { data: goal } = plan.goal_id ? await sb.from('goals').select('*').eq('id', plan.goal_id).maybeSingle() : { data: null };
+
+  // Fetch sessions
+  const { data: sessions } = await sb.from('sessions').select('*').eq('user_id', currentUser.id).eq('plan_id', plan.id).order('session_date', { ascending: true });
+  currentSessions = sessions || [];
+
+  renderDashboard(plan, goal, sessions || []);
+}
+
+function renderDashboard(plan, goal, sessions) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const startDate = new Date(plan.start_date);
+  const dayOfPlan = Math.floor((new Date(todayStr) - startDate) / 86400000) + 1;
+  document.getElementById('statDay').textContent = dayOfPlan;
+
+  // Countdown to goal
+  if (goal && goal.target_date) {
+    const days = Math.max(0, Math.floor((new Date(goal.target_date) - new Date(todayStr)) / 86400000));
+    document.getElementById('statCountdown').textContent = days + 'd';
+    document.getElementById('statGoal').textContent = goal.goal_label;
+  } else {
+    document.getElementById('statCountdown').textContent = '∞';
+    document.getElementById('statGoal').textContent = goal?.goal_label || 'ongoing';
+  }
+
+  // Current phase (rough calc from phases + start date)
+  const phases = plan.phases || [];
+  let cumulative = 0, currentPhase = phases[0];
+  const weekOfPlan = Math.floor((dayOfPlan - 1) / 7) + 1;
+  for (const p of phases) {
+    cumulative += (p.weeks || 0);
+    if (weekOfPlan <= cumulative) { currentPhase = p; break; }
+  }
+  document.getElementById('statPhaseName').textContent = currentPhase?.name || '—';
+  document.getElementById('statPhaseWeek').textContent = 'Week ' + weekOfPlan;
+  document.getElementById('statPhase').textContent = 'in ' + (currentPhase?.name || 'plan');
+
+  // This week's sessions
+  const now = new Date(todayStr);
+  const dow = now.getDay(); // 0 sun
+  const monday = new Date(now); monday.setDate(now.getDate() - ((dow + 6) % 7));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const weekSessions = sessions.filter(s => {
+    const d = new Date(s.session_date);
+    return d >= monday && d <= sunday && s.sport !== 'rest';
+  });
+  const weekDone = weekSessions.filter(s => s.status === 'done').length;
+  document.getElementById('statWeekDone').textContent = weekDone;
+  document.getElementById('statWeekTotal').textContent = 'of ' + weekSessions.length + ' sessions';
+
+  // Next session
+  const upcoming = sessions.find(s => s.session_date >= todayStr && s.status === 'planned') || sessions.find(s => s.session_date >= todayStr);
+  if (upcoming) {
+    document.getElementById('nextSport').textContent = upcoming.sport;
+    document.getElementById('nextSport').className = 'next-sport ' + upcoming.sport;
+    document.getElementById('nextTitle').textContent = upcoming.title || 'Session';
+    const dur = upcoming.planned?.duration_min || 0;
+    document.getElementById('nextDuration').textContent = dur ? (dur + ' min') : '—';
+    document.getElementById('nextIntensity').textContent = (upcoming.planned?.intensity || '').toUpperCase();
+    document.getElementById('nextNotes').textContent = upcoming.planned?.notes || upcoming.planned?.distance_km ? ((upcoming.planned?.distance_km ? upcoming.planned.distance_km + ' km. ' : '') + (upcoming.planned?.notes || '')) : 'Follow the plan and log how it went.';
+    document.getElementById('nextCard').dataset.sessionId = upcoming.id;
+  } else {
+    document.getElementById('nextTitle').textContent = 'No upcoming sessions';
+    document.getElementById('nextNotes').textContent = 'Your plan may need extending. This will trigger automatically as you approach the end of week 4.';
+  }
+}
+
+async function markSessionDone() {
+  const id = document.getElementById('nextCard').dataset.sessionId;
+  if (!id) return;
+  await sb.from('sessions').update({ status: 'done' }).eq('id', id);
+  await loadDashboard();
+}
+
 </script>
 </body>
 </html>
