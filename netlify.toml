@@ -1,6 +1,16 @@
+[build]
+  publish = "."
+
+[build.environment]
+  # SUPABASE_URL is public by design and also appears in index.html.
+  # Exclude it from secret scanning so builds don't fail on a false positive.
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
+
 [functions]
   node_bundler = "esbuild"
 
 [functions."generate-plan"]
-  # Extend timeout for AI plan generation (free tier max = 26s)
+  timeout = 26
+
+[functions."strava-sync"]
   timeout = 26
