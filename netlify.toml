@@ -1,0 +1,6 @@
+[functions]
+  node_bundler = "esbuild"
+
+[functions."generate-plan"]
+  # Extend timeout for AI plan generation (free tier max = 26s)
+  timeout = 26
