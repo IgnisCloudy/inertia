@@ -813,11 +813,16 @@ async function onbFinish() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(planReq)
     });
-    if (!resp.ok) {
-      const errBody = await resp.text();
-      throw new Error('Plan generation failed: ' + errBody);
+    // Handle timeout / gateway errors that return HTML instead of JSON
+    const contentType = resp.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error('The plan generator took too long to respond. Please try again — it usually works on retry.');
     }
-    const { plan } = await resp.json();
+    const respData = await resp.json();
+    if (!resp.ok) {
+      throw new Error(respData.error || 'Plan generation failed');
+    }
+    const plan = respData.plan;
     if (!plan || !plan.sessions) throw new Error('Empty plan returned');
 
     document.getElementById('gen-title').textContent = 'Saving your plan…';
