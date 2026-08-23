@@ -730,6 +730,16 @@ async function handleGoogle() {
 
 // ═══════════════════════ ROUTING (auth → onb or dashboard) ═══════════════════════
 async function afterLogin(user) {
+  // Validate the session still maps to a real auth user.
+  // (Guards against a deleted user leaving a stale token behind.)
+  const { data: check, error: checkErr } = await sb.auth.getUser();
+  if (checkErr || !check || !check.user) {
+    await sb.auth.signOut();
+    document.getElementById('authScreen').style.display = 'flex';
+    showMsg('Your session expired. Please sign in again.', 'info');
+    return;
+  }
+  user = check.user;
   document.getElementById('authScreen').style.display = 'none';
   // Check if onboarding is done
   const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
