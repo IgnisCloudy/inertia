@@ -220,6 +220,36 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .action-btn{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:11px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
 .action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 
+/* ── STRAVA ── */
+.strava-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 20px;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.strava-left{display:flex;align-items:center;gap:12px}
+.strava-mark{width:34px;height:34px;border-radius:9px;background:#fc4c02;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.strava-mark svg{width:19px;height:19px}
+.strava-title{font-size:14px;font-weight:600}
+.strava-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.btn-strava{background:#fc4c02;color:#fff;border:none;padding:10px 18px;border-radius:10px;
+  font-family:var(--font);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn-strava:active{transform:scale(.98)}
+.btn-sync{background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:10px 18px;border-radius:10px;
+  font-family:var(--font);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn-sync:disabled{opacity:.55;cursor:not-allowed}
+
+/* planned vs actual */
+.pva{margin-top:14px;padding-top:14px;border-top:1px solid var(--b1)}
+.pva-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pva-tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--muted);width:58px;flex-shrink:0}
+.pva-val{font-family:var(--mono);font-size:13px;font-weight:700}
+.pva-val.actual{color:var(--acc)}
+.pva-delta{font-size:11px;padding:2px 8px;border-radius:5px;font-family:var(--mono);margin-left:auto}
+.pva-delta.over{background:rgba(124,179,66,.15);color:var(--green)}
+.pva-delta.under{background:rgba(232,74,63,.13);color:var(--red)}
+.pva-delta.spot{background:var(--s3);color:var(--muted)}
+.done-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;
+  text-transform:uppercase;letter-spacing:1.2px;color:var(--green);
+  background:rgba(124,179,66,.12);padding:4px 9px;border-radius:5px;margin-left:8px}
+
 </style>
 </head>
 <body>
@@ -479,6 +509,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
   </div>
 
+  <div class="strava-card" id="stravaCard">
+    <div class="strava-left">
+      <div class="strava-mark">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M13.8 2 7.3 14.6h3.9L13.8 9l2.6 5.6h3.8L13.8 2zm2.6 12.6-1.9 3.7-1.9-3.7h-2.8L14.5 22l4.7-7.4h-2.8z"/></svg>
+      </div>
+      <div>
+        <div class="strava-title" id="stravaTitle">Connect Strava</div>
+        <div class="strava-sub" id="stravaSub">Auto-track what you actually did</div>
+      </div>
+    </div>
+    <button class="btn-strava" id="stravaBtn" onclick="connectStrava()">Connect</button>
+  </div>
+
   <div class="next-card" id="nextCard">
     <div class="next-label">Next up</div>
     <div class="next-sport run" id="nextSport">—</div>
@@ -488,6 +531,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <span id="nextIntensity">—</span>
     </div>
     <div class="next-notes" id="nextNotes">—</div>
+    <div class="pva" id="pvaBlock" style="display:none">
+      <div class="pva-row">
+        <span class="pva-tag">Planned</span>
+        <span class="pva-val" id="pvaPlanned">—</span>
+      </div>
+      <div class="pva-row">
+        <span class="pva-tag">Actual</span>
+        <span class="pva-val actual" id="pvaActual">—</span>
+        <span class="pva-delta spot" id="pvaDelta">—</span>
+      </div>
+    </div>
     <div class="action-row">
       <button class="action-btn primary" onclick="markSessionDone()">Mark done</button>
       <button class="action-btn" onclick="alert('Full plan view coming in Phase 3')">Full plan</button>
@@ -679,6 +733,7 @@ async function afterLogin(user) {
   }
   currentUser = user;
   currentProfile = profile;
+  handleStravaReturn();
   if (!profile || !profile.onboarding_done) {
     startOnboarding(user);
   } else {
@@ -909,6 +964,7 @@ async function loadDashboard() {
   currentSessions = sessions || [];
 
   renderDashboard(plan, goal, sessions || []);
+  checkStravaStatus();
 }
 
 function renderDashboard(plan, goal, sessions) {
@@ -963,10 +1019,108 @@ function renderDashboard(plan, goal, sessions) {
     document.getElementById('nextIntensity').textContent = (upcoming.planned?.intensity || '').toUpperCase();
     document.getElementById('nextNotes').textContent = upcoming.planned?.notes || upcoming.planned?.distance_km ? ((upcoming.planned?.distance_km ? upcoming.planned.distance_km + ' km. ' : '') + (upcoming.planned?.notes || '')) : 'Follow the plan and log how it went.';
     document.getElementById('nextCard').dataset.sessionId = upcoming.id;
+
+    const pva = document.getElementById('pvaBlock');
+    const act = upcoming.actual || {};
+    if (act.distance_km || act.duration_min) {
+      const pMin = upcoming.planned?.duration_min || 0;
+      const aMin = act.duration_min || 0;
+      document.getElementById('pvaPlanned').textContent =
+        (upcoming.planned?.distance_km ? upcoming.planned.distance_km + ' km · ' : '') + (pMin ? pMin + ' min' : '—');
+      document.getElementById('pvaActual').textContent =
+        (act.distance_km ? act.distance_km + ' km · ' : '') + (aMin ? aMin + ' min' : '—')
+        + (act.avg_hr ? ' · ' + Math.round(act.avg_hr) + ' bpm' : '');
+      const d = document.getElementById('pvaDelta');
+      if (pMin && aMin) {
+        const diff = Math.round(((aMin - pMin) / pMin) * 100);
+        d.textContent = (diff > 0 ? '+' : '') + diff + '%';
+        d.className = 'pva-delta ' + (Math.abs(diff) <= 10 ? 'spot' : diff > 0 ? 'over' : 'under');
+      } else { d.textContent = 'logged'; d.className = 'pva-delta spot'; }
+      pva.style.display = 'block';
+    } else {
+      pva.style.display = 'none';
+    }
   } else {
     document.getElementById('nextTitle').textContent = 'No upcoming sessions';
     document.getElementById('nextNotes').textContent = 'Your plan may need extending. This will trigger automatically as you approach the end of week 4.';
   }
+}
+
+// ═══════════════════════ STRAVA ═══════════════════════
+const STRAVA_CLIENT_ID = '246568';
+let stravaConnected = false;
+
+function connectStrava() {
+  if (!currentUser) return;
+  const redirectUri = encodeURIComponent(window.location.origin + '/.netlify/functions/strava-auth');
+  const url = 'https://www.strava.com/oauth/authorize'
+    + '?client_id=' + STRAVA_CLIENT_ID
+    + '&response_type=code'
+    + '&redirect_uri=' + redirectUri
+    + '&approval_prompt=auto'
+    + '&scope=activity:read_all'
+    + '&state=' + currentUser.id;
+  window.location.href = url;
+}
+
+async function checkStravaStatus() {
+  if (!currentUser) return;
+  const { data } = await sb.from('strava_tokens').select('athlete_name,updated_at')
+    .eq('user_id', currentUser.id).maybeSingle();
+  stravaConnected = !!data;
+  const title = document.getElementById('stravaTitle');
+  const sub = document.getElementById('stravaSub');
+  const btn = document.getElementById('stravaBtn');
+  if (!title) return;
+  if (stravaConnected) {
+    title.textContent = 'Strava connected';
+    sub.textContent = data.athlete_name ? ('as ' + data.athlete_name) : 'Ready to sync';
+    btn.textContent = 'Sync now';
+    btn.className = 'btn-sync';
+    btn.onclick = syncStrava;
+  } else {
+    title.textContent = 'Connect Strava';
+    sub.textContent = 'Auto-track what you actually did';
+    btn.textContent = 'Connect';
+    btn.className = 'btn-strava';
+    btn.onclick = connectStrava;
+  }
+}
+
+async function syncStrava() {
+  const btn = document.getElementById('stravaBtn');
+  const sub = document.getElementById('stravaSub');
+  btn.disabled = true;
+  btn.textContent = 'Syncing…';
+  try {
+    const res = await fetch('/.netlify/functions/strava-sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: currentUser.id })
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('Sync timed out — try again');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Sync failed');
+    sub.textContent = data.synced + ' activities · ' + data.matched + ' matched to plan';
+    await loadDashboard();
+  } catch (e) {
+    sub.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sync now';
+  }
+}
+
+// handle OAuth return
+function handleStravaReturn() {
+  const p = new URLSearchParams(window.location.search);
+  const s = p.get('strava');
+  if (!s) return;
+  window.history.replaceState({}, '', window.location.pathname);
+  if (s === 'connected') setTimeout(() => syncStrava(), 900);
+  else if (s === 'denied') alert('Strava connection was cancelled.');
+  else if (s === 'error') alert('Strava error: ' + (p.get('msg') || 'unknown'));
 }
 
 async function markSessionDone() {
