@@ -1,3 +1,9 @@
+// ─────────────────────────────────────────────────────────────
+// Inertia — Strava activity sync
+// Refreshes token if needed, pulls recent activities,
+// stores them, and matches them to planned sessions.
+// ─────────────────────────────────────────────────────────────
+
 const CLIENT_ID = '246568';
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -74,7 +80,12 @@ exports.handler = async function (event) {
       'https://www.strava.com/api/v3/athlete/activities?per_page=50&after=' + after,
       { headers: { Authorization: 'Bearer ' + tok.access_token } }
     );
-    if (!aRes.ok) return j(aRes.status, { error: 'Strava fetch failed' });
+    if (!aRes.ok) {
+      const errTxt = await aRes.text();
+      let detail = errTxt.slice(0, 200);
+      if (aRes.status === 401) detail = 'Strava rejected the token — tap Connect again to re-authorize with activity read access.';
+      return j(aRes.status, { error: detail });
+    }
     const acts = await aRes.json();
     if (!Array.isArray(acts)) return j(500, { error: 'Unexpected Strava response' });
 
