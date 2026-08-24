@@ -1072,7 +1072,7 @@ function connectStrava() {
     + '?client_id=' + STRAVA_CLIENT_ID
     + '&response_type=code'
     + '&redirect_uri=' + redirectUri
-    + '&approval_prompt=auto'
+    + '&approval_prompt=force'
     + '&scope=activity:read_all'
     + '&state=' + currentUser.id;
   window.location.href = url;
