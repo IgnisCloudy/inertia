@@ -1116,14 +1116,28 @@ async function syncStrava() {
     const ct = res.headers.get('content-type') || '';
     if (!ct.includes('application/json')) throw new Error('Sync timed out — try again');
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Sync failed');
+    if (!res.ok) {
+      if (data.reconnect) {
+        stravaConnected = false;
+        document.getElementById('stravaTitle').textContent = 'Reconnect Strava';
+        sub.textContent = data.error;
+        btn.disabled = false;
+        btn.textContent = 'Connect';
+        btn.className = 'btn-strava';
+        btn.onclick = connectStrava;
+        return;
+      }
+      throw new Error(data.error || 'Sync failed');
+    }
     sub.textContent = data.synced + ' activities · ' + data.matched + ' matched to plan';
     await loadDashboard();
   } catch (e) {
     sub.textContent = e.message;
-  } finally {
     btn.disabled = false;
     btn.textContent = 'Sync now';
+    return;
+  } finally {
+    btn.disabled = false;
   }
 }
 
