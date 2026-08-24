@@ -61,7 +61,10 @@ exports.handler = async function (event) {
         }).toString()
       });
       const nt = await rRes.json();
-      if (!rRes.ok || nt.errors) return j(401, { error: 'Token refresh failed — reconnect Strava' });
+      if (!rRes.ok || nt.errors) {
+        await fetch(sbUrl + '/rest/v1/strava_tokens?user_id=eq.' + userId, { method: 'DELETE', headers: H });
+        return j(401, { error: 'Strava session expired. Tap Connect to re-authorize.', reconnect: true });
+      }
       tok.access_token = nt.access_token;
       tok.refresh_token = nt.refresh_token;
       tok.expires_at = nt.expires_at;
@@ -82,9 +85,12 @@ exports.handler = async function (event) {
     );
     if (!aRes.ok) {
       const errTxt = await aRes.text();
-      let detail = errTxt.slice(0, 200);
-      if (aRes.status === 401) detail = 'Strava rejected the token — tap Connect again to re-authorize with activity read access.';
-      return j(aRes.status, { error: detail });
+      if (aRes.status === 401) {
+        // Token is dead (revoked or wrong scope). Clear it so the UI offers Connect again.
+        await fetch(sbUrl + '/rest/v1/strava_tokens?user_id=eq.' + userId, { method: 'DELETE', headers: H });
+        return j(401, { error: 'Strava access was revoked. Tap Connect to re-authorize.', reconnect: true });
+      }
+      return j(aRes.status, { error: errTxt.slice(0, 200) });
     }
     const acts = await aRes.json();
     if (!Array.isArray(acts)) return j(500, { error: 'Unexpected Strava response' });
