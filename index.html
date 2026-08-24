@@ -723,7 +723,7 @@ async function handleAuth() {
 async function handleGoogle() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: 'https://tryathelete.netlify.app' }
+    options: { redirectTo: window.location.origin }
   });
   if (error) showMsg(error.message, 'error');
 }
@@ -889,7 +889,7 @@ async function onbFinish() {
       goal: goalRow,
       baseline: { days_per_week: onbData.days, injuries: onbData.injuries, notes: onbData.notes }
     };
-    const resp = await fetch('/.netlify/functions/generate-plan', {
+    const resp = await fetch('/api/generate-plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(planReq)
@@ -1067,7 +1067,7 @@ let stravaConnected = false;
 
 function connectStrava() {
   if (!currentUser) return;
-  const redirectUri = encodeURIComponent(window.location.origin + '/.netlify/functions/strava-auth');
+  const redirectUri = encodeURIComponent(window.location.origin + '/api/strava-auth');
   const url = 'https://www.strava.com/oauth/authorize'
     + '?client_id=' + STRAVA_CLIENT_ID
     + '&response_type=code'
@@ -1108,7 +1108,7 @@ async function syncStrava() {
   btn.disabled = true;
   btn.textContent = 'Syncing…';
   try {
-    const res = await fetch('/.netlify/functions/strava-sync', {
+    const res = await fetch('/api/strava-sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: currentUser.id })
