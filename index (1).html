@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Inertia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0806; --s1:#13100d; --s2:#1c1815; --s3:#26211c;
+  --b1:#2a241e; --b2:#3a322a; --b3:#4d4238;
+  --text:#f5f0e8; --muted:#9a9086; --dim:#6b6259;
+  --acc:#ff5e1a; --acc-dim:rgba(255,94,26,.12);
+  --ember:#ffa32e; --forge:#ffc857;
+  --swim:#4a9eca; --bike:#ffa32e; --run:#ff5e1a; --str:#c9942a; --indigo:#4a9eca;
+  --red:#e84a3f; --green:#7cb342;
+  --font:'Space Grotesk',system-ui,sans-serif; --mono:'Space Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* ═══════════════════════ SPLASH ═══════════════════════ */
+#splash{position:fixed;inset:0;background:#08060a;z-index:1000;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;transition:opacity .55s ease,visibility .55s}
+#splash.hide{opacity:0;visibility:hidden}
+#splash::before{content:'';position:absolute;width:62vmax;height:62vmax;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,94,26,.11),transparent 62%);
+  opacity:0;animation:glowIn 2.6s ease-out forwards}
+@keyframes glowIn{0%,18%{opacity:0;transform:scale(.7)}45%{opacity:1;transform:scale(1)}100%{opacity:.85;transform:scale(1.04)}}
+
+/* streaks that precede the bolt */
+.dashline{position:absolute;height:3px;border-radius:3px;opacity:0;
+  background:linear-gradient(90deg,transparent,#ffc857,transparent)}
+.dashline:nth-of-type(1){width:280px;top:calc(50% - 46px);animation:dashFly 2.6s ease-out forwards}
+.dashline:nth-of-type(2){width:420px;top:calc(50% - 12px);animation:dashFly 2.6s ease-out forwards .04s}
+.dashline:nth-of-type(3){width:330px;top:calc(50% + 26px);animation:dashFly 2.6s ease-out forwards .08s}
+.dashline:nth-of-type(4){width:210px;top:calc(50% + 58px);animation:dashFly 2.6s ease-out forwards .12s}
+@keyframes dashFly{0%{transform:translateX(-58vw);opacity:0}8%{opacity:.95}26%{transform:translateX(40vw);opacity:.6}40%,100%{transform:translateX(62vw);opacity:0}}
+
+/* the i bolts in, then nertia expands out from it */
+.reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:none}
+.wm{display:flex;font-size:clamp(50px,12vw,104px);font-weight:700;letter-spacing:-3px;line-height:1}
+.wm span{display:inline-block;opacity:0;
+  background:linear-gradient(100deg,#ffd98a,#ff5e1a 50%,#ffa32e);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* first letter = the bolt */
+.wm span:nth-child(1){
+  filter:drop-shadow(0 0 22px rgba(255,94,26,.55));
+  animation:iFlash 2.6s cubic-bezier(.12,.86,.22,1) forwards}
+@keyframes iFlash{
+  0%   {opacity:0;transform:translateX(-62vw) scaleX(15) scaleY(.26)}
+  6%   {opacity:1}
+  20%  {transform:translateX(0) scaleX(2.4) scaleY(.7);opacity:1}
+  30%  {transform:translateX(0) scaleX(1) scaleY(1);opacity:1}
+  100% {transform:translateX(0) scaleX(1) scaleY(1);opacity:1}
+}
+
+/* remaining letters expand outward from the i */
+.wm span:nth-child(n+2){animation:letterOut 2.6s cubic-bezier(.2,1.3,.35,1) forwards}
+@keyframes letterOut{
+  0%,31%{opacity:0;transform:translateX(-58px) scaleX(.08)}
+  56%   {opacity:1;transform:translateX(0) scaleX(1)}
+  100%  {opacity:1;transform:translateX(0) scaleX(1)}
+}
+.wm span:nth-child(2){animation-delay:.02s}
+.wm span:nth-child(3){animation-delay:.07s}
+.wm span:nth-child(4){animation-delay:.12s}
+.wm span:nth-child(5){animation-delay:.17s}
+.wm span:nth-child(6){animation-delay:.22s}
+.wm span:nth-child(7){animation-delay:.27s}
+
+.tagline{font-family:var(--mono);font-size:clamp(10px,2.4vw,13px);color:#9a9086;
+  letter-spacing:7px;text-transform:uppercase;opacity:0;animation:tagIn 2.6s ease-out forwards}
+@keyframes tagIn{0%,68%{opacity:0;transform:translateY(9px)}88%,100%{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════ AUTH ═══════════════════════ */
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative}
+.auth-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.auth-bg::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,var(--acc-dim),transparent 70%);top:-100px;right:-100px;filter:blur(40px)}
+.auth-bg::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.1),transparent 70%);bottom:-100px;left:-100px;filter:blur(40px)}
+
+.auth-card{width:100%;max-width:400px;background:linear-gradient(180deg,var(--s1),var(--bg));border:1px solid var(--b1);border-radius:24px;padding:36px 28px 28px;box-shadow:0 24px 60px rgba(0,0,0,.4);position:relative;z-index:1}
+
+.auth-brand{text-align:center;margin-bottom:26px}
+.auth-brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:6px}
+.brand-glyph{width:32px;height:32px;flex-shrink:0}
+.brand-name{font-size:22px;font-weight:700;letter-spacing:-.5px;background:linear-gradient(135deg,var(--acc),var(--swim) 60%,var(--indigo));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.auth-title{font-size:20px;font-weight:600;margin-top:14px;letter-spacing:-.3px}
+.auth-sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px}
+.field input{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:13px 15px;border-radius:12px;font-family:var(--font);font-size:15px;transition:border-color .15s}
+.field input:focus{outline:none;border-color:var(--acc)}
+.field select,.onb-select{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:13px 15px;border-radius:12px;font-family:var(--font);font-size:15px}
+.field input::placeholder{color:var(--dim)}
+
+.btn-primary{width:100%;background:var(--acc);color:var(--bg);border:none;padding:14px;border-radius:12px;font-family:var(--font);font-weight:700;font-size:15px;cursor:pointer;transition:transform .1s,opacity .15s;margin-top:6px}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--dim);font-size:12px;font-family:var(--mono)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+.btn-google{width:100%;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:13px;border-radius:12px;font-family:var(--font);font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:border-color .15s}
+.btn-google:active{border-color:var(--b3)}
+.gicon{width:18px;height:18px}
+
+.auth-toggle{text-align:center;margin-top:22px;font-size:13px;color:var(--muted)}
+.auth-toggle a{color:var(--acc);font-weight:600;cursor:pointer;text-decoration:none}
+
+.auth-msg{text-align:center;font-size:13px;margin-top:16px;padding:11px;border-radius:10px;display:none}
+.auth-msg.error{display:block;background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+.auth-msg.success{display:block;background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.2)}
+.auth-msg.info{display:block;background:var(--s2);color:var(--muted);border:1px solid var(--b2)}
+
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(8,11,16,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════ DASHBOARD PLACEHOLDER ═══════════════════════ */
+#dashboard{display:none;min-height:100vh;padding:24px;flex-direction:column;max-width:600px;margin:0 auto}
+#dashboard.active{display:flex}
+.dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+.dash-brand{display:flex;align-items:center;gap:8px}
+.dash-brand svg{width:28px;height:28px}
+.dash-brand-name{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--swim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dash-hello{font-size:26px;font-weight:700;margin-bottom:6px}
+.dash-hello span{background:linear-gradient(135deg,var(--acc),var(--swim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dash-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:24px;margin-bottom:16px}
+.logout-btn{background:none;border:1px solid var(--b2);color:var(--muted);padding:8px 16px;border-radius:10px;font-family:var(--font);font-size:13px;cursor:pointer}
+
+/* ═══════════════════════ ONBOARDING ═══════════════════════ */
+#onboarding{display:none;min-height:100vh;padding:24px;flex-direction:column;max-width:520px;margin:0 auto}
+#onboarding.active{display:flex}
+.onb-progress{display:flex;gap:6px;margin-bottom:32px;margin-top:8px}
+.onb-dot{flex:1;height:4px;border-radius:2px;background:var(--b1);transition:background .3s}
+.onb-dot.active{background:var(--acc)}
+.onb-dot.done{background:var(--acc);opacity:.5}
+.onb-step{display:none;flex-direction:column;flex:1}
+.onb-step.active{display:flex}
+.onb-title{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}
+.onb-title span{background:linear-gradient(135deg,var(--acc),var(--swim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.onb-sub{color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.5}
+.onb-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.onb-row.single{grid-template-columns:1fr}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:10px 16px;border-radius:24px;font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--b3)}
+.chip.selected{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
+.onb-actions{display:flex;gap:10px;margin-top:auto;padding-top:24px}
+.btn-secondary{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:14px;border-radius:12px;font-family:var(--font);font-weight:600;font-size:14px;cursor:pointer}
+.btn-secondary:active{background:var(--s3)}
+.onb-actions .btn-primary{flex:2;margin-top:0}
+.section-label{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;margin-top:4px}
+
+/* Plan generation — the forge */
+#generating{display:none;position:fixed;inset:0;background:var(--bg);z-index:900;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+#generating.active{display:flex}
+#generating::before{content:'';position:absolute;width:60vmax;height:60vmax;border-radius:50%;background:radial-gradient(circle,rgba(255,94,26,.13),transparent 60%);animation:forgePulse 2.6s ease-in-out infinite}
+
+.anvil-wrap{position:relative;width:280px;height:150px;margin-bottom:38px}
+.ironbar{position:absolute;left:50%;top:44px;transform:translateX(-50%);width:190px;height:16px;border-radius:4px;
+  background:#4a4640;animation:heatUp 3.2s ease-in-out infinite}
+@keyframes heatUp{
+  0%   {background:#4a4640;box-shadow:none}
+  35%  {background:#8a3d12;box-shadow:0 0 18px rgba(255,94,26,.35)}
+  60%  {background:#ff5e1a;box-shadow:0 0 34px rgba(255,94,26,.6)}
+  80%  {background:#ffc857;box-shadow:0 0 52px rgba(255,200,87,.75)}
+  100% {background:#4a4640;box-shadow:none}
+}
+.hammer{position:absolute;left:50%;top:-14px;width:14px;height:58px;border-radius:3px;background:var(--steel,#7d8590);
+  transform-origin:bottom center;animation:strike 1.6s cubic-bezier(.4,0,.5,1) infinite}
+.hammer::before{content:'';position:absolute;top:-8px;left:-13px;width:40px;height:20px;border-radius:4px;background:#6d7580}
+@keyframes strike{0%,55%{transform:translateX(-50%) rotate(-52deg)}70%{transform:translateX(-50%) rotate(4deg)}85%,100%{transform:translateX(-50%) rotate(-52deg)}}
+.anvilbase{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:130px;height:52px;
+  background:#2a2620;border-radius:6px 6px 14px 14px;border-top:3px solid #3a352d}
+.gen-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--forge);opacity:0;
+  left:50%;top:48px;animation:genSpark 1.6s ease-out infinite}
+@keyframes genSpark{0%,68%{opacity:0;transform:translate(0,0) scale(1)}72%{opacity:1}100%{opacity:0;transform:translate(var(--gx),var(--gy)) scale(.2)}}
+
+.quote-box{max-width:520px;text-align:center;min-height:96px;display:flex;flex-direction:column;justify-content:center}
+.quote-text{font-size:clamp(17px,3.4vw,22px);font-weight:500;line-height:1.55;color:var(--text);opacity:0;
+  animation:quoteCycle 5s ease-in-out infinite}
+@keyframes quoteCycle{0%{opacity:0;transform:translateY(8px)}12%{opacity:1;transform:translateY(0)}82%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-8px)}}
+.quote-attr{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-top:14px;opacity:0;
+  animation:quoteCycle 5s ease-in-out infinite}
+.gen-status{position:absolute;bottom:56px;font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+.gen-bar{position:absolute;bottom:38px;width:min(300px,70vw);height:2px;background:var(--b1);border-radius:2px;overflow:hidden}
+.gen-bar::after{content:'';position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:barSlide 1.8s ease-in-out infinite}
+@keyframes barSlide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+/* ═══════════════════════ REAL DASHBOARD ═══════════════════════ */
+#dashboard{max-width:520px}
+.dash-hello{font-size:24px;font-weight:700;margin-bottom:4px}
+.dash-day{color:var(--muted);font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:24px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px}
+.stat-label{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+.stat-value{font-size:26px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono)}
+.stat-value.accent{color:var(--acc)}
+.stat-value.swim{color:var(--swim)}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+.next-card{background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--b2);border-radius:18px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+.next-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--acc),var(--swim),var(--indigo))}
+.next-label{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.5px;color:var(--acc);margin-bottom:10px}
+.next-sport{display:inline-block;font-size:11px;padding:4px 10px;border-radius:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.next-sport.run{background:rgba(244,114,182,.15);color:var(--run)}
+.next-sport.bike{background:rgba(251,146,60,.15);color:var(--bike)}
+.next-sport.swim{background:rgba(56,189,248,.15);color:var(--swim)}
+.next-sport.strength{background:rgba(129,140,248,.15);color:var(--indigo)}
+.next-sport.rest{background:var(--s3);color:var(--muted)}
+.next-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.next-meta{display:flex;gap:16px;color:var(--muted);font-size:13px;margin-bottom:14px;font-family:var(--mono)}
+.next-notes{font-size:14px;line-height:1.6;color:var(--text);opacity:.9}
+
+.action-row{display:flex;gap:8px;margin-top:8px}
+.action-btn{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:11px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+.action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+
+.card-block{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.act-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.act-title{font-size:14px;font-weight:600}
+.act-count{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.act-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--b1)}
+.act-row:first-child{border-top:none}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.act-name{font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act-meta{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.act-date{font-family:var(--mono);font-size:10px;color:var(--dim);width:52px;text-align:right;flex-shrink:0}
+
+/* ── STRAVA ── */
+.strava-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 20px;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.strava-left{display:flex;align-items:center;gap:12px}
+.strava-mark{width:34px;height:34px;border-radius:9px;background:#fc4c02;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.strava-mark svg{width:19px;height:19px}
+.strava-title{font-size:14px;font-weight:600}
+.strava-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.btn-strava{background:#fc4c02;color:#fff;border:none;padding:10px 18px;border-radius:10px;
+  font-family:var(--font);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn-strava:active{transform:scale(.98)}
+.btn-sync{background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:10px 18px;border-radius:10px;
+  font-family:var(--font);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn-sync:disabled{opacity:.55;cursor:not-allowed}
+
+/* planned vs actual */
+.pva{margin-top:14px;padding-top:14px;border-top:1px solid var(--b1)}
+.pva-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pva-tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--muted);width:58px;flex-shrink:0}
+.pva-val{font-family:var(--mono);font-size:13px;font-weight:700}
+.pva-val.actual{color:var(--acc)}
+.pva-delta{font-size:11px;padding:2px 8px;border-radius:5px;font-family:var(--mono);margin-left:auto}
+.pva-delta.over{background:rgba(124,179,66,.15);color:var(--green)}
+.pva-delta.under{background:rgba(232,74,63,.13);color:var(--red)}
+.pva-delta.spot{background:var(--s3);color:var(--muted)}
+.done-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;
+  text-transform:uppercase;letter-spacing:1.2px;color:var(--green);
+  background:rgba(124,179,66,.12);padding:4px 9px;border-radius:5px;margin-left:8px}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SPLASH ═══════════════════════ -->
+<div id="splash">
+  <div class="dashline"></div><div class="dashline"></div>
+  <div class="dashline"></div><div class="dashline"></div>
+  <div class="reveal">
+    <div class="wm"><span>i</span><span>n</span><span>e</span><span>r</span><span>t</span><span>i</span><span>a</span></div>
+    <div class="tagline">Stay in motion</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ AUTH ═══════════════════════ -->
+<div class="auth-wrap" id="authScreen" style="display:none">
+  <div class="auth-bg"></div>
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-brand-mark">
+        <svg class="brand-glyph" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="14" fill="none" stroke="#a3e635" stroke-width="1.5"/>
+          <path d="M 8 16 L 24 16" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 10 11 L 22 11" stroke="#a3e635" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 12 21 L 20 21" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="brand-name">inertia</div>
+      </div>
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub" id="authSub">Sign in to continue your journey</div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="field" id="nameField" style="display:none">
+      <label>Full name</label>
+      <input type="text" id="fullName" placeholder="Your name" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-primary" id="submitBtn" onclick="handleAuth()">Sign in</button>
+
+    <div class="divider">OR</div>
+
+    <button class="btn-google" onclick="handleGoogle()">
+      <svg class="gicon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="auth-msg" id="authMsg"></div>
+
+    <div class="auth-toggle" id="authToggle">
+      New to Inertia? <a onclick="toggleMode()">Create an account</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ONBOARDING ═══════════════════════ -->
+<div id="onboarding">
+  <div class="onb-progress">
+    <div class="onb-dot active" data-step="1"></div>
+    <div class="onb-dot" data-step="2"></div>
+    <div class="onb-dot" data-step="3"></div>
+    <div class="onb-dot" data-step="4"></div>
+  </div>
+
+  <!-- Step 1: About you -->
+  <div class="onb-step active" data-step="1">
+    <div class="onb-title">Tell us <span>about you</span></div>
+    <div class="onb-sub">This helps us build a plan that fits your body and lifestyle.</div>
+
+    <div class="onb-row">
+      <div class="field"><label>Age</label><input type="number" id="onb-age" placeholder="28" min="10" max="99"></div>
+      <div class="field"><label>Sex</label>
+        <select id="onb-sex" class="onb-select">
+          <option value="">Select</option>
+          <option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="onb-row">
+      <div class="field"><label>Height (cm)</label><input type="number" id="onb-height" placeholder="175"></div>
+      <div class="field"><label>Weight (kg)</label><input type="number" id="onb-weight" placeholder="70"></div>
+    </div>
+    <div class="onb-row single">
+      <div class="field"><label>Diet</label>
+        <select id="onb-diet" class="onb-select">
+          <option value="omnivore">Omnivore</option>
+          <option value="eggetarian">Eggetarian</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="vegan">Vegan</option>
+          <option value="pescatarian">Pescatarian</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-primary" onclick="onbNext(1)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Your sports -->
+  <div class="onb-step" data-step="2">
+    <div class="onb-title">What do you <span>do</span>?</div>
+    <div class="onb-sub">Pick every sport you train. You can change this later.</div>
+
+    <div class="section-label">Sports</div>
+    <div class="chip-group" id="sport-chips">
+      <div class="chip" data-value="running">🏃 Running</div>
+      <div class="chip" data-value="cycling">🚴 Cycling</div>
+      <div class="chip" data-value="swimming">🏊 Swimming</div>
+      <div class="chip" data-value="walking">🚶 Walking</div>
+      <div class="chip" data-value="strength">💪 Strength</div>
+      <div class="chip" data-value="yoga">🧘 Yoga</div>
+    </div>
+
+    <div class="section-label">Current fitness level</div>
+    <div class="chip-group" id="level-chips">
+      <div class="chip" data-value="beginner">Beginner</div>
+      <div class="chip" data-value="intermediate">Intermediate</div>
+      <div class="chip" data-value="advanced">Advanced</div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-secondary" onclick="onbBack(2)">Back</button>
+      <button class="btn-primary" onclick="onbNext(2)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Your goal -->
+  <div class="onb-step" data-step="3">
+    <div class="onb-title">What's the <span>goal</span>?</div>
+    <div class="onb-sub">Everything we build is aimed at this.</div>
+
+    <div class="section-label">Choose one</div>
+    <div class="chip-group" id="goal-chips">
+      <div class="chip" data-value="5k">5K</div>
+      <div class="chip" data-value="10k">10K</div>
+      <div class="chip" data-value="half_marathon">Half marathon</div>
+      <div class="chip" data-value="marathon">Full marathon</div>
+      <div class="chip" data-value="triathlon">Triathlon</div>
+      <div class="chip" data-value="ironman_703">Ironman 70.3</div>
+      <div class="chip" data-value="ironman">Ironman</div>
+      <div class="chip" data-value="cycling_sportive">Cycling sportive</div>
+      <div class="chip" data-value="healthy">General fitness</div>
+    </div>
+
+    <div id="goal-details" style="display:none">
+      <div class="onb-row single">
+        <div class="field"><label>Race name (optional)</label><input type="text" id="onb-goalname" placeholder="e.g. Ironman 70.3 Goa"></div>
+      </div>
+      <div class="onb-row single">
+        <div class="field"><label>Target date</label><input type="date" id="onb-goaldate"></div>
+      </div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-secondary" onclick="onbBack(3)">Back</button>
+      <button class="btn-primary" onclick="onbNext(3)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Baseline -->
+  <div class="onb-step" data-step="4">
+    <div class="onb-title">Where are you <span>right now</span>?</div>
+    <div class="onb-sub">Honest answers = better plan. No judgement.</div>
+
+    <div class="section-label">Days per week you train now</div>
+    <div class="chip-group" id="days-chips">
+      <div class="chip" data-value="1">1</div>
+      <div class="chip" data-value="2">2</div>
+      <div class="chip" data-value="3">3</div>
+      <div class="chip" data-value="4">4</div>
+      <div class="chip" data-value="5">5</div>
+      <div class="chip" data-value="6">6+</div>
+    </div>
+
+    <div class="onb-row single">
+      <div class="field"><label>Injuries or restrictions</label>
+        <input type="text" id="onb-injuries" placeholder="e.g. left knee, or 'none'">
+      </div>
+    </div>
+    <div class="onb-row single">
+      <div class="field"><label>Anything else we should know</label>
+        <input type="text" id="onb-notes" placeholder="Optional">
+      </div>
+    </div>
+
+    <div class="onb-actions">
+      <button class="btn-secondary" onclick="onbBack(4)">Back</button>
+      <button class="btn-primary" onclick="onbFinish()">Generate my plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ GENERATING — THE FORGE ═══════════════════════ -->
+<div id="generating">
+  <div class="anvil-wrap">
+    <div class="hammer"></div>
+    <div class="ironbar"></div>
+    <div class="anvilbase"></div>
+    <div id="genSparks"></div>
+  </div>
+
+  <div class="quote-box">
+    <div class="quote-text" id="quoteText">Iron is forged in fire.</div>
+    <div class="quote-attr" id="quoteAttr">Forging your plan</div>
+  </div>
+
+  <div class="gen-status" id="genStatus">Heating the iron</div>
+  <div class="gen-bar"></div>
+</div>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div id="dashboard">
+  <div class="dash-top">
+    <div class="dash-brand">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" fill="none" stroke="#a3e635" stroke-width="1.5"/>
+        <path d="M 8 16 L 24 16" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 10 11 L 22 11" stroke="#a3e635" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 12 21 L 20 21" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="dash-brand-name">inertia</div>
+    </div>
+    <button class="logout-btn" onclick="handleLogout()">Log out</button>
+  </div>
+
+  <div class="dash-hello">Hey <span id="dashName">athlete</span> 👋</div>
+  <div class="dash-day" id="dashDay">—</div>
+
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-label">Day of plan</div>
+      <div class="stat-value accent" id="statDay">—</div>
+      <div class="stat-sub" id="statPhase">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">To goal</div>
+      <div class="stat-value swim" id="statCountdown">—</div>
+      <div class="stat-sub" id="statGoal">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">This week done</div>
+      <div class="stat-value" id="statWeekDone">—</div>
+      <div class="stat-sub" id="statWeekTotal">of — sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Current phase</div>
+      <div class="stat-value" style="font-size:18px" id="statPhaseName">—</div>
+      <div class="stat-sub" id="statPhaseWeek">—</div>
+    </div>
+  </div>
+
+  <div class="strava-card" id="stravaCard">
+    <div class="strava-left">
+      <div class="strava-mark">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M13.8 2 7.3 14.6h3.9L13.8 9l2.6 5.6h3.8L13.8 2zm2.6 12.6-1.9 3.7-1.9-3.7h-2.8L14.5 22l4.7-7.4h-2.8z"/></svg>
+      </div>
+      <div>
+        <div class="strava-title" id="stravaTitle">Connect Strava</div>
+        <div class="strava-sub" id="stravaSub">Auto-track what you actually did</div>
+      </div>
+    </div>
+    <button class="btn-strava" id="stravaBtn" onclick="connectStrava()">Connect</button>
+  </div>
+
+  <div class="card-block" id="actCard" style="display:none">
+    <div class="act-head">
+      <div class="act-title">Recent activities</div>
+      <div class="act-count" id="actCount">—</div>
+    </div>
+    <div id="actList"></div>
+  </div>
+
+  <div class="next-card" id="nextCard">
+    <div class="next-label">Next up</div>
+    <div class="next-sport run" id="nextSport">—</div>
+    <div class="next-title" id="nextTitle">—</div>
+    <div class="next-meta">
+      <span id="nextDuration">—</span>
+      <span id="nextIntensity">—</span>
+    </div>
+    <div class="next-notes" id="nextNotes">—</div>
+    <div class="pva" id="pvaBlock" style="display:none">
+      <div class="pva-row">
+        <span class="pva-tag">Planned</span>
+        <span class="pva-val" id="pvaPlanned">—</span>
+      </div>
+      <div class="pva-row">
+        <span class="pva-tag">Actual</span>
+        <span class="pva-val actual" id="pvaActual">—</span>
+        <span class="pva-delta spot" id="pvaDelta">—</span>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="action-btn primary" onclick="markSessionDone()">Mark done</button>
+      <button class="action-btn" onclick="alert('Full plan view coming in Phase 3')">Full plan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ─── SUPABASE CONFIG ───
+const SUPABASE_URL = 'https://wihwxunxgrrkasdnejdg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_EPZ1hVBz7zRAKHN5BnQlJQ_gsJQJjf8';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let mode = 'login';
+
+// ─── PARTICLES ───
+function seedParticles(id, count, cls, spread, xVar) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = cls;
+    p.style.left = (10 + Math.random() * 80).toFixed(1) + '%';
+    p.style.top  = (55 + Math.random() * 35).toFixed(1) + '%';
+    p.style.animationDelay = (Math.random() * 3.4).toFixed(2) + 's';
+    el.appendChild(p);
+  }
+}
+function seedGenSparks() {
+  const el = document.getElementById('genSparks');
+  if (!el) return;
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement('div');
+    s.className = 'gen-spark';
+    const ang = (Math.random() * Math.PI) - Math.PI / 2;
+    const dist = 40 + Math.random() * 90;
+    s.style.setProperty('--gx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+    s.style.setProperty('--gy', (-Math.abs(Math.sin(ang)) * dist).toFixed(0) + 'px');
+    s.style.animationDelay = (Math.random() * 1.6).toFixed(2) + 's';
+    el.appendChild(s);
+  }
+}
+seedGenSparks();
+
+// ─── SPLASH: always plays full during build phase ───
+const SPLASH_MS = 2800;
+
+// ─── FORGE QUOTES ───
+const FORGE_QUOTES = [
+  ['Iron is forged in fire. So is everything worth having.', 'The work begins'],
+  ['An object in motion stays in motion.', "Newton's first law"],
+  ['You do not rise to the level of your goals. You fall to the level of your systems.', 'James Clear'],
+  ['The body achieves what the mind believes.', 'Keep going'],
+  ['Discipline is choosing between what you want now and what you want most.', 'Stay the course'],
+  ['Anybody can do just about anything with themselves that they really want to.', 'Sir Roger Bannister'],
+  ['Pain is temporary. Quitting lasts forever.', 'Lance Armstrong'],
+  ['It never gets easier. You just go faster.', 'Greg LeMond'],
+  ['The miracle is not that I finished. It is that I had the courage to start.', 'John Bingham'],
+  ['Consistency beats intensity. Every single time.', 'Trust the process']
+];
+const GEN_STAGES = ['Heating the iron', 'Shaping the plan', 'Tempering the load', 'Quenching', 'Almost ready'];
+let quoteTimer = null, stageTimer = null;
+
+function startForgeLoop() {
+  let qi = Math.floor(Math.random() * FORGE_QUOTES.length);
+  let si = 0;
+  const qt = document.getElementById('quoteText');
+  const qa = document.getElementById('quoteAttr');
+  const gs = document.getElementById('genStatus');
+  const paint = () => {
+    qt.textContent = FORGE_QUOTES[qi][0];
+    qa.textContent = FORGE_QUOTES[qi][1];
+    qi = (qi + 1) % FORGE_QUOTES.length;
+  };
+  paint();
+  quoteTimer = setInterval(paint, 5000);
+  stageTimer = setInterval(() => {
+    si = Math.min(si + 1, GEN_STAGES.length - 1);
+    gs.textContent = GEN_STAGES[si];
+  }, 4200);
+}
+function setGenStatus(txt) {
+  const el = document.getElementById('genStatus');
+  if (el) el.textContent = txt;
+}
+
+function stopForgeLoop() {
+  clearInterval(quoteTimer); clearInterval(stageTimer);
+  quoteTimer = null; stageTimer = null;
+}
+
+// ─── SPLASH → AUTH ───
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => {
+      if (session) {
+        afterLogin(session.user);
+      } else {
+        document.getElementById('authScreen').style.display = 'flex';
+      }
+    }, 500);
+  }, SPLASH_MS);
+});
+
+// ─── TOGGLE LOGIN/SIGNUP ───
+function toggleMode() {
+  mode = mode === 'login' ? 'signup' : 'login';
+  const nameField = document.getElementById('nameField');
+  const submitBtn = document.getElementById('submitBtn');
+  const authTitle = document.querySelector('.auth-title');
+  const authSub = document.getElementById('authSub');
+  const authToggle = document.getElementById('authToggle');
+  if (mode === 'signup') {
+    nameField.style.display = 'block';
+    submitBtn.textContent = 'Create account';
+    authTitle.textContent = 'Get moving';
+    authSub.textContent = 'Start your training journey';
+    authToggle.innerHTML = 'Already have an account? <a onclick="toggleMode()">Sign in</a>';
+  } else {
+    nameField.style.display = 'none';
+    submitBtn.textContent = 'Sign in';
+    authTitle.textContent = 'Welcome back';
+    authSub.textContent = 'Sign in to continue your journey';
+    authToggle.innerHTML = 'New to Inertia? <a onclick="toggleMode()">Create an account</a>';
+  }
+  clearMsg();
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('authMsg');
+  el.textContent = text;
+  el.className = 'auth-msg ' + type;
+}
+function clearMsg() {
+  document.getElementById('authMsg').className = 'auth-msg';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('submitBtn');
+
+  if (!email || !password) { showMsg('Please enter email and password', 'error'); return; }
+  if (password.length < 6) { showMsg('Password must be at least 6 characters', 'error'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    if (mode === 'signup') {
+      const fullName = document.getElementById('fullName').value.trim();
+      const { data, error } = await sb.auth.signUp({
+        email, password,
+        options: { data: { full_name: fullName } }
+      });
+      if (error) throw error;
+      if (data.user && !data.session) {
+        showMsg('Check your email to confirm your account, then sign in.', 'success');
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+        return;
+      }
+      showDashboard(data.user);
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      showDashboard(data.user);
+    }
+  } catch (err) {
+    showMsg(err.message || 'Something went wrong', 'error');
+    btn.disabled = false;
+    btn.textContent = mode === 'signup' ? 'Create account' : 'Sign in';
+  }
+}
+
+async function handleGoogle() {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) showMsg(error.message, 'error');
+}
+
+// ═══════════════════════ ROUTING (auth → onb or dashboard) ═══════════════════════
+async function afterLogin(user) {
+  // Validate the session still maps to a real auth user.
+  // (Guards against a deleted user leaving a stale token behind.)
+  const { data: check, error: checkErr } = await sb.auth.getUser();
+  if (checkErr || !check || !check.user) {
+    await sb.auth.signOut();
+    document.getElementById('authScreen').style.display = 'flex';
+    showMsg('Your session expired. Please sign in again.', 'info');
+    return;
+  }
+  user = check.user;
+  document.getElementById('authScreen').style.display = 'none';
+  // Check if onboarding is done
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  if (error) {
+    console.error('Profile fetch error:', error);
+  }
+  currentUser = user;
+  currentProfile = profile;
+  handleStravaReturn();
+  if (!profile || !profile.onboarding_done) {
+    startOnboarding(user);
+  } else {
+    loadDashboard();
+  }
+}
+
+// Keep showDashboard as an alias for backward compat with existing auth handlers
+function showDashboard(user) { afterLogin(user); }
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('generating').classList.remove('active');
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('email').value = '';
+  document.getElementById('password').value = '';
+  currentUser = null; currentProfile = null; currentPlan = null; currentSessions = [];
+  clearMsg();
+}
+
+// ═══════════════════════ ONBOARDING ═══════════════════════
+let currentUser = null;
+let currentProfile = null;
+let currentPlan = null;
+let currentSessions = [];
+let onbData = { sports: [], level: null, goal: null, days: null };
+
+function startOnboarding(user) {
+  document.getElementById('onboarding').classList.add('active');
+  goStep(1);
+  // Wire chip groups
+  wireChips('sport-chips', true, v => { onbData.sports = v; });
+  wireChips('level-chips', false, v => { onbData.level = v; });
+  wireChips('goal-chips', false, v => {
+    onbData.goal = v;
+    const details = document.getElementById('goal-details');
+    // Show target date fields for anything except general fitness
+    details.style.display = (v && v !== 'healthy') ? 'block' : 'none';
+  });
+  wireChips('days-chips', false, v => { onbData.days = v; });
+}
+
+function wireChips(containerId, multi, cb) {
+  const chips = document.querySelectorAll('#' + containerId + ' .chip');
+  chips.forEach(chip => {
+    chip.onclick = () => {
+      if (multi) {
+        chip.classList.toggle('selected');
+        const selected = Array.from(chips).filter(c => c.classList.contains('selected')).map(c => c.dataset.value);
+        cb(selected);
+      } else {
+        chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        cb(chip.dataset.value);
+      }
+    };
+  });
+}
+
+function goStep(n) {
+  document.querySelectorAll('.onb-step').forEach(el => el.classList.remove('active'));
+  document.querySelector('.onb-step[data-step="' + n + '"]').classList.add('active');
+  document.querySelectorAll('.onb-dot').forEach(el => {
+    const step = parseInt(el.dataset.step);
+    el.classList.remove('active', 'done');
+    if (step < n) el.classList.add('done');
+    else if (step === n) el.classList.add('active');
+  });
+}
+
+function onbNext(from) {
+  if (from === 1) {
+    const age = document.getElementById('onb-age').value;
+    const sex = document.getElementById('onb-sex').value;
+    const height = document.getElementById('onb-height').value;
+    const weight = document.getElementById('onb-weight').value;
+    if (!age || !height || !weight) { alert('Please fill in age, height, and weight'); return; }
+    onbData.age = parseInt(age);
+    onbData.sex = sex || null;
+    onbData.height_cm = parseFloat(height);
+    onbData.weight_kg = parseFloat(weight);
+    onbData.diet = document.getElementById('onb-diet').value;
+    goStep(2);
+  } else if (from === 2) {
+    if (!onbData.sports || onbData.sports.length === 0) { alert('Pick at least one sport'); return; }
+    if (!onbData.level) { alert('Pick your current fitness level'); return; }
+    goStep(3);
+  } else if (from === 3) {
+    if (!onbData.goal) { alert('Pick a goal'); return; }
+    if (onbData.goal !== 'healthy') {
+      onbData.goal_name = document.getElementById('onb-goalname').value.trim();
+      onbData.goal_date = document.getElementById('onb-goaldate').value;
+      if (!onbData.goal_date) { alert('Please set a target date for your goal'); return; }
+    }
+    goStep(4);
+  }
+}
+function onbBack(from) { goStep(from - 1); }
+
+async function onbFinish() {
+  if (!onbData.days) { alert('Pick how many days per week you train now'); return; }
+  onbData.injuries = document.getElementById('onb-injuries').value.trim() || 'none';
+  onbData.notes = document.getElementById('onb-notes').value.trim();
+
+  // Show generating screen
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('generating').classList.add('active');
+  startForgeLoop();
+
+  try {
+    // 1. Save profile
+    const profileUpdate = {
+      age: onbData.age, sex: onbData.sex,
+      height_cm: onbData.height_cm, weight_kg: onbData.weight_kg,
+      diet: onbData.diet, fitness_level: onbData.level,
+      sports: onbData.sports, onboarding_done: true, updated_at: new Date().toISOString()
+    };
+    const { error: pErr } = await sb.from('profiles').update(profileUpdate).eq('id', currentUser.id);
+    if (pErr) throw new Error('Profile save: ' + pErr.message);
+
+    // 2. Save goal
+    const goalRow = {
+      user_id: currentUser.id,
+      goal_type: onbData.goal,
+      goal_label: onbData.goal_name || labelForGoal(onbData.goal),
+      target_date: onbData.goal_date || null,
+      is_active: true
+    };
+    const { data: goalData, error: gErr } = await sb.from('goals').insert(goalRow).select().single();
+    if (gErr) throw new Error('Goal save: ' + gErr.message);
+
+    // 3. Generate plan via Netlify function
+    setGenStatus('Shaping the plan');
+    const planReq = {
+      profile: { ...profileUpdate },
+      goal: goalRow,
+      baseline: { days_per_week: onbData.days, injuries: onbData.injuries, notes: onbData.notes }
+    };
+    const resp = await fetch('/api/generate-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(planReq)
+    });
+    // Handle timeout / gateway errors that return HTML instead of JSON
+    const contentType = resp.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error('The plan generator took too long to respond. Please try again — it usually works on retry.');
+    }
+    const respData = await resp.json();
+    if (!resp.ok) {
+      throw new Error(respData.error || 'Plan generation failed');
+    }
+    const plan = respData.plan;
+    if (!plan || !plan.sessions) throw new Error('Empty plan returned');
+
+    setGenStatus('Quenching');
+
+    // 4. Save plan
+    const { data: planRow, error: plErr } = await sb.from('plans').insert({
+      user_id: currentUser.id,
+      goal_id: goalData.id,
+      title: plan.title || 'My training plan',
+      start_date: plan.start_date,
+      end_date: plan.end_date,
+      phases: plan.phases || [],
+      is_active: true
+    }).select().single();
+    if (plErr) throw new Error('Plan save: ' + plErr.message);
+
+    // 5. Save sessions
+    const sessionRows = plan.sessions.map(s => ({
+      user_id: currentUser.id,
+      plan_id: planRow.id,
+      session_date: s.date,
+      sport: s.sport,
+      title: s.title,
+      planned: { duration_min: s.duration_min, intensity: s.intensity, ...(s.planned || {}) },
+      status: 'planned',
+      source: 'plan'
+    }));
+    const { error: sErr } = await sb.from('sessions').insert(sessionRows);
+    if (sErr) throw new Error('Sessions save: ' + sErr.message);
+
+    // 6. Load dashboard
+    stopForgeLoop();
+    document.getElementById('generating').classList.remove('active');
+    await loadDashboard();
+
+  } catch (err) {
+    stopForgeLoop();
+    document.getElementById('generating').classList.remove('active');
+    alert('Something went wrong: ' + err.message + '\n\nYou can try again from your profile.');
+    document.getElementById('onboarding').classList.add('active');
+    goStep(4);
+  }
+}
+
+function labelForGoal(g) {
+  const map = {
+    '5k':'5K','10k':'10K','half_marathon':'Half marathon','marathon':'Marathon',
+    'triathlon':'Triathlon','ironman_703':'Ironman 70.3','ironman':'Ironman',
+    'cycling_sportive':'Cycling sportive','healthy':'General fitness'
+  };
+  return map[g] || g;
+}
+
+// ═══════════════════════ DASHBOARD ═══════════════════════
+async function loadDashboard() {
+  document.getElementById('dashboard').classList.add('active');
+
+  const name = currentProfile?.full_name || currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'athlete';
+  document.getElementById('dashName').textContent = name;
+  const today = new Date();
+  document.getElementById('dashDay').textContent = today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' });
+
+  // Fetch active plan
+  const { data: plan } = await sb.from('plans').select('*').eq('user_id', currentUser.id).eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  currentPlan = plan;
+  if (!plan) return;
+
+  // Fetch goal
+  const { data: goal } = plan.goal_id ? await sb.from('goals').select('*').eq('id', plan.goal_id).maybeSingle() : { data: null };
+
+  // Fetch sessions
+  const { data: sessions } = await sb.from('sessions').select('*').eq('user_id', currentUser.id).eq('plan_id', plan.id).order('session_date', { ascending: true });
+  currentSessions = sessions || [];
+
+  renderDashboard(plan, goal, sessions || []);
+  checkStravaStatus();
+  renderRecentActivities();
+}
+
+function renderDashboard(plan, goal, sessions) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const startDate = new Date(plan.start_date);
+  const dayOfPlan = Math.floor((new Date(todayStr) - startDate) / 86400000) + 1;
+  document.getElementById('statDay').textContent = dayOfPlan;
+
+  // Countdown to goal
+  if (goal && goal.target_date) {
+    const days = Math.max(0, Math.floor((new Date(goal.target_date) - new Date(todayStr)) / 86400000));
+    document.getElementById('statCountdown').textContent = days + 'd';
+    document.getElementById('statGoal').textContent = goal.goal_label;
+  } else {
+    document.getElementById('statCountdown').textContent = '∞';
+    document.getElementById('statGoal').textContent = goal?.goal_label || 'ongoing';
+  }
+
+  // Current phase (rough calc from phases + start date)
+  const phases = plan.phases || [];
+  let cumulative = 0, currentPhase = phases[0];
+  const weekOfPlan = Math.floor((dayOfPlan - 1) / 7) + 1;
+  for (const p of phases) {
+    cumulative += (p.weeks || 0);
+    if (weekOfPlan <= cumulative) { currentPhase = p; break; }
+  }
+  document.getElementById('statPhaseName').textContent = currentPhase?.name || '—';
+  document.getElementById('statPhaseWeek').textContent = 'Week ' + weekOfPlan;
+  document.getElementById('statPhase').textContent = 'in ' + (currentPhase?.name || 'plan');
+
+  // This week's sessions
+  const now = new Date(todayStr);
+  const dow = now.getDay(); // 0 sun
+  const monday = new Date(now); monday.setDate(now.getDate() - ((dow + 6) % 7));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const weekSessions = sessions.filter(s => {
+    const d = new Date(s.session_date);
+    return d >= monday && d <= sunday && s.sport !== 'rest';
+  });
+  const weekDone = weekSessions.filter(s => s.status === 'done').length;
+  document.getElementById('statWeekDone').textContent = weekDone;
+  document.getElementById('statWeekTotal').textContent = 'of ' + weekSessions.length + ' sessions';
+
+  // Next session
+  const upcoming = sessions.find(s => s.session_date >= todayStr && s.status === 'planned') || sessions.find(s => s.session_date >= todayStr);
+  if (upcoming) {
+    document.getElementById('nextSport').textContent = upcoming.sport;
+    document.getElementById('nextSport').className = 'next-sport ' + upcoming.sport;
+    document.getElementById('nextTitle').textContent = upcoming.title || 'Session';
+    const dur = upcoming.planned?.duration_min || 0;
+    document.getElementById('nextDuration').textContent = dur ? (dur + ' min') : '—';
+    document.getElementById('nextIntensity').textContent = (upcoming.planned?.intensity || '').toUpperCase();
+    document.getElementById('nextNotes').textContent = upcoming.planned?.notes || upcoming.planned?.distance_km ? ((upcoming.planned?.distance_km ? upcoming.planned.distance_km + ' km. ' : '') + (upcoming.planned?.notes || '')) : 'Follow the plan and log how it went.';
+    document.getElementById('nextCard').dataset.sessionId = upcoming.id;
+
+    const pva = document.getElementById('pvaBlock');
+    const act = upcoming.actual || {};
+    if (act.distance_km || act.duration_min) {
+      const pMin = upcoming.planned?.duration_min || 0;
+      const aMin = act.duration_min || 0;
+      document.getElementById('pvaPlanned').textContent =
+        (upcoming.planned?.distance_km ? upcoming.planned.distance_km + ' km · ' : '') + (pMin ? pMin + ' min' : '—');
+      document.getElementById('pvaActual').textContent =
+        (act.distance_km ? act.distance_km + ' km · ' : '') + (aMin ? aMin + ' min' : '—')
+        + (act.avg_hr ? ' · ' + Math.round(act.avg_hr) + ' bpm' : '');
+      if (act.sport_matched === false && act.sport_done) {
+        document.getElementById('pvaActual').textContent += '  (' + act.sport_done + ')';
+      }
+      const d = document.getElementById('pvaDelta');
+      if (pMin && aMin) {
+        const diff = Math.round(((aMin - pMin) / pMin) * 100);
+        d.textContent = (diff > 0 ? '+' : '') + diff + '%';
+        d.className = 'pva-delta ' + (Math.abs(diff) <= 10 ? 'spot' : diff > 0 ? 'over' : 'under');
+      } else { d.textContent = 'logged'; d.className = 'pva-delta spot'; }
+      pva.style.display = 'block';
+    } else {
+      pva.style.display = 'none';
+    }
+  } else {
+    document.getElementById('nextTitle').textContent = 'No upcoming sessions';
+    document.getElementById('nextNotes').textContent = 'Your plan may need extending. This will trigger automatically as you approach the end of week 4.';
+  }
+}
+
+async function renderRecentActivities() {
+  if (!currentUser) return;
+  const { data } = await sb.from('strava_activities')
+    .select('*').eq('user_id', currentUser.id)
+    .order('start_date', { ascending: false }).limit(8);
+  const card = document.getElementById('actCard');
+  const list = document.getElementById('actList');
+  if (!card || !list) return;
+  if (!data || !data.length) { card.style.display = 'none'; return; }
+
+  const colors = { run:'var(--run)', bike:'var(--bike)', swim:'var(--swim)', strength:'var(--str)' };
+  document.getElementById('actCount').textContent = data.length + ' synced';
+  list.innerHTML = data.map(a => {
+    const km = a.distance_m ? (a.distance_m/1000).toFixed(1) + ' km' : '';
+    const min = a.moving_time_s ? Math.round(a.moving_time_s/60) + ' min' : '';
+    const hr = a.avg_hr ? Math.round(a.avg_hr) + ' bpm' : '';
+    const meta = [km, min, hr].filter(Boolean).join(' · ');
+    const d = new Date(a.start_date);
+    const day = d.toLocaleDateString('en-US', { day:'numeric', month:'short' });
+    return `<div class="act-row">
+      <div class="act-dot" style="background:${colors[a.sport]||'var(--muted)'}"></div>
+      <div class="act-name">${a.name || a.sport}</div>
+      <div class="act-meta">${meta}</div>
+      <div class="act-date">${day}</div>
+    </div>`;
+  }).join('');
+  card.style.display = 'block';
+}
+
+// ═══════════════════════ STRAVA ═══════════════════════
+const STRAVA_CLIENT_ID = '246568';
+let stravaConnected = false;
+
+function connectStrava() {
+  if (!currentUser) return;
+  const redirectUri = encodeURIComponent(window.location.origin + '/api/strava-auth');
+  const url = 'https://www.strava.com/oauth/authorize'
+    + '?client_id=' + STRAVA_CLIENT_ID
+    + '&response_type=code'
+    + '&redirect_uri=' + redirectUri
+    + '&approval_prompt=force'
+    + '&scope=activity:read_all'
+    + '&state=' + currentUser.id;
+  window.location.href = url;
+}
+
+async function checkStravaStatus() {
+  if (!currentUser) return;
+  const { data } = await sb.from('strava_tokens').select('athlete_name,updated_at')
+    .eq('user_id', currentUser.id).maybeSingle();
+  stravaConnected = !!data;
+  const title = document.getElementById('stravaTitle');
+  const sub = document.getElementById('stravaSub');
+  const btn = document.getElementById('stravaBtn');
+  if (!title) return;
+  if (stravaConnected) {
+    title.textContent = 'Strava connected';
+    sub.textContent = data.athlete_name ? ('as ' + data.athlete_name) : 'Ready to sync';
+    btn.textContent = 'Sync now';
+    btn.className = 'btn-sync';
+    btn.onclick = syncStrava;
+  } else {
+    title.textContent = 'Connect Strava';
+    sub.textContent = 'Auto-track what you actually did';
+    btn.textContent = 'Connect';
+    btn.className = 'btn-strava';
+    btn.onclick = connectStrava;
+  }
+}
+
+async function syncStrava() {
+  const btn = document.getElementById('stravaBtn');
+  const sub = document.getElementById('stravaSub');
+  btn.disabled = true;
+  btn.textContent = 'Syncing…';
+  try {
+    const res = await fetch('/api/strava-sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: currentUser.id })
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('Sync timed out — try again');
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.reconnect) {
+        stravaConnected = false;
+        document.getElementById('stravaTitle').textContent = 'Reconnect Strava';
+        sub.textContent = data.error;
+        btn.disabled = false;
+        btn.textContent = 'Connect';
+        btn.className = 'btn-strava';
+        btn.onclick = connectStrava;
+        return;
+      }
+      throw new Error(data.error || 'Sync failed');
+    }
+    const resultMsg = data.synced + ' activities · ' + data.matched + ' matched to plan';
+    await loadDashboard();
+    document.getElementById('stravaSub').textContent = resultMsg;
+    renderRecentActivities();
+  } catch (e) {
+    sub.textContent = e.message;
+    btn.disabled = false;
+    btn.textContent = 'Sync now';
+    return;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// handle OAuth return
+function handleStravaReturn() {
+  const p = new URLSearchParams(window.location.search);
+  const s = p.get('strava');
+  if (!s) return;
+  window.history.replaceState({}, '', window.location.pathname);
+  if (s === 'connected') setTimeout(() => syncStrava(), 900);
+  else if (s === 'denied') alert('Strava connection was cancelled.');
+  else if (s === 'error') alert('Strava error: ' + (p.get('msg') || 'unknown'));
+}
+
+async function markSessionDone() {
+  const id = document.getElementById('nextCard').dataset.sessionId;
+  if (!id) return;
+  await sb.from('sessions').update({ status: 'done' }).eq('id', id);
+  await loadDashboard();
+}
+
+</script>
+</body>
+</html>
