@@ -130,9 +130,17 @@ export async function onRequestPost(context) {
 
     for (const a of rowsToSave) {
       const day = (a.start_date || '').split('T')[0];
-      const hit = Array.isArray(sessions)
-        ? sessions.find(s => s.session_date === day && s.sport === a.sport)
-        : null;
+      if (!Array.isArray(sessions)) break;
+
+      // Prefer an exact same-day, same-sport match.
+      let hit = sessions.find(s => s.session_date === day && s.sport === a.sport);
+      let exact = true;
+
+      // Otherwise take any non-rest session that day (you trained, just not the planned sport).
+      if (!hit) {
+        hit = sessions.find(s => s.session_date === day && s.sport !== 'rest');
+        exact = false;
+      }
       if (!hit) continue;
       await fetch(sbUrl + '/rest/v1/sessions?id=eq.' + hit.id, {
         method: 'PATCH', headers: H,
@@ -141,7 +149,8 @@ export async function onRequestPost(context) {
           actual: {
             distance_km: a.distance_m ? +(a.distance_m / 1000).toFixed(2) : null,
             duration_min: a.moving_time_s ? Math.round(a.moving_time_s / 60) : null,
-            avg_hr: a.avg_hr, source: 'strava', name: a.name
+            avg_hr: a.avg_hr, source: 'strava', name: a.name,
+            sport_done: a.sport, sport_matched: exact
           }
         })
       });
