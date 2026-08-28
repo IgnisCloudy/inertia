@@ -220,6 +220,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .action-btn{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:11px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
 .action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 
+.card-block{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.act-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.act-title{font-size:14px;font-weight:600}
+.act-count{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.act-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--b1)}
+.act-row:first-child{border-top:none}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.act-name{font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act-meta{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.act-date{font-family:var(--mono);font-size:10px;color:var(--dim);width:52px;text-align:right;flex-shrink:0}
+
 /* ── STRAVA ── */
 .strava-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 20px;margin-bottom:16px;
   display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
@@ -520,6 +531,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </div>
     </div>
     <button class="btn-strava" id="stravaBtn" onclick="connectStrava()">Connect</button>
+  </div>
+
+  <div class="card-block" id="actCard" style="display:none">
+    <div class="act-head">
+      <div class="act-title">Recent activities</div>
+      <div class="act-count" id="actCount">—</div>
+    </div>
+    <div id="actList"></div>
   </div>
 
   <div class="next-card" id="nextCard">
@@ -980,6 +999,7 @@ async function loadDashboard() {
 
   renderDashboard(plan, goal, sessions || []);
   checkStravaStatus();
+  renderRecentActivities();
 }
 
 function renderDashboard(plan, goal, sessions) {
@@ -1045,6 +1065,9 @@ function renderDashboard(plan, goal, sessions) {
       document.getElementById('pvaActual').textContent =
         (act.distance_km ? act.distance_km + ' km · ' : '') + (aMin ? aMin + ' min' : '—')
         + (act.avg_hr ? ' · ' + Math.round(act.avg_hr) + ' bpm' : '');
+      if (act.sport_matched === false && act.sport_done) {
+        document.getElementById('pvaActual').textContent += '  (' + act.sport_done + ')';
+      }
       const d = document.getElementById('pvaDelta');
       if (pMin && aMin) {
         const diff = Math.round(((aMin - pMin) / pMin) * 100);
@@ -1059,6 +1082,35 @@ function renderDashboard(plan, goal, sessions) {
     document.getElementById('nextTitle').textContent = 'No upcoming sessions';
     document.getElementById('nextNotes').textContent = 'Your plan may need extending. This will trigger automatically as you approach the end of week 4.';
   }
+}
+
+async function renderRecentActivities() {
+  if (!currentUser) return;
+  const { data } = await sb.from('strava_activities')
+    .select('*').eq('user_id', currentUser.id)
+    .order('start_date', { ascending: false }).limit(8);
+  const card = document.getElementById('actCard');
+  const list = document.getElementById('actList');
+  if (!card || !list) return;
+  if (!data || !data.length) { card.style.display = 'none'; return; }
+
+  const colors = { run:'var(--run)', bike:'var(--bike)', swim:'var(--swim)', strength:'var(--str)' };
+  document.getElementById('actCount').textContent = data.length + ' synced';
+  list.innerHTML = data.map(a => {
+    const km = a.distance_m ? (a.distance_m/1000).toFixed(1) + ' km' : '';
+    const min = a.moving_time_s ? Math.round(a.moving_time_s/60) + ' min' : '';
+    const hr = a.avg_hr ? Math.round(a.avg_hr) + ' bpm' : '';
+    const meta = [km, min, hr].filter(Boolean).join(' · ');
+    const d = new Date(a.start_date);
+    const day = d.toLocaleDateString('en-US', { day:'numeric', month:'short' });
+    return `<div class="act-row">
+      <div class="act-dot" style="background:${colors[a.sport]||'var(--muted)'}"></div>
+      <div class="act-name">${a.name || a.sport}</div>
+      <div class="act-meta">${meta}</div>
+      <div class="act-date">${day}</div>
+    </div>`;
+  }).join('');
+  card.style.display = 'block';
 }
 
 // ═══════════════════════ STRAVA ═══════════════════════
@@ -1129,8 +1181,10 @@ async function syncStrava() {
       }
       throw new Error(data.error || 'Sync failed');
     }
-    sub.textContent = data.synced + ' activities · ' + data.matched + ' matched to plan';
+    const resultMsg = data.synced + ' activities · ' + data.matched + ' matched to plan';
     await loadDashboard();
+    document.getElementById('stravaSub').textContent = resultMsg;
+    renderRecentActivities();
   } catch (e) {
     sub.textContent = e.message;
     btn.disabled = false;
