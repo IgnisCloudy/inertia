@@ -13,7 +13,7 @@
   --text:#f5f0e8; --muted:#9a9086; --dim:#6b6259;
   --acc:#ff5e1a; --acc-dim:rgba(255,94,26,.12);
   --ember:#ffa32e; --forge:#ffc857;
-  --swim:#4a9eca; --bike:#ffa32e; --run:#ff5e1a; --str:#c9942a; --indigo:#4a9eca;
+  --swim:#4a9eca; --bike:#ffa32e; --run:#e8506b; --str:#c9942a; --indigo:#4a9eca;
   --red:#e84a3f; --green:#7cb342;
   --font:'Space Grotesk',system-ui,sans-serif; --mono:'Space Mono',monospace;
 }
@@ -219,6 +219,38 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .action-row{display:flex;gap:8px;margin-top:8px}
 .action-btn{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:11px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
 .action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+
+/* ── NUDGE BANNER ── */
+.nudge{display:flex;align-items:center;gap:12px;background:linear-gradient(100deg,rgba(255,94,26,.09),rgba(74,158,202,.06));
+  border:1px solid var(--b1);border-radius:14px;padding:13px 16px;margin-bottom:18px}
+.nudge-icon{font-size:19px;flex-shrink:0}
+.nudge-text{font-size:13.5px;line-height:1.45;color:var(--text);opacity:.92}
+.nudge-days{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-left:auto;flex-shrink:0;white-space:nowrap}
+
+/* ── REPLAN BANNER ── */
+.replan{background:linear-gradient(135deg,rgba(255,94,26,.13),rgba(255,163,46,.06));
+  border:1px solid rgba(255,94,26,.28);border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.replan-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.replan-body{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.replan-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-replan{background:var(--acc);color:var(--bg);border:none;padding:10px 18px;border-radius:10px;
+  font-family:var(--font);font-weight:700;font-size:13px;cursor:pointer}
+.btn-dismiss{background:none;color:var(--muted);border:1px solid var(--b2);padding:10px 16px;border-radius:10px;
+  font-family:var(--font);font-size:13px;cursor:pointer}
+
+/* ── ANALYTICS ── */
+.vol-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.vol-sport{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;width:46px;flex-shrink:0}
+.vol-bar-wrap{flex:1;height:7px;background:var(--s3);border-radius:4px;overflow:hidden;position:relative}
+.vol-bar{height:100%;border-radius:4px;transition:width .5s ease}
+.vol-nums{font-family:var(--mono);font-size:11px;color:var(--muted);width:96px;text-align:right;flex-shrink:0}
+.vol-nums b{color:var(--text);font-weight:700}
+.phase-bar-wrap{height:8px;background:var(--s3);border-radius:5px;overflow:hidden;margin:10px 0 8px}
+.phase-bar{height:100%;background:linear-gradient(90deg,var(--acc),var(--ember));border-radius:5px}
+.quote-line{margin-top:16px;padding-top:15px;border-top:1px solid var(--b1);font-size:13.5px;
+  line-height:1.6;color:var(--text);opacity:.9;font-style:italic}
+.quote-src{display:block;font-family:var(--mono);font-size:10px;font-style:normal;color:var(--acc);
+  text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
 
 .card-block{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 20px;margin-bottom:16px}
 .act-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -497,6 +529,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <div class="dash-hello">Hey <span id="dashName">athlete</span> 👋</div>
   <div class="dash-day" id="dashDay">—</div>
 
+  <div class="nudge" id="nudgeBanner" style="display:none">
+    <div class="nudge-icon" id="nudgeIcon">🏊</div>
+    <div class="nudge-text" id="nudgeText">—</div>
+    <div class="nudge-days" id="nudgeDays"></div>
+  </div>
+
+  <div class="replan" id="replanBanner" style="display:none">
+    <div class="replan-title" id="replanTitle">Your plan has drifted</div>
+    <div class="replan-body" id="replanBody">—</div>
+    <div class="replan-actions">
+      <button class="btn-replan" onclick="requestReplan()">Rebuild my plan</button>
+      <button class="btn-dismiss" onclick="dismissReplan()">Not now</button>
+    </div>
+  </div>
+
   <div class="stats-grid">
     <div class="stat">
       <div class="stat-label">Day of plan</div>
@@ -531,6 +578,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </div>
     </div>
     <button class="btn-strava" id="stravaBtn" onclick="connectStrava()">Connect</button>
+  </div>
+
+  <div class="card-block" id="analyticsCard" style="display:none">
+    <div class="act-head">
+      <div class="act-title">This week</div>
+      <div class="act-count" id="weekRange">—</div>
+    </div>
+    <div id="volList"></div>
+
+    <div style="margin-top:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="act-count" id="phaseLabel">—</div>
+        <div class="act-count" id="phasePct">—</div>
+      </div>
+      <div class="phase-bar-wrap"><div class="phase-bar" id="phaseBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="quote-line" id="quoteLine">—<span class="quote-src" id="quoteSrc"></span></div>
   </div>
 
   <div class="card-block" id="actCard" style="display:none">
@@ -1000,6 +1065,7 @@ async function loadDashboard() {
   renderDashboard(plan, goal, sessions || []);
   checkStravaStatus();
   renderRecentActivities();
+  renderNudgeAndAnalytics();
 }
 
 function renderDashboard(plan, goal, sessions) {
@@ -1111,6 +1177,205 @@ async function renderRecentActivities() {
     </div>`;
   }).join('');
   card.style.display = 'block';
+}
+
+// ═══════════════════════ NUDGE · ANALYTICS · DRIFT ═══════════════════════
+
+const NUDGES = {
+  swim: [
+    ['The water has been quiet without you.', '🏊'],
+    ['Your goggles are gathering dust.', '🥽'],
+    ['The lane is open. It always is.', '🏊'],
+    ['Somewhere a pool is missing its best swimmer.', '💧']
+  ],
+  bike: [
+    ['Your saddle is waiting.', '🚴'],
+    ['The road has been asking about you.', '🛣️'],
+    ['Two wheels, still hopeful.', '🚲'],
+    ['That climb is not going to ride itself.', '⛰️']
+  ],
+  run: [
+    ['The lake misses your footsteps.', '🏃'],
+    ['Your shoes are by the door, still hopeful.', '👟'],
+    ['Sunrise has been running without you.', '🌅'],
+    ['The pavement remembers.', '🏃']
+  ],
+  strength: [
+    ['The iron has been resting too.', '🏋️'],
+    ['Strength fades quietly. Go remind it.', '💪']
+  ],
+  allgood: [
+    ['Every sport touched this week. This is what momentum feels like.', '🔥'],
+    ['Swim, bike, run — all moving. Stay in motion.', '⚡'],
+    ['You are doing the work. It shows.', '✨']
+  ]
+};
+
+const MOVIE_LINES = [
+  ['Just keep swimming.', 'Finding Nemo'],
+  ['Why do we fall? So we can learn to pick ourselves up.', 'Batman Begins'],
+  ['Get busy living.', 'The Shawshank Redemption'],
+  ['It ain\'t about how hard you hit.', 'Rocky Balboa'],
+  ['Do, or do not. There is no try.', 'The Empire Strikes Back'],
+  ['Our greatest glory is not in never falling.', 'Confucius'],
+  ['The distance is nothing. The first step is everything.', 'Inertia'],
+  ['Nobody is coming. It is on you. That is the good news.', 'Inertia'],
+  ['You do not find the time. You take it.', 'Inertia']
+];
+
+async function renderNudgeAndAnalytics() {
+  if (!currentUser) return;
+
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today); monday.setDate(today.getDate() - ((dow + 6) % 7)); monday.setHours(0,0,0,0);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6); sunday.setHours(23,59,59,999);
+
+  // ── activities (30d for nudge, week slice for volume) ──
+  const since = new Date(today); since.setDate(today.getDate() - 30);
+  const { data: acts } = await sb.from('strava_activities')
+    .select('sport,distance_m,moving_time_s,start_date')
+    .eq('user_id', currentUser.id)
+    .gte('start_date', since.toISOString())
+    .order('start_date', { ascending: false });
+
+  const list = acts || [];
+
+  // ── NUDGE: which sport has been neglected longest? ──
+  const mySports = (currentProfile && currentProfile.sports) ? currentProfile.sports : [];
+  const sportKey = { running:'run', cycling:'bike', swimming:'swim', strength:'strength', walking:'run' };
+  const tracked = [...new Set(mySports.map(s => sportKey[s]).filter(s => s && NUDGES[s]))];
+  const pool = tracked.length ? tracked : ['swim','bike','run'];
+
+  let worstSport = null, worstDays = -1;
+  pool.forEach(sp => {
+    const last = list.find(a => a.sport === sp);
+    const days = last
+      ? Math.floor((today - new Date(last.start_date)) / 86400000)
+      : 99;
+    if (days > worstDays) { worstDays = days; worstSport = sp; }
+  });
+
+  const nb = document.getElementById('nudgeBanner');
+  if (nb) {
+    let msg, icon, dayTxt;
+    if (worstDays <= 2) {
+      const pick = NUDGES.allgood[Math.floor(Math.random() * NUDGES.allgood.length)];
+      msg = pick[0]; icon = pick[1]; dayTxt = 'on it';
+    } else {
+      const opts = NUDGES[worstSport] || NUDGES.run;
+      const pick = opts[Math.floor(Math.random() * opts.length)];
+      msg = pick[0]; icon = pick[1];
+      dayTxt = worstDays >= 99 ? 'not yet' : worstDays + 'd';
+    }
+    document.getElementById('nudgeIcon').textContent = icon;
+    document.getElementById('nudgeText').textContent = msg;
+    document.getElementById('nudgeDays').textContent = dayTxt;
+    nb.style.display = 'flex';
+  }
+
+  // ── WEEKLY VOLUME ──
+  const weekActs = list.filter(a => {
+    const d = new Date(a.start_date);
+    return d >= monday && d <= sunday;
+  });
+
+  const { data: weekSessions } = await sb.from('sessions')
+    .select('sport,planned,session_date')
+    .eq('user_id', currentUser.id)
+    .gte('session_date', monday.toISOString().split('T')[0])
+    .lte('session_date', sunday.toISOString().split('T')[0]);
+
+  const colors = { swim:'#4a9eca', bike:'#ffa32e', run:'#e8506b', strength:'#c9942a' };
+  const labels = { swim:'Swim', bike:'Bike', run:'Run', strength:'Strength' };
+  const shown = pool.filter(s => s !== 'strength').concat(pool.includes('strength') ? ['strength'] : []);
+
+  const volHtml = shown.map(sp => {
+    const a = weekActs.filter(x => x.sport === sp);
+    const km = a.reduce((t,x) => t + (x.distance_m || 0), 0) / 1000;
+    const min = Math.round(a.reduce((t,x) => t + (x.moving_time_s || 0), 0) / 60);
+    const plannedMin = (weekSessions || [])
+      .filter(s => s.sport === sp)
+      .reduce((t,s) => t + ((s.planned && s.planned.duration_min) || 0), 0);
+    const pct = plannedMin ? Math.min(100, Math.round((min / plannedMin) * 100)) : (min ? 100 : 0);
+    const nums = sp === 'strength'
+      ? '<b>' + min + '</b> / ' + plannedMin + ' min'
+      : '<b>' + km.toFixed(1) + '</b> km · ' + min + 'm';
+    return '<div class="vol-row">' +
+      '<div class="vol-sport" style="color:' + colors[sp] + '">' + labels[sp] + '</div>' +
+      '<div class="vol-bar-wrap"><div class="vol-bar" style="width:' + pct + '%;background:' + colors[sp] + '"></div></div>' +
+      '<div class="vol-nums">' + nums + '</div></div>';
+  }).join('');
+
+  const volList = document.getElementById('volList');
+  if (volList) volList.innerHTML = volHtml;
+
+  const fmt = d => d.toLocaleDateString('en-US', { day:'numeric', month:'short' });
+  const wr = document.getElementById('weekRange');
+  if (wr) wr.textContent = fmt(monday) + ' – ' + fmt(sunday);
+
+  // ── PHASE PROGRESS ──
+  if (currentPlan) {
+    const start = new Date(currentPlan.start_date);
+    const end = new Date(currentPlan.end_date);
+    const total = Math.max(1, (end - start) / 86400000);
+    const done = Math.max(0, Math.min(total, (today - start) / 86400000));
+    const pct = Math.round((done / total) * 100);
+    const phases = currentPlan.phases || [];
+    const weekOf = Math.floor(done / 7) + 1;
+    let cum = 0, cur = phases[0];
+    for (const p of phases) { cum += (p.weeks || 0); if (weekOf <= cum) { cur = p; break; } }
+    const pl = document.getElementById('phaseLabel');
+    const pp = document.getElementById('phasePct');
+    const pb = document.getElementById('phaseBar');
+    if (pl) pl.textContent = (cur && cur.name ? cur.name : 'Plan') + ' · week ' + weekOf;
+    if (pp) pp.textContent = pct + '% to goal';
+    if (pb) pb.style.width = pct + '%';
+  }
+
+  // ── QUOTE ──
+  const q = MOVIE_LINES[Math.floor(Math.random() * MOVIE_LINES.length)];
+  const ql = document.getElementById('quoteLine');
+  if (ql) {
+    ql.innerHTML = q[0] + '<span class="quote-src" id="quoteSrc">' + q[1] + '</span>';
+  }
+
+  const ac = document.getElementById('analyticsCard');
+  if (ac) ac.style.display = 'block';
+
+  checkDrift(weekSessions || [], weekActs);
+}
+
+// ── DRIFT: at most one prompt per day ──
+function checkDrift(weekSessions, weekActs) {
+  const banner = document.getElementById('replanBanner');
+  if (!banner) return;
+
+  const todayKey = new Date().toISOString().split('T')[0];
+  if (localStorage.getItem('inertia_replan_dismissed') === todayKey) return;
+
+  const todayStr = todayKey;
+  const past = weekSessions.filter(s => s.session_date < todayStr && s.sport !== 'rest');
+  const trained = new Set(weekActs.map(a => (a.start_date || '').split('T')[0]));
+  const missed = past.filter(s => !trained.has(s.session_date));
+
+  if (missed.length < 2) return;
+
+  document.getElementById('replanTitle').textContent =
+    'You have missed ' + missed.length + ' session' + (missed.length > 1 ? 's' : '') + ' this week';
+  document.getElementById('replanBody').textContent =
+    'Life happens. I can rebuild the rest of your week around what you are actually doing, so the plan fits you instead of the other way round.';
+  banner.style.display = 'block';
+}
+
+function dismissReplan() {
+  localStorage.setItem('inertia_replan_dismissed', new Date().toISOString().split('T')[0]);
+  document.getElementById('replanBanner').style.display = 'none';
+}
+
+async function requestReplan() {
+  alert('Replan engine lands in the next build — this button will rebuild your week.');
+  dismissReplan();
 }
 
 // ═══════════════════════ STRAVA ═══════════════════════
