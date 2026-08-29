@@ -1701,7 +1701,7 @@ async function openRecapSheet(mode) {
   recapMode = mode || 'week';
   playSwell();
   openSheet('<div class="rp-load"><div class="rp-orbit"><span></span><span></span><span></span></div>' +
-            '<div class="rp-msg">Pulling your numbers…</div></div>');
+            '<div class="rp-msg">' + (pack().food || 'Pulling your numbers…') + '</div></div>');
   const html = await buildRecapHtml();
   openSheet(
     '<div class="recap-switch">' +
@@ -2104,7 +2104,7 @@ async function handleFoodPhoto(input) {
   openSheet('<img src="' + dataUrl + '" class="scan-preview">' +
     '<div class="rp-load" style="padding:12px 0 4px">' +
       '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
-      '<div class="rp-msg">Looking at your plate…</div>' +
+      '<div class="rp-msg">' + (pack().plate || 'Looking at your plate…') + '</div>' +
       '<div class="rp-sub">Compressed to ' + kb + ' KB before sending</div>' +
     '</div>');
 
@@ -2235,7 +2235,7 @@ function setScanMult(m, btn) {
 async function openLibrary() {
   playSwell();
   openSheet('<div class="rp-load"><div class="rp-orbit"><span></span><span></span><span></span></div>' +
-            '<div class="rp-msg">Opening your foods…</div></div>');
+            '<div class="rp-msg">' + (pack().food || 'Opening your foods…') + '</div></div>');
 
   const { data } = await sb.from('food_library')
     .select('*').eq('user_id', currentUser.id).order('name');
@@ -2260,6 +2260,19 @@ function libSections(saved, starter, diet) {
     html += '<div class="lib-sec">Suggested · ' + diet + '</div>' + starterRows(starter);
   }
   return html || '<div style="padding:22px 0;text-align:center;color:var(--muted);font-size:13px">Nothing here yet.</div>';
+}
+
+function libRows(foods) {
+  return foods.map(f =>
+    '<div class="lib-row" onclick="logFromLibrary(\'' + f.id + '\')">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13.5px">' + f.name + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (f.serving || '') +
+          ' · P' + Math.round(f.protein_g||0) + ' C' + Math.round(f.carbs_g||0) + ' F' + Math.round(f.fat_g||0) + '</div>' +
+      '</div>' +
+      '<div style="font-family:var(--mono);font-size:12.5px">' + Math.round(f.calories||0) + '</div>' +
+      '<div style="color:var(--acc);font-size:16px;margin-left:8px">+</div>' +
+    '</div>').join('');
 }
 
 function starterRows(foods) {
@@ -2662,7 +2675,7 @@ async function applyProposal() {
 
   openSheet('<div class="rp-load">' +
     '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
-    '<div class="rp-msg">Locking it in…</div>' +
+    '<div class="rp-msg">' + (pack().saving || 'Locking it in…') + '</div>' +
     '<div class="rp-sub">Updating your sessions</div>' +
     '<div class="rp-bar"></div></div>');
 
@@ -2906,7 +2919,8 @@ const REGIONS = {
       decent: ['Steady progress. Boring weeks build the strongest athletes.','You moved. That already beats last week you.'],
       quiet: ['Quiet week. Happens to everyone — the next one is yours.','Small week, no drama. The shoes are still by the door.']
     },
-    loading: ['Working on it…','Reading your plan and your actuals.','Doing the maths on your week.']
+    loading: ['Working on it…','Reading your plan and your actuals.','Doing the maths on your week.'],
+    food: 'Opening your foods…', plate: 'Looking at your plate…', saving: 'Locking it in…'
   },
 
   bengaluru: {
@@ -2923,7 +2937,8 @@ const REGIONS = {
       decent: ['Solid enough macha. Not every week is a highlight reel.','Steady progress guru. Boring weeks build strong athletes.'],
       quiet: ['Quiet week macha. Happens — next one is yours.','Small week, no drama boss. Shoes still by the door.']
     },
-    loading: ['Swalpa adjust maadi…','Macha, hold on — coach is thinking.','One minute guru, doing the maths.']
+    loading: ['Swalpa adjust maadi…','Macha, hold on — coach is thinking.','One minute guru, doing the maths.'],
+    food: 'Pulling up your food macha…', plate: 'Nodta idini… what is on the plate?', saving: 'Locking it in macha…'
   },
 
   mumbai: {
@@ -2940,7 +2955,8 @@ const REGIONS = {
       decent: ['Theek thaak boss. Har week highlight reel nahi hota.','Steady hai bhau. Boring weeks hi champion banate hain.'],
       quiet: ['Halka week tha boss. Chalta hai — agla tera hai.','Chhota week, tension nahi. Shoes abhi bhi ready hain.']
     },
-    loading: ['Thoda adjust kar raha hoon…','Ruk bhau, coach soch raha hai.','Ek minute boss, hisaab lag raha hai.']
+    loading: ['Thoda adjust kar raha hoon…','Ruk bhau, coach soch raha hai.','Ek minute boss, hisaab lag raha hai.'],
+    food: 'Khana nikal raha hoon boss…', plate: 'Plate dekh raha hoon…', saving: 'Save kar raha hoon bhau…'
   },
 
   delhi: {
@@ -2957,7 +2973,8 @@ const REGIONS = {
       decent: ['Theek hai yaar. Har week jhakaas nahi ho sakta.','Steady chal raha hai bhai. Boring weeks hi kaam aate hain.'],
       quiet: ['Halka week tha bhai. Hota hai — agla tera.','Chhota week, koi tension nahi. Joote ready hain.']
     },
-    loading: ['Thoda adjust kar raha hoon…','Ruk bhai, coach soch raha hai.','Ek minute yaar, hisaab laga raha hoon.']
+    loading: ['Thoda adjust kar raha hoon…','Ruk bhai, coach soch raha hai.','Ek minute yaar, hisaab laga raha hoon.'],
+    food: 'Khana nikal raha hoon bhai…', plate: 'Plate dekh raha hoon…', saving: 'Save kar raha hoon yaar…'
   },
 
   punjab: {
@@ -2974,7 +2991,8 @@ const REGIONS = {
       decent: ['Theek hai paaji. Har week dhamaka nahi hunda.','Steady challa hai. Boring weeks hi champion bandi ne.'],
       quiet: ['Halka week si paaji. Hunda hai — agla tuhada.','Chhota week, koi gal nahi. Bootan taiyaar ne.']
     },
-    loading: ['Thoda adjust kar reha haan…','Ruk paaji, coach soch reha hai.','Ik minute, hisaab laa reha haan.']
+    loading: ['Thoda adjust kar reha haan…','Ruk paaji, coach soch reha hai.','Ik minute, hisaab laa reha haan.'],
+    food: 'Khana kadh reha haan paaji…', plate: 'Thali vekh reha haan…', saving: 'Save kar reha haan paaji…'
   },
 
   kolkata: {
@@ -2991,7 +3009,8 @@ const REGIONS = {
       decent: ['Motamuti bhalo dada. Prottek week highlight hoy na.','Steady cholche. Boring week gulo-i champion baniye dey.'],
       quiet: ['Halka week chilo dada. Hoy — porer ta tomar.','Choto week, chinta nei. Juto ekhono ready.']
     },
-    loading: ['Ektu adjust korchi…','Dnaraan dada, coach bhabche.','Ek minute, hisheb korchi.']
+    loading: ['Ektu adjust korchi…','Dnaraan dada, coach bhabche.','Ek minute, hisheb korchi.'],
+    food: 'Tomar khabar ber korchi dada…', plate: 'Plate ta dekhchi…', saving: 'Save korchi dada…'
   },
 
   gujarat: {
@@ -3008,7 +3027,8 @@ const REGIONS = {
       decent: ['Thik chhe bhai. Badha week highlight na hoy.','Steady chale chhe. Boring week j champion banave.'],
       quiet: ['Halko week hato bhai. Thay — aavto tamaro.','Nano week, chinta nahi. Boot taiyar chhe.']
     },
-    loading: ['Thodu adjust karu chhu…','Ubha raho bhai, coach vichare chhe.','Ek minute, hisab kari lau.']
+    loading: ['Thodu adjust karu chhu…','Ubha raho bhai, coach vichare chhe.','Ek minute, hisab kari lau.'],
+    food: 'Tamaru khavanu kadhu chhu bhai…', plate: 'Thali joi rahyo chhu…', saving: 'Save karu chhu bhai…'
   },
 
   chennai: {
@@ -3025,7 +3045,8 @@ const REGIONS = {
       decent: ['Paravaala machan. Ellaa week um highlight illa.','Steady ah poguthu. Boring weeks dhaan champion aakkum.'],
       quiet: ['Chinna week machan. Nadakkum — adutha week un.','Konjam kammi, prachanai illa. Shoes ready dhaan.']
     },
-    loading: ['Konjam adjust panren…','Iru machan, coach yosikkiran.','Oru nimisham, kanakku paakren.']
+    loading: ['Konjam adjust panren…','Iru machan, coach yosikkiran.','Oru nimisham, kanakku paakren.'],
+    food: 'Un saapadu edukkuren machan…', plate: 'Plate ah paakren…', saving: 'Save panren machan…'
   },
 
   hyderabad: {
@@ -3042,7 +3063,8 @@ const REGIONS = {
       decent: ['Parledu anna. Prathi week highlight kaadu.','Steady ga poddi. Boring weeks ye champion chestay.'],
       quiet: ['Chinna week anna. Jarugutundi — next di nedi.','Thakkuva week, tension ledu. Shoes ready ga unnay.']
     },
-    loading: ['Koncham adjust chestunna…','Aagu anna, coach alochistunnadu.','Oka nimisham, lekka chustunna.']
+    loading: ['Koncham adjust chestunna…','Aagu anna, coach alochistunnadu.','Oka nimisham, lekka chustunna.'],
+    food: 'Nee food teestunna anna…', plate: 'Plate chustunna…', saving: 'Save chestunna anna…'
   }
 };
 
