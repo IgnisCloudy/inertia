@@ -385,6 +385,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .scan-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--acc);flex-shrink:0}
 .lib-search{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
   padding:12px 14px;border-radius:11px;font-family:var(--font);font-size:13.5px;margin-bottom:14px}
+.lib-sec{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.4px;
+  color:var(--dim);margin:18px 0 4px;padding-top:8px}
+.lib-sec:first-child{margin-top:6px;padding-top:0}
+.role-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
 .lib-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--b1);cursor:pointer}
 .lib-row:hover{background:rgba(255,255,255,.02)}
 .conf-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;
@@ -1891,6 +1895,87 @@ function stackedChart(buckets, from, bucketDays) {
     max.toFixed(0) + ' km</text></svg>';
 }
 
+// ═══════════════════════ STARTER FOODS ═══════════════════════
+// diet tags: veg | vegan | dairy | egg | fish | meat
+// role: protein | fuel | recovery | light
+const STARTER_FOODS = [
+  // ── eggs ──
+  {n:'Boiled eggs (2)',      s:'2 whole',        k:156, p:13,  c:1,  f:11, d:'egg',   r:'protein'},
+  {n:'Egg whites (4)',       s:'4 whites',       k:68,  p:14,  c:1,  f:0,  d:'egg',   r:'protein'},
+  {n:'Egg bhurji',           s:'2 eggs',         k:220, p:13,  c:4,  f:17, d:'egg',   r:'protein'},
+  {n:'Egg curry',            s:'2 eggs + gravy', k:280, p:14,  c:8,  f:21, d:'egg',   r:'protein'},
+  {n:'Masala omelette',      s:'2 eggs',         k:240, p:13,  c:3,  f:19, d:'egg',   r:'protein'},
+
+  // ── dairy ──
+  {n:'Paneer bhurji',        s:'100g',           k:200, p:14,  c:5,  f:14, d:'dairy', r:'protein'},
+  {n:'Grilled paneer',       s:'100g',           k:265, p:18,  c:6,  f:21, d:'dairy', r:'protein'},
+  {n:'Hung curd / Greek yogurt', s:'150g',       k:130, p:15,  c:6,  f:5,  d:'dairy', r:'recovery'},
+  {n:'Curd (dahi)',          s:'1 bowl 150g',    k:90,  p:5,   c:7,  f:5,  d:'dairy', r:'light'},
+  {n:'Toned milk',           s:'250 ml',         k:125, p:8,   c:12, f:5,  d:'dairy', r:'recovery'},
+  {n:'Paneer tikka',         s:'6 pieces',       k:280, p:19,  c:8,  f:19, d:'dairy', r:'protein'},
+  {n:'Whey protein shake',   s:'1 scoop 30g',    k:120, p:24,  c:3,  f:2,  d:'veg',   r:'recovery'},
+  {n:'Banana milkshake',     s:'1 glass',        k:230, p:9,   c:38, f:5,  d:'dairy', r:'recovery'},
+
+  // ── legumes & plant protein ──
+  {n:'Moong dal',            s:'1 bowl 150g',    k:160, p:9,   c:27, f:1,  d:'vegan', r:'protein'},
+  {n:'Toor dal',             s:'1 bowl 150g',    k:150, p:8,   c:24, f:2,  d:'vegan', r:'protein'},
+  {n:'Rajma curry',          s:'1 bowl',         k:200, p:12,  c:35, f:1,  d:'vegan', r:'protein'},
+  {n:'Chole / chana masala', s:'1 bowl',         k:210, p:11,  c:33, f:4,  d:'vegan', r:'protein'},
+  {n:'Sprouts salad',        s:'1 bowl 100g',    k:100, p:8,   c:18, f:1,  d:'vegan', r:'light'},
+  {n:'Soya chunks curry',    s:'50g dry',        k:175, p:26,  c:17, f:1,  d:'vegan', r:'protein'},
+  {n:'Tofu bhurji',          s:'100g',           k:145, p:16,  c:3,  f:9,  d:'vegan', r:'protein'},
+  {n:'Besan chilla',         s:'2 pieces',       k:220, p:11,  c:24, f:9,  d:'vegan', r:'protein'},
+  {n:'Sambar',               s:'1 bowl',         k:110, p:5,   c:15, f:3,  d:'vegan', r:'light'},
+  {n:'Rasam',                s:'1 bowl',         k:60,  p:2,   c:9,  f:2,  d:'vegan', r:'light'},
+
+  // ── training fuel ──
+  {n:'Roti / chapati',       s:'2 pieces',       k:210, p:6,   c:40, f:4,  d:'vegan', r:'fuel'},
+  {n:'Steamed rice',         s:'1 cup 150g',     k:200, p:4,   c:44, f:1,  d:'vegan', r:'fuel'},
+  {n:'Idli',                 s:'3 pieces',       k:174, p:6,   c:36, f:1,  d:'vegan', r:'fuel'},
+  {n:'Plain dosa',           s:'1 large',        k:168, p:4,   c:28, f:5,  d:'vegan', r:'fuel'},
+  {n:'Poha',                 s:'1 bowl',         k:250, p:5,   c:45, f:6,  d:'vegan', r:'fuel'},
+  {n:'Upma',                 s:'1 bowl',         k:230, p:6,   c:38, f:6,  d:'vegan', r:'fuel'},
+  {n:'Khichdi',              s:'1 bowl',         k:250, p:9,   c:42, f:5,  d:'vegan', r:'fuel'},
+  {n:'Oats porridge',        s:'40g dry',        k:150, p:5,   c:27, f:3,  d:'vegan', r:'fuel'},
+  {n:'Ragi malt',            s:'1 glass',        k:180, p:5,   c:35, f:2,  d:'vegan', r:'fuel'},
+  {n:'Sweet potato',         s:'150g',           k:130, p:2,   c:30, f:1,  d:'vegan', r:'fuel'},
+  {n:'Multigrain bread',     s:'2 slices',       k:160, p:6,   c:28, f:3,  d:'vegan', r:'fuel'},
+
+  // ── quick energy & recovery ──
+  {n:'Banana',               s:'1 medium',       k:105, p:1,   c:27, f:1,  d:'vegan', r:'fuel'},
+  {n:'Dates',                s:'3 pieces',       k:200, p:2,   c:54, f:1,  d:'vegan', r:'fuel'},
+  {n:'Coconut water',        s:'200 ml',         k:38,  p:1,   c:9,  f:0,  d:'vegan', r:'light'},
+  {n:'Electrolyte drink',    s:'500 ml',         k:60,  p:0,   c:15, f:0,  d:'vegan', r:'fuel'},
+  {n:'Peanut butter',        s:'2 tbsp 32g',     k:190, p:8,   c:6,  f:16, d:'vegan', r:'protein'},
+  {n:'Roasted peanuts',      s:'30g',            k:170, p:8,   c:5,  f:14, d:'vegan', r:'protein'},
+  {n:'Almonds',              s:'15 pieces',      k:105, p:4,   c:4,  f:9,  d:'vegan', r:'light'},
+  {n:'Pumpkin seeds',        s:'30g',            k:160, p:9,   c:4,  f:14, d:'vegan', r:'protein'},
+  {n:'Chia seeds',           s:'2 tbsp',         k:138, p:5,   c:12, f:9,  d:'vegan', r:'light'},
+
+  // ── fish ──
+  {n:'Fish curry',           s:'100g fish',      k:190, p:20,  c:5,  f:10, d:'fish',  r:'protein'},
+  {n:'Grilled fish',         s:'150g',           k:210, p:34,  c:0,  f:8,  d:'fish',  r:'protein'},
+
+  // ── meat ──
+  {n:'Chicken breast',       s:'100g',           k:165, p:31,  c:0,  f:4,  d:'meat',  r:'protein'},
+  {n:'Chicken curry',        s:'150g',           k:290, p:27,  c:7,  f:17, d:'meat',  r:'protein'},
+  {n:'Mutton curry',         s:'150g',           k:350, p:25,  c:6,  f:25, d:'meat',  r:'protein'}
+];
+
+const DIET_ALLOWS = {
+  vegan:        ['vegan'],
+  vegetarian:   ['vegan','veg','dairy'],
+  eggetarian:   ['vegan','veg','dairy','egg'],
+  pescatarian:  ['vegan','veg','dairy','egg','fish'],
+  omnivore:     ['vegan','veg','dairy','egg','fish','meat']
+};
+
+function starterFoods() {
+  const diet = (currentProfile && currentProfile.diet) || 'omnivore';
+  const allowed = DIET_ALLOWS[diet] || DIET_ALLOWS.omnivore;
+  return STARTER_FOODS.filter(f => allowed.includes(f.d));
+}
+
 // ═══════════════════════ FUEL ═══════════════════════
 let todayMeals = [];
 let pendingScan = null;
@@ -2151,41 +2236,89 @@ async function openLibrary() {
   playSwell();
   openSheet('<div class="rp-load"><div class="rp-orbit"><span></span><span></span><span></span></div>' +
             '<div class="rp-msg">Opening your foods…</div></div>');
+
   const { data } = await sb.from('food_library')
     .select('*').eq('user_id', currentUser.id).order('name');
-  const foods = data || [];
-  if (!foods.length) {
-    openSheet('<div class="sheet-title">No saved foods yet</div>' +
-      '<div class="sheet-sum">Scan a meal and anything you log gets saved here automatically. Next time it is one tap.</div>' +
-      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
-    return;
-  }
-  window._lib = foods;
+  const saved = data || [];
+  window._lib = saved;
+  window._starter = starterFoods();
+
+  const diet = (currentProfile && currentProfile.diet) || 'omnivore';
   openSheet(
     '<div class="sheet-title">My foods</div>' +
     '<input class="lib-search" id="libSearch" placeholder="Search…" oninput="filterLib(this.value)">' +
-    '<div id="libList">' + libRows(foods) + '</div>' +
+    '<div id="libList">' + libSections(saved, window._starter, diet) + '</div>' +
     '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
 }
 
-function libRows(foods) {
-  return foods.map(f =>
-    '<div class="lib-row" onclick="logFromLibrary(\'' + f.id + '\')">' +
+function libSections(saved, starter, diet) {
+  let html = '';
+  if (saved.length) {
+    html += '<div class="lib-sec">Your foods</div>' + libRows(saved);
+  }
+  if (starter.length) {
+    html += '<div class="lib-sec">Suggested · ' + diet + '</div>' + starterRows(starter);
+  }
+  return html || '<div style="padding:22px 0;text-align:center;color:var(--muted);font-size:13px">Nothing here yet.</div>';
+}
+
+function starterRows(foods) {
+  const roleColor = { protein:'#e8506b', fuel:'#ffa32e', recovery:'#4a9eca', light:'#c9942a' };
+  return foods.map((f, i) =>
+    '<div class="lib-row" onclick="logStarter(' + STARTER_FOODS.indexOf(f) + ')">' +
       '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:13.5px">' + f.name + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (f.serving || '') +
-          ' · P' + Math.round(f.protein_g||0) + ' C' + Math.round(f.carbs_g||0) + ' F' + Math.round(f.fat_g||0) + '</div>' +
+        '<div style="font-size:13.5px;display:flex;align-items:center;gap:7px">' + f.n +
+          '<span class="role-dot" style="background:' + roleColor[f.r] + '"></span></div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + f.s +
+          ' · P' + f.p + ' C' + f.c + ' F' + f.f + '</div>' +
       '</div>' +
-      '<div style="font-family:var(--mono);font-size:12.5px">' + Math.round(f.calories||0) + '</div>' +
+      '<div style="font-family:var(--mono);font-size:12.5px">' + f.k + '</div>' +
       '<div style="color:var(--acc);font-size:16px;margin-left:8px">+</div>' +
     '</div>').join('');
 }
 
 function filterLib(q) {
-  const list = (window._lib || []).filter(f => f.name.toLowerCase().includes(q.toLowerCase()));
-  document.getElementById('libList').innerHTML = list.length
-    ? libRows(list)
+  const ql = q.toLowerCase();
+  const saved = (window._lib || []).filter(f => f.name.toLowerCase().includes(ql));
+  const starter = (window._starter || []).filter(f => f.n.toLowerCase().includes(ql));
+  const diet = (currentProfile && currentProfile.diet) || 'omnivore';
+  const html = libSections(saved, starter, diet);
+  document.getElementById('libList').innerHTML =
+    (saved.length || starter.length) ? html
     : '<div style="padding:20px 0;text-align:center;color:var(--muted);font-size:13px">Nothing matches.</div>';
+}
+
+async function logStarter(idx) {
+  const f = STARTER_FOODS[idx];
+  if (!f) return;
+  const today = new Date().toISOString().split('T')[0];
+
+  const { error } = await sb.from('meals').insert({
+    user_id: currentUser.id, meal_date: today, slot: 'logged',
+    name: f.n, serving: f.s, calories: f.k,
+    protein_g: f.p, carbs_g: f.c, fat_g: f.f
+  });
+  if (error) {
+    playThud();
+    openSheet('<div class="sheet-title">Could not log that</div>' +
+      '<div class="sheet-sum">' + error.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+    return;
+  }
+
+  // graduate it into their own library
+  const { data: exists } = await sb.from('food_library')
+    .select('id').eq('user_id', currentUser.id).eq('name', f.n).maybeSingle();
+  if (!exists) {
+    await sb.from('food_library').insert({
+      user_id: currentUser.id, name: f.n, serving: f.s, calories: f.k,
+      protein_g: f.p, carbs_g: f.c, fat_g: f.f, source: 'starter'
+    });
+  }
+
+  playChime();
+  closeSheet();
+  renderFuel();
 }
 
 async function logFromLibrary(id) {
