@@ -320,6 +320,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   border-radius:9px;font-family:var(--mono);font-size:11.5px;cursor:pointer;transition:.15s}
 .mult-btn.active{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
 
+
+/* ── ANALYTICS CHARTS ── */
+.range-switch{display:flex;gap:5px;background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:4px;margin-bottom:16px}
+.range-switch button{flex:1;background:none;border:none;color:var(--muted);padding:8px;border-radius:8px;
+  font-family:var(--mono);font-size:11px;cursor:pointer;transition:.15s}
+.range-switch button.active{background:var(--s3);color:var(--text)}
+
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.metric{background:var(--s1);border:1px solid var(--b1);border-radius:15px;padding:15px 16px 8px;overflow:hidden}
+.m-label{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+.m-top{display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
+.m-val{font-family:var(--mono);font-size:25px;font-weight:700;letter-spacing:-1px}
+.m-unit{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.m-delta{font-family:var(--mono);font-size:10.5px;display:flex;align-items:center;gap:3px;margin-bottom:6px}
+.m-delta.up{color:var(--green)} .m-delta.down{color:var(--red)} .m-delta.flat{color:var(--dim)}
+.m-spark{margin:0 -16px -8px;display:block}
+
+.chart-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px 4px 10px 4px;margin-bottom:16px}
+.chart-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:14px}
+.chart-title{font-size:14px;font-weight:600}
+.chart-legend{display:flex;gap:12px}
+.leg{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+.leg i{width:8px;height:8px;border-radius:2px;display:block}
+.chart-empty{text-align:center;padding:34px 16px;color:var(--muted);font-size:13px}
+
 /* ── NUTRITION ── */
 .macro-hero{background:linear-gradient(150deg,#1b1310,#120d10);border:1px solid var(--b2);
   border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
@@ -987,8 +1012,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div class="dash-hello" style="font-size:21px">Progress</div>
     <div class="dash-day">Where you actually are</div>
 
+    <div class="range-switch">
+      <button class="active" data-r="7"  onclick="setRange(7,this)">7 DAYS</button>
+      <button data-r="30" onclick="setRange(30,this)">30 DAYS</button>
+      <button data-r="90" onclick="setRange(90,this)">90 DAYS</button>
+    </div>
+
+    <div class="metric-grid" id="metricGrid"></div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Volume over time</div>
+        <div class="chart-legend">
+          <div class="leg"><i style="background:#e8506b"></i>Run</div>
+          <div class="leg"><i style="background:#ffa32e"></i>Bike</div>
+          <div class="leg"><i style="background:#4a9eca"></i>Swim</div>
+        </div>
+      </div>
+      <div id="volChart"></div>
+    </div>
+
     <div class="card-block" id="analyticsCard" style="display:none">
-      <div class="act-head"><div class="act-title">This week</div><div class="act-count" id="weekRange">—</div></div>
+      <div class="act-head"><div class="act-title">This week vs plan</div><div class="act-count" id="weekRange">—</div></div>
       <div id="volList"></div>
       <div style="margin-top:18px">
         <div style="display:flex;align-items:center;justify-content:space-between">
@@ -1695,6 +1740,155 @@ async function updateRecapChip() {
   const km = (data || []).reduce((t,a) => t + (a.distance_m||0), 0) / 1000;
   const n = (data || []).length;
   sub.textContent = n ? (km.toFixed(1) + ' km across ' + n + ' session' + (n>1?'s':'')) : 'Nothing logged yet this week';
+}
+
+// ═══════════════════════ ANALYTICS CHARTS ═══════════════════════
+let chartRange = 7;
+
+function setRange(days, btn) {
+  chartRange = days;
+  document.querySelectorAll('.range-switch button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  playTick();
+  renderCharts();
+}
+
+// build an SVG sparkline from an array of numbers
+function sparkline(vals, color, w, h) {
+  if (!vals.length) return '';
+  const max = Math.max(1, ...vals);
+  const step = vals.length > 1 ? w / (vals.length - 1) : w;
+  const pad = 4;
+  const pts = vals.map((v, i) => [i * step, h - pad - (v / max) * (h - pad * 2)]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const area = line + ' L' + w + ' ' + h + ' L0 ' + h + ' Z';
+  const gid = 'sg' + Math.random().toString(36).slice(2, 8);
+  return '<svg class="m-spark" viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">' +
+    '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="' + color + '" stop-opacity="0.28"/>' +
+      '<stop offset="1" stop-color="' + color + '" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + area + '" fill="url(#' + gid + ')"/>' +
+    '<path d="' + line + '" fill="none" stroke="' + color + '" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function deltaHtml(now, prev) {
+  if (!prev) return '<div class="m-delta flat">— no prior data</div>';
+  const pct = Math.round(((now - prev) / prev) * 100);
+  if (Math.abs(pct) < 2) return '<div class="m-delta flat">→ flat</div>';
+  const cls = pct > 0 ? 'up' : 'down';
+  const arrow = pct > 0 ? '↗' : '↘';
+  return '<div class="m-delta ' + cls + '">' + arrow + ' ' + Math.abs(pct) + '%</div>';
+}
+
+async function renderCharts() {
+  if (!currentUser) return;
+  const grid = document.getElementById('metricGrid');
+  const chart = document.getElementById('volChart');
+  if (!grid) return;
+
+  const days = chartRange;
+  const now = new Date(); now.setHours(23,59,59,999);
+  const from = new Date(now); from.setDate(now.getDate() - days + 1); from.setHours(0,0,0,0);
+  const prevFrom = new Date(from); prevFrom.setDate(from.getDate() - days);
+
+  const { data } = await sb.from('strava_activities')
+    .select('sport,distance_m,moving_time_s,start_date')
+    .eq('user_id', currentUser.id)
+    .gte('start_date', prevFrom.toISOString())
+    .order('start_date', { ascending: true });
+
+  const all = data || [];
+  const cur = all.filter(a => new Date(a.start_date) >= from);
+  const prev = all.filter(a => { const d = new Date(a.start_date); return d >= prevFrom && d < from; });
+
+  const sum = (arr, f) => arr.reduce((t, a) => t + (f(a) || 0), 0);
+  const km = arr => sum(arr, a => a.distance_m) / 1000;
+  const mins = arr => Math.round(sum(arr, a => a.moving_time_s) / 60);
+  const activeDays = arr => new Set(arr.map(a => (a.start_date || '').split('T')[0])).size;
+
+  // bucket into days (7/30) or weeks (90)
+  const bucketDays = days > 30 ? 7 : 1;
+  const nBuckets = Math.ceil(days / bucketDays);
+  const buckets = Array.from({ length: nBuckets }, () => ({ km: 0, min: 0, n: 0, run: 0, bike: 0, swim: 0 }));
+
+  cur.forEach(a => {
+    const d = new Date(a.start_date);
+    const idx = Math.min(nBuckets - 1, Math.floor((d - from) / 86400000 / bucketDays));
+    if (idx < 0) return;
+    const b = buckets[idx];
+    const k = (a.distance_m || 0) / 1000;
+    b.km += k; b.min += (a.moving_time_s || 0) / 60; b.n++;
+    if (b[a.sport] !== undefined) b[a.sport] += k;
+  });
+
+  grid.innerHTML =
+    metricCard('Distance', km(cur).toFixed(1), 'km', deltaHtml(km(cur), km(prev)),
+               buckets.map(b => b.km), '#ff5e1a') +
+    metricCard('Time moving', (() => { const m = mins(cur); return m >= 60 ? Math.floor(m/60) + 'h ' + (m%60) + 'm' : m + 'm'; })(),
+               '', deltaHtml(mins(cur), mins(prev)), buckets.map(b => b.min), '#ffa32e') +
+    metricCard('Sessions', cur.length, '', deltaHtml(cur.length, prev.length),
+               buckets.map(b => b.n), '#4a9eca') +
+    metricCard('Active days', activeDays(cur), 'of ' + days,
+               deltaHtml(activeDays(cur), activeDays(prev)),
+               buckets.map(b => (b.n ? 1 : 0)), '#e8506b');
+
+  chart.innerHTML = cur.length ? stackedChart(buckets, from, bucketDays)
+    : '<div class="chart-empty">No activity in this window yet.</div>';
+}
+
+function metricCard(label, val, unit, delta, spark, color) {
+  return '<div class="metric">' +
+    '<div class="m-label">' + label + '</div>' +
+    '<div class="m-top"><div class="m-val">' + val + '</div>' +
+      (unit ? '<div class="m-unit">' + unit + '</div>' : '') + '</div>' +
+    delta + sparkline(spark, color, 160, 42) + '</div>';
+}
+
+function stackedChart(buckets, from, bucketDays) {
+  const W = 340, H = 150, padL = 6, padB = 22, padT = 8;
+  const innerW = W - padL * 2, innerH = H - padB - padT;
+  const max = Math.max(1, ...buckets.map(b => b.run + b.bike + b.swim));
+  const bw = innerW / buckets.length;
+  const colors = { run:'#e8506b', bike:'#ffa32e', swim:'#4a9eca' };
+
+  let bars = '';
+  buckets.forEach((b, i) => {
+    let y = H - padB;
+    ['swim','bike','run'].forEach(sp => {
+      const v = b[sp] || 0;
+      if (v <= 0) return;
+      const h = (v / max) * innerH;
+      y -= h;
+      bars += '<rect x="' + (padL + i * bw + bw * 0.18).toFixed(1) + '" y="' + y.toFixed(1) +
+              '" width="' + (bw * 0.64).toFixed(1) + '" height="' + h.toFixed(1) +
+              '" rx="2" fill="' + colors[sp] + '" opacity="0.9"/>';
+    });
+  });
+
+  let grid = '';
+  [0, 0.5, 1].forEach(f => {
+    const y = padT + innerH * (1 - f);
+    grid += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padL) + '" y2="' + y +
+            '" stroke="#2a241e" stroke-width="1"/>';
+  });
+
+  let labels = '';
+  const every = buckets.length > 14 ? Math.ceil(buckets.length / 7) : (buckets.length > 7 ? 2 : 1);
+  buckets.forEach((b, i) => {
+    if (i % every !== 0) return;
+    const d = new Date(from); d.setDate(from.getDate() + i * bucketDays);
+    const txt = bucketDays > 1
+      ? d.toLocaleDateString('en-US', { day:'numeric', month:'short' })
+      : d.toLocaleDateString('en-US', { day:'numeric' });
+    labels += '<text x="' + (padL + i * bw + bw / 2).toFixed(1) + '" y="' + (H - 6) +
+              '" fill="#6b6259" font-size="8.5" font-family="monospace" text-anchor="middle">' + txt + '</text>';
+  });
+
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' +
+    grid + bars + labels +
+    '<text x="' + padL + '" y="' + (padT + 8) + '" fill="#6b6259" font-size="8.5" font-family="monospace">' +
+    max.toFixed(0) + ' km</text></svg>';
 }
 
 // ═══════════════════════ FUEL ═══════════════════════
@@ -2407,6 +2601,7 @@ function goView(name, btn) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'plan') { renderPlanView(); renderRevisions(); }
   if (name === 'fuel') renderFuel();
+  if (name === 'progress') renderCharts();
 
 }
 
