@@ -222,6 +222,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 
 
+/* ── REPLAN LOADER ── */
+.rp-load{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 10px 26px;text-align:center}
+.rp-orbit{position:relative;width:74px;height:74px;margin-bottom:24px}
+.rp-orbit span{position:absolute;inset:0;border-radius:50%;border:2px solid transparent}
+.rp-orbit span:nth-child(1){border-top-color:var(--acc);animation:rpSpin 1.1s linear infinite}
+.rp-orbit span:nth-child(2){inset:11px;border-top-color:var(--ember);animation:rpSpin 1.6s linear infinite reverse}
+.rp-orbit span:nth-child(3){inset:22px;border-top-color:var(--swim);animation:rpSpin .85s linear infinite}
+@keyframes rpSpin{to{transform:rotate(360deg)}}
+.rp-msg{font-size:17px;font-weight:600;margin-bottom:8px;transition:opacity .22s;min-height:24px}
+.rp-sub{font-size:12.5px;color:var(--muted);line-height:1.5;max-width:280px}
+.rp-bar{margin-top:22px;width:180px;height:2px;background:var(--b1);border-radius:2px;overflow:hidden;position:relative}
+.rp-bar::after{content:'';position:absolute;inset:0;width:38%;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:rpSlide 1.5s ease-in-out infinite}
+@keyframes rpSlide{0%{transform:translateX(-110%)}100%{transform:translateX(370%)}}
+
 /* ── REPLAN SHEET ── */
 .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:900;opacity:0;visibility:hidden;transition:.22s}
 .sheet-overlay.open{opacity:1;visibility:visible}
@@ -756,7 +771,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         onkeydown="if(event.key==='Enter')askCoachReplan()">
       <button onclick="askCoachReplan()">Adjust</button>
     </div>
-    <div class="ask-hint">Try: "I'm sick today, lighten the week" · "No pool access until Friday" · "Work trip Thursday and Friday"</div>
+    <div class="ask-hint">Try: "Riding Bangalore to Mysore on Oct 2, build me up for it" · "Not well today, lighten the week" · "No pool access until Friday" · "Signed up for a 10K on Sep 14"</div>
 
     <div class="card-block" id="revisionCard" style="display:none">
       <div class="act-head"><div class="act-title">Revision history</div><div class="act-count" id="revCount">—</div></div>
@@ -1358,15 +1373,25 @@ function fillDrawer(goal) {
   }
 }
 
+const REPLAN_LOADING = [
+  'Swalpa adjust maadi…',
+  'Macha, hold on — coach is thinking.',
+  'Looking at what you planned vs what you actually did.',
+  'Doing the maths on your week.',
+  'Reshuffling, one second guru.'
+];
+
 // ═══════════════════════ ADAPTIVE REPLANNING ═══════════════════════
 let pendingProposal = null;
 
 function openSheet(html) {
+  if (window._rpTimer && !html.includes('rp-load')) { clearInterval(window._rpTimer); window._rpTimer = null; }
   document.getElementById('sheetContent').innerHTML = html;
   document.getElementById('replanSheet').classList.add('open');
   document.getElementById('sheetOverlay').classList.add('open');
 }
 function closeSheet() {
+  if (window._rpTimer) { clearInterval(window._rpTimer); window._rpTimer = null; }
   document.getElementById('replanSheet').classList.remove('open');
   document.getElementById('sheetOverlay').classList.remove('open');
 }
@@ -1384,8 +1409,20 @@ async function requestReplan() { runReplan(''); }
 async function runReplan(requestText) {
   if (!currentUser || !currentPlan) return;
 
-  openSheet('<div class="sheet-title">Rethinking your plan…</div>' +
-    '<div class="sheet-loading">Your coach is looking at what you planned, what you actually did, and what is coming up.</div>');
+  const loadMsg = REPLAN_LOADING[Math.floor(Math.random() * REPLAN_LOADING.length)];
+  openSheet(
+    '<div class="rp-load">' +
+      '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
+      '<div class="rp-msg" id="rpMsg">' + loadMsg + '</div>' +
+      '<div class="rp-sub">Reading your plan, your Strava, and what is coming up</div>' +
+      '<div class="rp-bar"></div>' +
+    '</div>');
+  let li = 0;
+  window._rpTimer = setInterval(() => {
+    li = (li + 1) % REPLAN_LOADING.length;
+    const m = document.getElementById('rpMsg');
+    if (m) { m.style.opacity = 0; setTimeout(() => { m.textContent = REPLAN_LOADING[li]; m.style.opacity = 1; }, 220); }
+  }, 2300);
 
   try {
     const res = await fetch('/api/replan', {
@@ -1451,7 +1488,11 @@ async function applyProposal() {
   if (!pendingProposal || !currentUser || !currentPlan) return;
   const changed = (pendingProposal.changes || []).filter(c => c.changed);
 
-  openSheet('<div class="sheet-title">Updating your plan…</div><div class="sheet-loading">One moment.</div>');
+  openSheet('<div class="rp-load">' +
+    '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
+    '<div class="rp-msg">Locking it in…</div>' +
+    '<div class="rp-sub">Updating your sessions</div>' +
+    '<div class="rp-bar"></div></div>');
 
   try {
     for (const ch of changed) {
@@ -1675,31 +1716,32 @@ async function renderPlanView() {
 
 const NUDGES = {
   swim: [
-    ['The water has been quiet without you.', '🏊'],
-    ['Your goggles are gathering dust.', '🥽'],
-    ['The lane is open. It always is.', '🏊'],
-    ['Somewhere a pool is missing its best swimmer.', '💧']
+    ['Macha, your goggles are gathering dust.', '🥽'],
+    ['The pool is waiting, boss. It has been a while.', '🏊'],
+    ['Water has been suspiciously calm without you.', '💧'],
+    ['Swim day keeps getting postponed, guru.', '🏊']
   ],
   bike: [
-    ['Your saddle is waiting.', '🚴'],
-    ['The road has been asking about you.', '🛣️'],
-    ['Two wheels, still hopeful.', '🚲'],
-    ['That climb is not going to ride itself.', '⛰️']
+    ['Macha, your saddle is getting lonely.', '🚴'],
+    ['The cycle has been asking about you.', '🚲'],
+    ['Nandi Hills is not going to climb itself.', '⛰️'],
+    ['Two wheels, still parked, still hopeful.', '🚴']
   ],
   run: [
-    ['The lake misses your footsteps.', '🏃'],
-    ['Your shoes are by the door, still hopeful.', '👟'],
+    ['Shoes by the door, still hopeful macha.', '👟'],
+    ['Cubbon Park misses your footsteps.', '🌳'],
     ['Sunrise has been running without you.', '🌅'],
-    ['The pavement remembers.', '🏃']
+    ['The road remembers, boss. Go say hi.', '🏃']
   ],
   strength: [
-    ['The iron has been resting too.', '🏋️'],
-    ['Strength fades quietly. Go remind it.', '💪']
+    ['The iron has been resting too, macha.', '🏋️'],
+    ['Strength fades quietly. Go remind it who you are.', '💪']
   ],
   allgood: [
-    ['Every sport touched this week. This is what momentum feels like.', '🔥'],
-    ['Swim, bike, run — all moving. Stay in motion.', '⚡'],
-    ['You are doing the work. It shows.', '✨']
+    ['Sakkath week macha. Everything moving.', '🔥'],
+    ['Swim, bike, run — full josh. Keep it rolling.', '⚡'],
+    ['Bombat consistency. This is what momentum feels like.', '✨'],
+    ['Every sport touched this week. One number, boss.', '🎯']
   ]
 };
 
