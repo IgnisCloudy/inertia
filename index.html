@@ -275,6 +275,86 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .rev-date{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;flex-shrink:0}
 .rev-text{color:var(--muted);line-height:1.5}
 
+
+/* ── RECAP ── */
+.recap-card{position:relative;border-radius:22px;padding:26px 24px;margin-bottom:18px;overflow:hidden;
+  background:linear-gradient(145deg,#1a1008,#241206 45%,#12090c);border:1px solid var(--b2)}
+.recap-card::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,94,26,.22),transparent 68%)}
+.recap-card.month{background:linear-gradient(145deg,#0d1620,#0a1a24 45%,#0a0f14)}
+.recap-card.month::before{background:radial-gradient(circle,rgba(74,158,202,.22),transparent 68%)}
+.recap-kicker{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:2px;
+  color:var(--acc);margin-bottom:6px;position:relative}
+.recap-card.month .recap-kicker{color:var(--swim)}
+.recap-range{font-size:19px;font-weight:700;margin-bottom:20px;position:relative}
+.recap-hero{display:flex;align-items:baseline;gap:9px;margin-bottom:4px;position:relative}
+.recap-num{font-family:var(--mono);font-size:46px;font-weight:700;line-height:1;
+  background:linear-gradient(120deg,#ffd98a,#ff5e1a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.recap-card.month .recap-num{background:linear-gradient(120deg,#9fd8f5,#4a9eca);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.recap-unit{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.recap-heroLabel{font-size:12px;color:var(--muted);margin-bottom:22px;position:relative}
+.recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;position:relative}
+.recap-cell{background:rgba(255,255,255,.035);border:1px solid var(--b1);border-radius:13px;padding:13px 12px}
+.recap-cell-v{font-family:var(--mono);font-size:19px;font-weight:700}
+.recap-cell-l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.8px}
+.recap-sports{position:relative;margin-bottom:18px}
+.recap-sport{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.recap-sport-n{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;width:42px;flex-shrink:0}
+.recap-sport-bar{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.recap-sport-fill{height:100%;border-radius:3px}
+.recap-sport-v{font-family:var(--mono);font-size:11px;color:var(--muted);width:74px;text-align:right;flex-shrink:0}
+.recap-note{position:relative;font-size:13.5px;line-height:1.65;padding-top:16px;border-top:1px solid var(--b1);opacity:.94}
+.recap-badge{display:inline-block;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;
+  padding:4px 10px;border-radius:20px;background:rgba(255,94,26,.16);color:var(--acc);margin-bottom:14px;position:relative}
+.recap-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;line-height:1.6}
+.sound-toggle{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+
+/* ── RECAP POSTCARDS ── */
+.recap-switch{display:flex;gap:6px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:4px;margin-bottom:20px}
+.recap-switch button{flex:1;background:none;border:none;color:var(--muted);padding:9px;border-radius:9px;
+  font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+.recap-switch button.active{background:var(--s3);color:var(--text)}
+
+.postcard{position:relative;border-radius:22px;padding:26px 24px;margin-bottom:16px;overflow:hidden;
+  border:1px solid var(--b2);background:linear-gradient(150deg,#1b1310,#120d10 55%,#0d0a10)}
+.postcard::before{content:'';position:absolute;top:-70px;right:-70px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,94,26,.20),transparent 66%)}
+.postcard::after{content:'';position:absolute;bottom:-90px;left:-60px;width:230px;height:230px;border-radius:50%;
+  background:radial-gradient(circle,rgba(74,158,202,.13),transparent 68%)}
+.pc-inner{position:relative;z-index:1}
+.pc-kicker{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:2.4px;color:var(--acc);margin-bottom:8px}
+.pc-title{font-size:29px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:4px}
+.pc-range{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:22px}
+.pc-hero{display:flex;align-items:baseline;gap:9px;margin-bottom:22px}
+.pc-hero-num{font-family:var(--mono);font-size:46px;font-weight:700;letter-spacing:-2px;
+  background:linear-gradient(120deg,var(--forge),var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pc-hero-unit{font-size:14px;color:var(--muted);font-family:var(--mono)}
+.pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.pc-cell{background:rgba(255,255,255,.032);border:1px solid var(--b1);border-radius:13px;padding:14px 15px}
+.pc-cell-label{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted);margin-bottom:6px}
+.pc-cell-val{font-family:var(--mono);font-size:19px;font-weight:700}
+.pc-sports{display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.pc-sport{display:flex;align-items:center;gap:11px}
+.pc-sport-name{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;width:52px;flex-shrink:0}
+.pc-sport-bar{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.pc-sport-fill{height:100%;border-radius:4px}
+.pc-sport-val{font-family:var(--mono);font-size:11.5px;color:var(--text);width:70px;text-align:right;flex-shrink:0}
+.pc-standout{background:rgba(255,255,255,.04);border-left:3px solid var(--acc);border-radius:0 11px 11px 0;
+  padding:13px 15px;margin-bottom:18px}
+.pc-standout-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin-bottom:5px}
+.pc-standout-text{font-size:13.5px;line-height:1.5}
+.pc-line{font-size:14.5px;line-height:1.6;font-style:italic;color:var(--text);opacity:.95;
+  padding-top:16px;border-top:1px solid var(--b1)}
+.pc-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13.5px;line-height:1.6}
+
+/* ── SOUND TOGGLE ── */
+.sound-row{display:flex;align-items:center;justify-content:space-between}
+.toggle{width:42px;height:24px;border-radius:14px;background:var(--b2);position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.toggle.on{background:var(--acc)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on::after{transform:translateX(18px)}
+
 /* ── TABS ── */
 .tabs{display:flex;gap:6px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:5px;margin-bottom:22px}
 .tab{flex:1;background:none;border:none;color:var(--muted);padding:10px 8px;border-radius:10px;
@@ -660,6 +740,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <span style="font-size:11px;color:var(--acc)" id="drawerStravaAction">Connect</span>
   </div>
 
+  <div class="drawer-sec">Preferences</div>
+  <div class="drawer-item" onclick="toggleSound()">
+    <span id="soundIcon">🔊</span>
+    <div style="flex:1">
+      <div>Sound</div>
+      <div class="drawer-item-sub" id="soundSub">Chimes on completion</div>
+    </div>
+    <span class="sound-toggle" id="soundState">ON</span>
+  </div>
+
+  <div class="drawer-sec">Preferences</div>
+  <div class="drawer-item sound-row" onclick="toggleSound()">
+    <div style="display:flex;align-items:center;gap:11px">
+      <span>🔊</span>
+      <div>
+        <div>Sounds</div>
+        <div class="drawer-item-sub" id="soundSub">Chimes on completion</div>
+      </div>
+    </div>
+    <div class="toggle on" id="soundToggle"></div>
+  </div>
+
   <div class="drawer-sec">Account</div>
   <div class="drawer-item" onclick="handleLogout()"><span>↩</span><div>Log out</div></div>
 </div>
@@ -684,6 +786,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <button class="tab active" data-view="today" onclick="goView('today',this)">Today</button>
     <button class="tab" data-view="plan" onclick="goView('plan',this)">Plan</button>
     <button class="tab" data-view="progress" onclick="goView('progress',this)">Progress</button>
+    <button class="tab" data-view="recap" onclick="goView('recap',this)">Recap</button>
+    <button class="tab" data-view="recap" onclick="goView('recap',this)">Recap</button>
   </div>
 
   <!-- ══════ TODAY ══════ -->
@@ -784,6 +888,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div id="planSessions"></div>
   </div>
 
+  <!-- ══════ RECAP ══════ -->
+  <div class="view" id="view-recap">
+    <div class="dash-hello" style="font-size:21px">Look back</div>
+    <div class="dash-day">Your weeks and months, in numbers</div>
+    <div id="recapContent"></div>
+  </div>
+
   <!-- ══════ PROGRESS ══════ -->
   <div class="view" id="view-progress">
     <div class="dash-hello" style="font-size:21px">Progress</div>
@@ -806,6 +917,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <div class="act-head"><div class="act-title">Recent activities</div><div class="act-count" id="actCount">—</div></div>
       <div id="actList"></div>
     </div>
+  </div>
+
+  <!-- ══════ RECAP ══════ -->
+  <div class="view" id="view-recap">
+    <div class="dash-hello" style="font-size:21px">Look back</div>
+    <div class="dash-day">Your week and month, in numbers</div>
+    <div class="recap-switch">
+      <button class="active" id="rcWeekBtn" onclick="setRecap('week')">This week</button>
+      <button id="rcMonthBtn" onclick="setRecap('month')">This month</button>
+    </div>
+    <div id="recapBody"></div>
   </div>
 </div>
 
@@ -1240,6 +1362,10 @@ async function loadDashboard() {
 
   renderDashboard(plan, goal, sessions || []);
   fillDrawer(goal);
+  const st = document.getElementById('soundToggle');
+  const ss = document.getElementById('soundSub');
+  if (st) st.classList.toggle('on', soundOn);
+  if (ss) ss.textContent = soundOn ? 'Chimes on completion' : 'Muted';
   checkStravaStatus();
   renderRecentActivities();
   renderNudgeAndAnalytics();
@@ -1380,6 +1506,196 @@ const REPLAN_LOADING = [
   'Doing the maths on your week.',
   'Reshuffling, one second guru.'
 ];
+
+// ═══════════════════════ SOUND ═══════════════════════
+let soundOn = localStorage.getItem('inertia_sound') !== 'off';
+let audioCtx = null;
+
+function ctx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  return audioCtx;
+}
+
+function tone(freq, startAt, dur, vol, type) {
+  const a = ctx(); if (!a) return;
+  const osc = a.createOscillator();
+  const gain = a.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  const t = a.currentTime + startAt;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(vol, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(gain); gain.connect(a.destination);
+  osc.start(t); osc.stop(t + dur + 0.05);
+}
+
+function playChime() {
+  if (!soundOn) return;
+  tone(659.25, 0,    0.5, 0.16);   // E5
+  tone(880.00, 0.09, 0.6, 0.13);   // A5
+}
+
+function playFanfare() {
+  if (!soundOn) return;
+  const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+  notes.forEach((f, i) => tone(f, i * 0.11, 0.75, 0.15 - i * 0.015, 'triangle'));
+  tone(1318.51, 0.5, 1.1, 0.09, 'sine');
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  localStorage.setItem('inertia_sound', soundOn ? 'on' : 'off');
+  const t = document.getElementById('soundToggle');
+  const s = document.getElementById('soundSub');
+  if (t) t.classList.toggle('on', soundOn);
+  if (s) s.textContent = soundOn ? 'Chimes on completion' : 'Muted';
+  if (soundOn) playChime();
+}
+
+// ═══════════════════════ RECAP ═══════════════════════
+let recapMode = 'week';
+
+const RECAP_LINES = {
+  strong: [
+    'Sakkath work macha. This is what a good block looks like.',
+    'Full josh week. Keep this rhythm and Goa will feel easy.',
+    'Bombat. The plan is finally chasing you, not the other way round.',
+    'You showed up. Repeatedly. That is the whole secret, boss.'
+  ],
+  decent: [
+    'Solid enough macha. Not every week has to be a highlight reel.',
+    'Steady progress. Boring weeks build the strongest athletes.',
+    'You moved. That already puts you ahead of last week you.',
+    'Good base laid, guru. Now go stack another one.'
+  ],
+  quiet: [
+    'Quiet week macha. Happens to everyone — next one is yours.',
+    'Rest weeks count too. Just do not let it become a habit, boss.',
+    'Small week, no drama. Shoes are still by the door.',
+    'Life got in the way. Fine. Monday is right there, guru.'
+  ]
+};
+
+function setRecap(mode) {
+  recapMode = mode;
+  document.getElementById('rcWeekBtn').classList.toggle('active', mode === 'week');
+  document.getElementById('rcMonthBtn').classList.toggle('active', mode === 'month');
+  renderRecap();
+}
+
+async function renderRecap() {
+  const body = document.getElementById('recapBody');
+  if (!body || !currentUser) return;
+
+  const now = new Date();
+  let from, to, kicker, title;
+
+  if (recapMode === 'week') {
+    const dow = now.getDay();
+    from = new Date(now); from.setDate(now.getDate() - ((dow + 6) % 7)); from.setHours(0,0,0,0);
+    to = new Date(from); to.setDate(from.getDate() + 6); to.setHours(23,59,59,999);
+    kicker = 'Weekly recap';
+    const weekNum = currentPlan
+      ? Math.floor(((from - new Date(currentPlan.start_date)) / 86400000) / 7) + 1
+      : null;
+    title = weekNum && weekNum > 0 ? 'Week ' + weekNum : 'This week';
+  } else {
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+    to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    kicker = 'Monthly recap';
+    title = from.toLocaleDateString('en-US', { month: 'long' });
+  }
+
+  const { data: acts } = await sb.from('strava_activities')
+    .select('sport,name,distance_m,moving_time_s,avg_hr,start_date')
+    .eq('user_id', currentUser.id)
+    .gte('start_date', from.toISOString())
+    .lte('start_date', to.toISOString())
+    .order('start_date', { ascending: false });
+
+  const { data: sess } = await sb.from('sessions')
+    .select('sport,status,session_date')
+    .eq('user_id', currentUser.id)
+    .gte('session_date', from.toISOString().split('T')[0])
+    .lte('session_date', to.toISOString().split('T')[0]);
+
+  const list = acts || [];
+  const fmt = d => d.toLocaleDateString('en-US', { day:'numeric', month:'short' });
+
+  if (!list.length) {
+    body.innerHTML = '<div class="postcard"><div class="pc-inner">' +
+      '<div class="pc-kicker">' + kicker + '</div>' +
+      '<div class="pc-title">' + title + '</div>' +
+      '<div class="pc-range">' + fmt(from) + ' – ' + fmt(to) + '</div>' +
+      '<div class="pc-empty">Nothing logged yet for this ' + recapMode + '.<br>Sync Strava or go make something worth recapping, macha.</div>' +
+      '</div></div>';
+    return;
+  }
+
+  const totalKm = list.reduce((t,a) => t + (a.distance_m || 0), 0) / 1000;
+  const totalMin = Math.round(list.reduce((t,a) => t + (a.moving_time_s || 0), 0) / 60);
+  const hrs = Math.floor(totalMin / 60), mins = totalMin % 60;
+  const activeDays = new Set(list.map(a => (a.start_date || '').split('T')[0])).size;
+  const doneCount = (sess || []).filter(s => s.status === 'done').length;
+  const plannedCount = (sess || []).filter(s => s.sport !== 'rest').length;
+
+  const colors = { swim:'#4a9eca', bike:'#ffa32e', run:'#e8506b', strength:'#c9942a' };
+  const labels = { swim:'Swim', bike:'Bike', run:'Run', strength:'Strength' };
+  const sports = ['run','bike','swim','strength'];
+  const perSport = sports.map(sp => {
+    const a = list.filter(x => x.sport === sp);
+    return { sp, km: a.reduce((t,x) => t + (x.distance_m||0),0)/1000,
+             min: Math.round(a.reduce((t,x) => t + (x.moving_time_s||0),0)/60), n: a.length };
+  }).filter(x => x.n > 0);
+  const maxMin = Math.max(1, ...perSport.map(x => x.min));
+
+  const sportRows = perSport.map(x =>
+    '<div class="pc-sport">' +
+      '<div class="pc-sport-name" style="color:' + colors[x.sp] + '">' + labels[x.sp] + '</div>' +
+      '<div class="pc-sport-bar"><div class="pc-sport-fill" style="width:' +
+        Math.round((x.min/maxMin)*100) + '%;background:' + colors[x.sp] + '"></div></div>' +
+      '<div class="pc-sport-val">' + (x.sp === 'strength' ? x.min + ' min' : x.km.toFixed(1) + ' km') + '</div>' +
+    '</div>').join('');
+
+  const longest = list.slice().sort((a,b) => (b.distance_m||0) - (a.distance_m||0))[0];
+  const standout = longest
+    ? '<div class="pc-standout"><div class="pc-standout-label">Standout</div>' +
+      '<div class="pc-standout-text">' + (longest.name || longest.sport) + ' — ' +
+      ((longest.distance_m||0)/1000).toFixed(1) + ' km in ' +
+      Math.round((longest.moving_time_s||0)/60) + ' min</div></div>'
+    : '';
+
+  const daySpan = recapMode === 'week' ? 7 : new Date(to).getDate();
+  const ratio = activeDays / daySpan;
+  const bucket = ratio >= 0.55 ? 'strong' : ratio >= 0.28 ? 'decent' : 'quiet';
+  const line = RECAP_LINES[bucket][Math.floor(Math.random() * RECAP_LINES[bucket].length)];
+
+  body.innerHTML =
+    '<div class="postcard"><div class="pc-inner">' +
+      '<div class="pc-kicker">' + kicker + '</div>' +
+      '<div class="pc-title">' + title + '</div>' +
+      '<div class="pc-range">' + fmt(from) + ' – ' + fmt(to) + '</div>' +
+      '<div class="pc-hero"><div class="pc-hero-num">' + totalKm.toFixed(1) + '</div>' +
+        '<div class="pc-hero-unit">km covered</div></div>' +
+      '<div class="pc-grid">' +
+        '<div class="pc-cell"><div class="pc-cell-label">Time moving</div><div class="pc-cell-val">' +
+          (hrs ? hrs + 'h ' : '') + mins + 'm</div></div>' +
+        '<div class="pc-cell"><div class="pc-cell-label">Active days</div><div class="pc-cell-val">' +
+          activeDays + ' / ' + daySpan + '</div></div>' +
+        '<div class="pc-cell"><div class="pc-cell-label">Activities</div><div class="pc-cell-val">' +
+          list.length + '</div></div>' +
+        '<div class="pc-cell"><div class="pc-cell-label">Plan hit</div><div class="pc-cell-val">' +
+          doneCount + ' / ' + plannedCount + '</div></div>' +
+      '</div>' +
+      '<div class="pc-sports">' + sportRows + '</div>' +
+      standout +
+      '<div class="pc-line">' + line + '</div>' +
+    '</div></div>';
+}
 
 // ═══════════════════════ ADAPTIVE REPLANNING ═══════════════════════
 let pendingProposal = null;
@@ -1559,6 +1875,7 @@ function goView(name, btn) {
   if (tab) tab.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'plan') { renderPlanView(); renderRevisions(); }
+  if (name === 'recap') renderRecap();
 }
 
 function openDrawer() {
@@ -1987,7 +2304,42 @@ async function markSessionDone() {
   const id = document.getElementById('nextCard').dataset.sessionId;
   if (!id) return;
   await sb.from('sessions').update({ status: 'done' }).eq('id', id);
+  playChime();
   await loadDashboard();
+  checkWeekComplete();
+}
+
+async function checkWeekComplete() {
+  if (!currentUser) return;
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((dow + 6) % 7));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const { data } = await sb.from('sessions')
+    .select('status,sport')
+    .eq('user_id', currentUser.id)
+    .gte('session_date', mon.toISOString().split('T')[0])
+    .lte('session_date', sun.toISOString().split('T')[0]);
+  if (!data) return;
+  const real = data.filter(s => s.sport !== 'rest');
+  if (!real.length) return;
+  if (real.every(s => s.status === 'done')) {
+    const key = 'inertia_week_done_' + mon.toISOString().split('T')[0];
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    setTimeout(() => {
+      playFanfare();
+      openSheet('<div class="rp-load">' +
+        '<div style="font-size:48px;margin-bottom:14px">🔥</div>' +
+        '<div class="rp-msg">Week complete, macha</div>' +
+        '<div class="rp-sub">Every session done. Go look at your recap.</div>' +
+        '</div>' +
+        '<div class="sheet-actions">' +
+          '<button class="btn-cancel" onclick="closeSheet()">Close</button>' +
+          '<button class="btn-apply" onclick="closeSheet();goView(\'recap\')">See recap</button>' +
+        '</div>');
+    }, 400);
+  }
 }
 
 </script>
