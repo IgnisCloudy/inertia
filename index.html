@@ -220,6 +220,62 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .action-btn{flex:1;background:var(--s2);color:var(--text);border:1px solid var(--b2);padding:11px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
 .action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 
+
+/* ── TABS ── */
+.tabs{display:flex;gap:6px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:5px;margin-bottom:22px}
+.tab{flex:1;background:none;border:none;color:var(--muted);padding:10px 8px;border-radius:10px;
+  font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .16s}
+.tab.active{background:var(--s3);color:var(--text)}
+.view{display:none}
+.view.active{display:block}
+
+/* ── DRAWER ── */
+.menu-btn{background:none;border:1px solid var(--b2);color:var(--text);width:38px;height:38px;border-radius:11px;
+  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;opacity:0;visibility:hidden;transition:.25s}
+.drawer-overlay.open{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:min(320px,85vw);background:var(--s1);border-right:1px solid var(--b1);
+  z-index:801;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);padding:26px 22px;overflow-y:auto}
+.drawer.open{transform:translateX(0)}
+.drawer-profile{display:flex;align-items:center;gap:13px;padding-bottom:20px;border-bottom:1px solid var(--b1);margin-bottom:20px}
+.avatar{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--ember));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px;color:var(--bg);flex-shrink:0}
+.drawer-name{font-size:15px;font-weight:700}
+.drawer-email{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-all}
+.drawer-sec{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;
+  color:var(--dim);margin:22px 0 10px}
+.drawer-item{display:flex;align-items:center;gap:11px;padding:12px 12px;border-radius:11px;cursor:pointer;
+  font-size:13.5px;transition:background .15s}
+.drawer-item:hover{background:var(--s2)}
+.drawer-item-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.drawer-close{position:absolute;top:20px;right:18px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+
+/* ── CLICKABLE STAT CARDS ── */
+.stat.clickable{cursor:pointer;transition:border-color .16s,transform .1s}
+.stat.clickable:hover{border-color:var(--b3)}
+.stat.clickable:active{transform:scale(.985)}
+.stat-hint{font-family:var(--mono);font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:7px}
+
+/* ── EFFORT GUIDANCE ── */
+.effort{margin-top:14px;padding:13px 15px;background:var(--s2);border:1px solid var(--b1);border-radius:11px}
+.effort-label{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin-bottom:7px}
+.effort-line{font-size:13px;line-height:1.6;color:var(--text);opacity:.9;margin-bottom:5px}
+.effort-line:last-child{margin-bottom:0}
+
+/* ── PLAN VIEW ── */
+.week-block{margin-bottom:22px}
+.week-head{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;
+  color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
+.ps-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);
+  border:1px solid var(--b1);border-radius:11px;margin-bottom:7px}
+.ps-row.done{opacity:.55}
+.ps-row.today{border-color:var(--acc);background:linear-gradient(100deg,rgba(255,94,26,.07),var(--s1))}
+.ps-day{font-family:var(--mono);font-size:10px;color:var(--muted);width:44px;flex-shrink:0}
+.ps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ps-title{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ps-dur{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0}
+.ps-check{font-size:12px;color:var(--green);flex-shrink:0}
+
 /* ── NUDGE BANNER ── */
 .nudge{display:flex;align-items:center;gap:12px;background:linear-gradient(100deg,rgba(255,94,26,.09),rgba(74,158,202,.06));
   border:1px solid var(--b1);border-radius:14px;padding:13px 16px;margin-bottom:18px}
@@ -511,9 +567,47 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <div class="gen-bar"></div>
 </div>
 
+<!-- ═══════════════════════ DRAWER ═══════════════════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <div class="drawer-profile">
+    <div class="avatar" id="drawerAvatar">S</div>
+    <div>
+      <div class="drawer-name" id="drawerName">—</div>
+      <div class="drawer-email" id="drawerEmail">—</div>
+    </div>
+  </div>
+
+  <div class="drawer-sec">Your goal</div>
+  <div class="drawer-item" style="cursor:default">
+    <span>🎯</span>
+    <div>
+      <div id="drawerGoal">—</div>
+      <div class="drawer-item-sub" id="drawerGoalDate">—</div>
+    </div>
+  </div>
+
+  <div class="drawer-sec">Connected apps</div>
+  <div class="drawer-item" id="drawerStrava" onclick="drawerStravaAction()">
+    <span style="width:22px;height:22px;border-radius:6px;background:#fc4c02;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg viewBox="0 0 24 24" fill="#fff" style="width:13px;height:13px"><path d="M13.8 2 7.3 14.6h3.9L13.8 9l2.6 5.6h3.8L13.8 2zm2.6 12.6-1.9 3.7-1.9-3.7h-2.8L14.5 22l4.7-7.4h-2.8z"/></svg>
+    </span>
+    <div style="flex:1">
+      <div id="drawerStravaTitle">Strava</div>
+      <div class="drawer-item-sub" id="drawerStravaSub">Not connected</div>
+    </div>
+    <span style="font-size:11px;color:var(--acc)" id="drawerStravaAction">Connect</span>
+  </div>
+
+  <div class="drawer-sec">Account</div>
+  <div class="drawer-item" onclick="handleLogout()"><span>↩</span><div>Log out</div></div>
+</div>
+
 <!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
 <div id="dashboard">
   <div class="dash-top">
+    <button class="menu-btn" onclick="openDrawer()">☰</button>
     <div class="dash-brand">
       <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="none" stroke="#a3e635" stroke-width="1.5"/>
@@ -523,112 +617,122 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </svg>
       <div class="dash-brand-name">inertia</div>
     </div>
-    <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    <div style="width:38px"></div>
   </div>
 
-  <div class="dash-hello">Hey <span id="dashName">athlete</span> 👋</div>
-  <div class="dash-day" id="dashDay">—</div>
-
-  <div class="nudge" id="nudgeBanner" style="display:none">
-    <div class="nudge-icon" id="nudgeIcon">🏊</div>
-    <div class="nudge-text" id="nudgeText">—</div>
-    <div class="nudge-days" id="nudgeDays"></div>
+  <div class="tabs">
+    <button class="tab active" data-view="today" onclick="goView('today',this)">Today</button>
+    <button class="tab" data-view="plan" onclick="goView('plan',this)">Plan</button>
+    <button class="tab" data-view="progress" onclick="goView('progress',this)">Progress</button>
   </div>
 
-  <div class="replan" id="replanBanner" style="display:none">
-    <div class="replan-title" id="replanTitle">Your plan has drifted</div>
-    <div class="replan-body" id="replanBody">—</div>
-    <div class="replan-actions">
-      <button class="btn-replan" onclick="requestReplan()">Rebuild my plan</button>
-      <button class="btn-dismiss" onclick="dismissReplan()">Not now</button>
-    </div>
-  </div>
+  <!-- ══════ TODAY ══════ -->
+  <div class="view active" id="view-today">
+    <div class="dash-hello">Hey <span id="dashName">athlete</span> 👋</div>
+    <div class="dash-day" id="dashDay">—</div>
 
-  <div class="stats-grid">
-    <div class="stat">
-      <div class="stat-label">Day of plan</div>
-      <div class="stat-value accent" id="statDay">—</div>
-      <div class="stat-sub" id="statPhase">—</div>
+    <div class="nudge" id="nudgeBanner" style="display:none">
+      <div class="nudge-icon" id="nudgeIcon">🏊</div>
+      <div class="nudge-text" id="nudgeText">—</div>
+      <div class="nudge-days" id="nudgeDays"></div>
     </div>
-    <div class="stat">
-      <div class="stat-label">To goal</div>
-      <div class="stat-value swim" id="statCountdown">—</div>
-      <div class="stat-sub" id="statGoal">—</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">This week done</div>
-      <div class="stat-value" id="statWeekDone">—</div>
-      <div class="stat-sub" id="statWeekTotal">of — sessions</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Current phase</div>
-      <div class="stat-value" style="font-size:18px" id="statPhaseName">—</div>
-      <div class="stat-sub" id="statPhaseWeek">—</div>
-    </div>
-  </div>
 
-  <div class="strava-card" id="stravaCard">
-    <div class="strava-left">
-      <div class="strava-mark">
-        <svg viewBox="0 0 24 24" fill="#fff"><path d="M13.8 2 7.3 14.6h3.9L13.8 9l2.6 5.6h3.8L13.8 2zm2.6 12.6-1.9 3.7-1.9-3.7h-2.8L14.5 22l4.7-7.4h-2.8z"/></svg>
-      </div>
-      <div>
-        <div class="strava-title" id="stravaTitle">Connect Strava</div>
-        <div class="strava-sub" id="stravaSub">Auto-track what you actually did</div>
+    <div class="replan" id="replanBanner" style="display:none">
+      <div class="replan-title" id="replanTitle">Your plan has drifted</div>
+      <div class="replan-body" id="replanBody">—</div>
+      <div class="replan-actions">
+        <button class="btn-replan" onclick="requestReplan()">Rebuild my plan</button>
+        <button class="btn-dismiss" onclick="dismissReplan()">Not now</button>
       </div>
     </div>
-    <button class="btn-strava" id="stravaBtn" onclick="connectStrava()">Connect</button>
-  </div>
 
-  <div class="card-block" id="analyticsCard" style="display:none">
-    <div class="act-head">
-      <div class="act-title">This week</div>
-      <div class="act-count" id="weekRange">—</div>
-    </div>
-    <div id="volList"></div>
-
-    <div style="margin-top:18px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="act-count" id="phaseLabel">—</div>
-        <div class="act-count" id="phasePct">—</div>
+    <div class="stats-grid">
+      <div class="stat clickable" onclick="goView('plan')">
+        <div class="stat-label">Day of plan</div>
+        <div class="stat-value accent" id="statDay">—</div>
+        <div class="stat-sub" id="statPhase">—</div>
+        <div class="stat-hint">See full plan →</div>
       </div>
-      <div class="phase-bar-wrap"><div class="phase-bar" id="phaseBar" style="width:0%"></div></div>
-    </div>
-
-    <div class="quote-line" id="quoteLine">—<span class="quote-src" id="quoteSrc"></span></div>
-  </div>
-
-  <div class="card-block" id="actCard" style="display:none">
-    <div class="act-head">
-      <div class="act-title">Recent activities</div>
-      <div class="act-count" id="actCount">—</div>
-    </div>
-    <div id="actList"></div>
-  </div>
-
-  <div class="next-card" id="nextCard">
-    <div class="next-label">Next up</div>
-    <div class="next-sport run" id="nextSport">—</div>
-    <div class="next-title" id="nextTitle">—</div>
-    <div class="next-meta">
-      <span id="nextDuration">—</span>
-      <span id="nextIntensity">—</span>
-    </div>
-    <div class="next-notes" id="nextNotes">—</div>
-    <div class="pva" id="pvaBlock" style="display:none">
-      <div class="pva-row">
-        <span class="pva-tag">Planned</span>
-        <span class="pva-val" id="pvaPlanned">—</span>
+      <div class="stat clickable" onclick="goView('plan')">
+        <div class="stat-label">To goal</div>
+        <div class="stat-value swim" id="statCountdown">—</div>
+        <div class="stat-sub" id="statGoal">—</div>
+        <div class="stat-hint">See full plan →</div>
       </div>
-      <div class="pva-row">
-        <span class="pva-tag">Actual</span>
-        <span class="pva-val actual" id="pvaActual">—</span>
-        <span class="pva-delta spot" id="pvaDelta">—</span>
+      <div class="stat clickable" onclick="goView('progress')">
+        <div class="stat-label">This week done</div>
+        <div class="stat-value" id="statWeekDone">—</div>
+        <div class="stat-sub" id="statWeekTotal">of — sessions</div>
+        <div class="stat-hint">See progress →</div>
+      </div>
+      <div class="stat clickable" onclick="goView('progress')">
+        <div class="stat-label">Current phase</div>
+        <div class="stat-value" style="font-size:17px" id="statPhaseName">—</div>
+        <div class="stat-sub" id="statPhaseWeek">—</div>
+        <div class="stat-hint">See progress →</div>
       </div>
     </div>
-    <div class="action-row">
-      <button class="action-btn primary" onclick="markSessionDone()">Mark done</button>
-      <button class="action-btn" onclick="alert('Full plan view coming in Phase 3')">Full plan</button>
+
+    <div class="next-card" id="nextCard">
+      <div class="next-label">Next up</div>
+      <div class="next-sport run" id="nextSport">—</div>
+      <div class="next-title" id="nextTitle">—</div>
+      <div class="next-meta">
+        <span id="nextDuration">—</span>
+        <span id="nextIntensity">—</span>
+      </div>
+      <div class="next-notes" id="nextNotes">—</div>
+
+      <div class="effort" id="effortBlock">
+        <div class="effort-label">How to run it</div>
+        <div class="effort-line" id="effort1">—</div>
+        <div class="effort-line" id="effort2">—</div>
+      </div>
+
+      <div class="pva" id="pvaBlock" style="display:none">
+        <div class="pva-row"><span class="pva-tag">Planned</span><span class="pva-val" id="pvaPlanned">—</span></div>
+        <div class="pva-row"><span class="pva-tag">Actual</span><span class="pva-val actual" id="pvaActual">—</span><span class="pva-delta spot" id="pvaDelta">—</span></div>
+      </div>
+
+      <div class="action-row">
+        <button class="action-btn primary" onclick="markSessionDone()">Mark done</button>
+        <button class="action-btn" onclick="goView('plan')">Full plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ PLAN ══════ -->
+  <div class="view" id="view-plan">
+    <div class="dash-hello" style="font-size:21px">Your plan</div>
+    <div class="dash-day" id="planSubtitle">—</div>
+    <div class="card-block" id="phaseOverview" style="display:none">
+      <div class="act-head"><div class="act-title">Phases</div><div class="act-count" id="planRange">—</div></div>
+      <div id="phaseList"></div>
+    </div>
+    <div id="planSessions"></div>
+  </div>
+
+  <!-- ══════ PROGRESS ══════ -->
+  <div class="view" id="view-progress">
+    <div class="dash-hello" style="font-size:21px">Progress</div>
+    <div class="dash-day" id="progressSubtitle">—</div>
+
+    <div class="card-block" id="analyticsCard" style="display:none">
+      <div class="act-head"><div class="act-title">This week</div><div class="act-count" id="weekRange">—</div></div>
+      <div id="volList"></div>
+      <div style="margin-top:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="act-count" id="phaseLabel">—</div>
+          <div class="act-count" id="phasePct">—</div>
+        </div>
+        <div class="phase-bar-wrap"><div class="phase-bar" id="phaseBar" style="width:0%"></div></div>
+      </div>
+      <div class="quote-line" id="quoteLine">—<span class="quote-src" id="quoteSrc"></span></div>
+    </div>
+
+    <div class="card-block" id="actCard" style="display:none">
+      <div class="act-head"><div class="act-title">Recent activities</div><div class="act-count" id="actCount">—</div></div>
+      <div id="actList"></div>
     </div>
   </div>
 </div>
@@ -1063,6 +1167,7 @@ async function loadDashboard() {
   currentSessions = sessions || [];
 
   renderDashboard(plan, goal, sessions || []);
+  fillDrawer(goal);
   checkStravaStatus();
   renderRecentActivities();
   renderNudgeAndAnalytics();
@@ -1077,7 +1182,7 @@ function renderDashboard(plan, goal, sessions) {
   // Countdown to goal
   if (goal && goal.target_date) {
     const days = Math.max(0, Math.floor((new Date(goal.target_date) - new Date(todayStr)) / 86400000));
-    document.getElementById('statCountdown').textContent = days + 'd';
+    document.getElementById('statCountdown').textContent = humanCountdown(days);
     document.getElementById('statGoal').textContent = goal.goal_label;
   } else {
     document.getElementById('statCountdown').textContent = '∞';
@@ -1120,6 +1225,7 @@ function renderDashboard(plan, goal, sessions) {
     document.getElementById('nextIntensity').textContent = (upcoming.planned?.intensity || '').toUpperCase();
     document.getElementById('nextNotes').textContent = upcoming.planned?.notes || upcoming.planned?.distance_km ? ((upcoming.planned?.distance_km ? upcoming.planned.distance_km + ' km. ' : '') + (upcoming.planned?.notes || '')) : 'Follow the plan and log how it went.';
     document.getElementById('nextCard').dataset.sessionId = upcoming.id;
+    setEffort(upcoming.sport, upcoming.planned && upcoming.planned.intensity);
 
     const pva = document.getElementById('pvaBlock');
     const act = upcoming.actual || {};
@@ -1177,6 +1283,185 @@ async function renderRecentActivities() {
     </div>`;
   }).join('');
   card.style.display = 'block';
+}
+
+function fillDrawer(goal) {
+  const name = (currentProfile && currentProfile.full_name)
+    || (currentUser.user_metadata && currentUser.user_metadata.full_name)
+    || (currentUser.email || '').split('@')[0] || 'athlete';
+  const el = id => document.getElementById(id);
+  if (el('drawerAvatar')) el('drawerAvatar').textContent = name.charAt(0).toUpperCase();
+  if (el('drawerName')) el('drawerName').textContent = name;
+  if (el('drawerEmail')) el('drawerEmail').textContent = currentUser.email || '';
+  if (goal) {
+    if (el('drawerGoal')) el('drawerGoal').textContent = goal.goal_label || '—';
+    if (el('drawerGoalDate')) el('drawerGoalDate').textContent = goal.target_date
+      ? new Date(goal.target_date).toLocaleDateString('en-US', { day:'numeric', month:'long', year:'numeric' })
+      : 'Ongoing';
+  }
+}
+
+// ═══════════════════════ VIEWS & DRAWER ═══════════════════════
+function goView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const view = document.getElementById('view-' + name);
+  if (view) view.classList.add('active');
+  const tab = btn || document.querySelector('.tab[data-view="' + name + '"]');
+  if (tab) tab.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'plan') renderPlanView();
+}
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+function drawerStravaAction() {
+  closeDrawer();
+  if (stravaConnected) syncStrava(); else connectStrava();
+}
+
+// ═══════════════════════ EFFORT GUIDANCE ═══════════════════════
+const EFFORT = {
+  run: {
+    easy: ['Zone 2 — conversational pace. You should be able to speak a full sentence without gasping.',
+           'If your breathing gets ragged, slow down. Aerobic base is built at boring speeds.'],
+    moderate: ['Steady effort just below threshold. Breathing rhythmic, but holding a conversation is a struggle.',
+               'Keep cadence quick and shoulders relaxed as fatigue creeps in.'],
+    hard: ['Intervals at a pace you could hold for roughly 10 minutes. Recover fully between reps.',
+           'Quality over volume — end the session if your form starts breaking down.']
+  },
+  bike: {
+    easy: ['Low resistance, high cadence — spin at 85–95 rpm rather than grinding a heavy gear.',
+           'Pure Zone 2 aerobic work. Save the watts; this session is about time in the saddle.'],
+    moderate: ['Hold steady power with cadence around 85–90 rpm. Effort should feel repeatable.',
+               'Practice staying aero and relaxed — race position is a skill you train.'],
+    hard: ['3–4 hard efforts at high watts with full recovery between. Build power, not fatigue.',
+           'Stop while it still feels repeatable. Wrecking tomorrow costs more than the session gains.']
+  },
+  swim: {
+    easy: ['Technique focus. Long strokes, high elbow catch, bilateral breathing.',
+           'Count strokes per length — aim for fewer, not faster. Efficiency beats effort in water.'],
+    moderate: ['Steady aerobic set. Hold consistent pace across every interval rather than fading.',
+               'Body position is everything — hips high, head neutral, eyes down.'],
+    hard: ['Race-pace intervals with short rest. The goal is holding form when tired.',
+           'Sight forward every 6–8 strokes to build the open-water habit early.']
+  },
+  strength: {
+    easy: ['Controlled tempo — two seconds down, one up. Form beats load every single time.',
+           'Leave two reps in reserve. This supports your endurance work, it does not replace it.'],
+    moderate: ['Controlled tempo with real load. Two seconds down, one up, no bouncing.',
+               'Leave two reps in reserve — you still have to train tomorrow.'],
+    hard: ['Heavy but clean. Stop the set the moment technique degrades.',
+           'Injury risk climbs fast here. Ego lifts have no place in a triathlon block.']
+  },
+  rest: {
+    rest: ['Full recovery. Light walking or mobility only — nothing that raises heart rate.',
+           'Adaptation happens now, not during the session. Rest is training.']
+  }
+};
+
+function setEffort(sport, intensity) {
+  const block = document.getElementById('effortBlock');
+  if (!block) return;
+  const sportMap = EFFORT[sport] || EFFORT.run;
+  const key = (intensity || 'easy').toLowerCase();
+  const lines = sportMap[key] || sportMap.easy || sportMap.rest || EFFORT.run.easy;
+  const label = sport === 'rest' ? 'How to recover'
+    : sport === 'strength' ? 'How to lift'
+    : sport === 'swim' ? 'How to swim'
+    : sport === 'bike' ? 'How to ride' : 'How to run';
+  block.querySelector('.effort-label').textContent = label;
+  document.getElementById('effort1').textContent = lines[0];
+  document.getElementById('effort2').textContent = lines[1];
+}
+
+// ═══════════════════════ COUNTDOWN ═══════════════════════
+function humanCountdown(days) {
+  if (days <= 0) return 'Today';
+  if (days < 31) return days + 'd';
+  const months = Math.floor(days / 30.44);
+  const rem = Math.round(days - months * 30.44);
+  if (months < 12) return months + 'mo ' + rem + 'd';
+  const years = Math.floor(months / 12);
+  const mo = months % 12;
+  return years + 'y ' + mo + 'mo';
+}
+
+// ═══════════════════════ PLAN VIEW ═══════════════════════
+async function renderPlanView() {
+  if (!currentPlan || !currentUser) return;
+
+  const po = document.getElementById('phaseOverview');
+  const pl = document.getElementById('phaseList');
+  const phases = currentPlan.phases || [];
+  const fmtD = s => new Date(s).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' });
+
+  document.getElementById('planSubtitle').textContent = currentPlan.title || 'Training plan';
+  document.getElementById('planRange').textContent = fmtD(currentPlan.start_date) + ' – ' + fmtD(currentPlan.end_date);
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(currentPlan.start_date);
+  const weekOf = Math.floor(((today - start) / 86400000) / 7) + 1;
+
+  let cum = 0;
+  pl.innerHTML = phases.map(p => {
+    const from = cum + 1; cum += (p.weeks || 0);
+    const active = weekOf >= from && weekOf <= cum;
+    return '<div class="ps-row' + (active ? ' today' : '') + '">' +
+      '<div class="ps-day">W' + from + '-' + cum + '</div>' +
+      '<div class="ps-title"><b>' + (p.name || 'Phase') + '</b><div style="font-size:11px;color:var(--muted);margin-top:2px">' + (p.focus || '') + '</div></div>' +
+      (active ? '<div class="ps-dur" style="color:var(--acc)">NOW</div>' : '') +
+      '</div>';
+  }).join('');
+  po.style.display = phases.length ? 'block' : 'none';
+
+  const { data: sessions } = await sb.from('sessions')
+    .select('*').eq('user_id', currentUser.id).eq('plan_id', currentPlan.id)
+    .order('session_date', { ascending: true });
+
+  if (!sessions || !sessions.length) {
+    document.getElementById('planSessions').innerHTML =
+      '<div class="card-block" style="text-align:center;color:var(--muted);font-size:13px">No sessions scheduled yet.</div>';
+    return;
+  }
+
+  const colors = { swim:'#4a9eca', bike:'#ffa32e', run:'#e8506b', strength:'#c9942a', rest:'#6b6259' };
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const byWeek = {};
+  sessions.forEach(s => {
+    const d = new Date(s.session_date);
+    const wk = Math.floor(((d - start) / 86400000) / 7) + 1;
+    (byWeek[wk] = byWeek[wk] || []).push(s);
+  });
+
+  document.getElementById('planSessions').innerHTML = Object.keys(byWeek)
+    .sort((a,b) => a - b)
+    .map(wk => {
+      const rows = byWeek[wk].map(s => {
+        const d = new Date(s.session_date);
+        const day = d.toLocaleDateString('en-US', { weekday:'short' });
+        const isToday = s.session_date === todayStr;
+        const done = s.status === 'done';
+        const dur = (s.planned && s.planned.duration_min) ? s.planned.duration_min + 'm' : '';
+        return '<div class="ps-row' + (done ? ' done' : '') + (isToday ? ' today' : '') + '">' +
+          '<div class="ps-day">' + day + ' ' + d.getDate() + '</div>' +
+          '<div class="ps-dot" style="background:' + (colors[s.sport] || '#666') + '"></div>' +
+          '<div class="ps-title">' + (s.title || s.sport) + '</div>' +
+          '<div class="ps-dur">' + dur + '</div>' +
+          (done ? '<div class="ps-check">✓</div>' : '') +
+          '</div>';
+      }).join('');
+      const doneCount = byWeek[wk].filter(s => s.status === 'done').length;
+      return '<div class="week-block"><div class="week-head"><span>Week ' + wk + '</span>' +
+        '<span>' + doneCount + '/' + byWeek[wk].filter(s => s.sport !== 'rest').length + ' done</span></div>' + rows + '</div>';
+    }).join('');
 }
 
 // ═══════════════════════ NUDGE · ANALYTICS · DRIFT ═══════════════════════
@@ -1400,30 +1685,21 @@ async function checkStravaStatus() {
   const { data } = await sb.from('strava_tokens').select('athlete_name,updated_at')
     .eq('user_id', currentUser.id).maybeSingle();
   stravaConnected = !!data;
-  const title = document.getElementById('stravaTitle');
-  const sub = document.getElementById('stravaSub');
-  const btn = document.getElementById('stravaBtn');
-  if (!title) return;
-  if (stravaConnected) {
-    title.textContent = 'Strava connected';
-    sub.textContent = data.athlete_name ? ('as ' + data.athlete_name) : 'Ready to sync';
-    btn.textContent = 'Sync now';
-    btn.className = 'btn-sync';
-    btn.onclick = syncStrava;
-  } else {
-    title.textContent = 'Connect Strava';
-    sub.textContent = 'Auto-track what you actually did';
-    btn.textContent = 'Connect';
-    btn.className = 'btn-strava';
-    btn.onclick = connectStrava;
-  }
+  const dT = document.getElementById('drawerStravaTitle');
+  const dS = document.getElementById('drawerStravaSub');
+  const dA = document.getElementById('drawerStravaAction');
+  if (dT) dT.textContent = 'Strava';
+  if (dS) dS.textContent = stravaConnected
+    ? (data && data.athlete_name ? data.athlete_name : 'Connected')
+    : 'Not connected';
+  if (dA) dA.textContent = stravaConnected ? 'Sync' : 'Connect';
 }
 
 async function syncStrava() {
-  const btn = document.getElementById('stravaBtn');
-  const sub = document.getElementById('stravaSub');
-  btn.disabled = true;
-  btn.textContent = 'Syncing…';
+  const dS = document.getElementById('drawerStravaSub');
+  const dA = document.getElementById('drawerStravaAction');
+  if (dS) dS.textContent = 'Syncing…';
+  if (dA) dA.textContent = '…';
   try {
     const res = await fetch('/api/strava-sync', {
       method: 'POST',
@@ -1436,27 +1712,19 @@ async function syncStrava() {
     if (!res.ok) {
       if (data.reconnect) {
         stravaConnected = false;
-        document.getElementById('stravaTitle').textContent = 'Reconnect Strava';
-        sub.textContent = data.error;
-        btn.disabled = false;
-        btn.textContent = 'Connect';
-        btn.className = 'btn-strava';
-        btn.onclick = connectStrava;
+        if (dS) dS.textContent = 'Reconnect needed';
+        if (dA) dA.textContent = 'Connect';
         return;
       }
       throw new Error(data.error || 'Sync failed');
     }
-    const resultMsg = data.synced + ' activities · ' + data.matched + ' matched to plan';
     await loadDashboard();
-    document.getElementById('stravaSub').textContent = resultMsg;
+    if (dS) dS.textContent = data.synced + ' synced · ' + data.matched + ' matched';
+    if (dA) dA.textContent = 'Sync';
     renderRecentActivities();
   } catch (e) {
-    sub.textContent = e.message;
-    btn.disabled = false;
-    btn.textContent = 'Sync now';
-    return;
-  } finally {
-    btn.disabled = false;
+    if (dS) dS.textContent = e.message;
+    if (dA) dA.textContent = 'Retry';
   }
 }
 
