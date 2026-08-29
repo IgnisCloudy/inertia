@@ -316,6 +316,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .snd-test:hover{border-color:var(--acc);color:var(--acc)}
 
 
+.mult-btn{flex:1;background:var(--s2);border:1px solid var(--b2);color:var(--muted);padding:9px 4px;
+  border-radius:9px;font-family:var(--mono);font-size:11.5px;cursor:pointer;transition:.15s}
+.mult-btn.active{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
+
 /* ── NUTRITION ── */
 .macro-hero{background:linear-gradient(150deg,#1b1310,#120d10);border:1px solid var(--b2);
   border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
@@ -1877,10 +1881,20 @@ function renderScanResult(data, dataUrl) {
     '</div>' +
     (data.note ? '<div class="sheet-rat">' + data.note + '</div>' : '') +
     rows +
+    '<div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--b1)">' +
+      '<div style="font-size:11.5px;color:var(--muted);margin-bottom:9px">Portion looks off? Scale it.</div>' +
+      '<div style="display:flex;gap:6px">' +
+        ['0.5','0.75','1','1.5','2'].map(m =>
+          '<button class="mult-btn' + (m === '1' ? ' active' : '') + '" data-m="' + m + '" ' +
+          'onclick="setScanMult(' + m + ',this)">' + m + '×</button>').join('') +
+      '</div>' +
+    '</div>' +
     '<div class="sheet-actions">' +
       '<button class="btn-cancel" onclick="closeSheet()">Discard</button>' +
       '<button class="btn-apply" onclick="saveScan()">Log it</button>' +
     '</div>');
+  window._scanMult = 1;
+  window._scanBase = data.total ? Math.round(data.total.calories) : 0;
 }
 
 async function saveScan() {
@@ -1892,13 +1906,23 @@ async function saveScan() {
   });
   if (!chosen.length) { closeSheet(); return; }
 
+  const mult = window._scanMult || 1;
   const rows = chosen.map(it => ({
     user_id: currentUser.id, meal_date: today, slot: 'logged',
     name: it.name, serving: it.serving || null,
-    calories: it.calories || 0, protein_g: it.protein_g || 0,
-    carbs_g: it.carbs_g || 0, fat_g: it.fat_g || 0
+    calories: Math.round((it.calories || 0) * mult),
+    protein_g: Math.round((it.protein_g || 0) * mult),
+    carbs_g: Math.round((it.carbs_g || 0) * mult),
+    fat_g: Math.round((it.fat_g || 0) * mult)
   }));
-  await sb.from('meals').insert(rows);
+  const { error: mErr } = await sb.from('meals').insert(rows);
+  if (mErr) {
+    playThud();
+    openSheet('<div class="sheet-title">Could not log that</div>' +
+      '<div class="sheet-sum">' + mErr.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+    return;
+  }
 
   // remember these foods so they never need re-entering
   for (const it of chosen) {
@@ -1917,6 +1941,15 @@ async function saveScan() {
   pendingScan = null;
   closeSheet();
   renderFuel();
+}
+
+function setScanMult(m, btn) {
+  window._scanMult = m;
+  document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.querySelector('.sheet-title');
+  if (el && window._scanBase) el.textContent = Math.round(window._scanBase * m) + ' kcal';
+  playTick();
 }
 
 // ── saved foods ──
@@ -1964,11 +1997,18 @@ function filterLib(q) {
 async function logFromLibrary(id) {
   const f = (window._lib || []).find(x => x.id === id);
   if (!f) return;
-  await sb.from('meals').insert({
+  const { error: lErr } = await sb.from('meals').insert({
     user_id: currentUser.id, meal_date: new Date().toISOString().split('T')[0], slot: 'logged',
     name: f.name, serving: f.serving, calories: f.calories,
     protein_g: f.protein_g, carbs_g: f.carbs_g, fat_g: f.fat_g
   });
+  if (lErr) {
+    playThud();
+    openSheet('<div class="sheet-title">Could not log that</div>' +
+      '<div class="sheet-sum">' + lErr.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+    return;
+  }
   playChime();
   closeSheet();
   renderFuel();
