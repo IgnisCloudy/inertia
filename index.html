@@ -311,6 +311,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 
 
+.snd-test{background:var(--s2);border:1px solid var(--b2);color:var(--muted);padding:7px 12px;
+  border-radius:9px;font-family:var(--mono);font-size:10.5px;cursor:pointer;transition:.15s}
+.snd-test:hover{border-color:var(--acc);color:var(--acc)}
+
 /* ── RECAP CHIP ── */
 .recap-chip{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
   background:linear-gradient(100deg,rgba(255,94,26,.08),rgba(74,158,202,.05));
@@ -761,27 +765,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
   <div class="drawer-sec">Preferences</div>
   <div style="padding:6px 12px 14px">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Coach's voice</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Coach speaks</div>
     <select id="regionSelect" onchange="setRegion(this.value)"
       style="width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
              padding:11px 13px;border-radius:11px;font-family:var(--font);font-size:13px"></select>
-  </div>
-  <div class="drawer-item" onclick="toggleSound()">
-    <span id="soundIcon">🔊</span>
-    <div style="flex:1">
-      <div>Sound</div>
-      <div class="drawer-item-sub" id="soundSub">Chimes on completion</div>
-    </div>
-    <span class="sound-toggle" id="soundState">ON</span>
   </div>
 
-  <div class="drawer-sec">Preferences</div>
-  <div style="padding:6px 12px 14px">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Coach's voice</div>
-    <select id="regionSelect" onchange="setRegion(this.value)"
-      style="width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
-             padding:11px 13px;border-radius:11px;font-family:var(--font);font-size:13px"></select>
-  </div>
   <div class="drawer-item sound-row" onclick="toggleSound()">
     <div style="display:flex;align-items:center;gap:11px">
       <span>🔊</span>
@@ -792,8 +781,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
     <div class="toggle on" id="soundToggle"></div>
   </div>
-  <div class="drawer-item" onclick="event.stopPropagation();playFanfare()">
-    <span>🎵</span><div><div>Test sound</div><div class="drawer-item-sub">Play the week-complete fanfare</div></div>
+
+  <div style="padding:4px 12px 12px">
+    <div style="font-size:11px;color:var(--dim);margin-bottom:9px">Tap to preview</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="snd-test" onclick="event.stopPropagation();playTick()">Tick</button>
+      <button class="snd-test" onclick="event.stopPropagation();playChime()">Session</button>
+      <button class="snd-test" onclick="event.stopPropagation();playSuccess()">Applied</button>
+      <button class="snd-test" onclick="event.stopPropagation();playSwell()">Recap</button>
+      <button class="snd-test" onclick="event.stopPropagation();playFanfare()">Week done</button>
+    </div>
   </div>
 
   <div class="drawer-sec">Account</div>
@@ -929,6 +926,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <div id="phaseList"></div>
     </div>
     <div id="planSessions"></div>
+  </div>
+
+  <!-- ══════ PROGRESS ══════ -->
+  <div class="view" id="view-progress">
+    <div class="dash-hello" style="font-size:21px">Progress</div>
+    <div class="dash-day">Where you actually are</div>
+
+    <div class="card-block" id="analyticsCard" style="display:none">
+      <div class="act-head"><div class="act-title">This week</div><div class="act-count" id="weekRange">—</div></div>
+      <div id="volList"></div>
+      <div style="margin-top:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="act-count" id="phaseLabel">—</div>
+          <div class="act-count" id="phasePct">—</div>
+        </div>
+        <div class="phase-bar-wrap"><div class="phase-bar" id="phaseBar" style="width:0%"></div></div>
+      </div>
+      <div class="quote-line" id="quoteLine">—<span class="quote-src" id="quoteSrc"></span></div>
+    </div>
+
+    <div class="card-block" id="actCard" style="display:none">
+      <div class="act-head"><div class="act-title">Recent activities</div><div class="act-count" id="actCount">—</div></div>
+      <div id="actList"></div>
+    </div>
   </div>
 
 </div>
@@ -1523,6 +1544,7 @@ function fillRegionSelect() {
 // ═══════════════════════ RECAP POPUP ═══════════════════════
 async function openRecapSheet(mode) {
   recapMode = mode || 'week';
+  playSwell();
   openSheet('<div class="rp-load"><div class="rp-orbit"><span></span><span></span><span></span></div>' +
             '<div class="rp-msg">Pulling your numbers…</div></div>');
   const html = await buildRecapHtml();
@@ -1595,17 +1617,46 @@ function tone(freq, startAt, dur, vol, type) {
   osc.start(t); osc.stop(t + dur + 0.05);
 }
 
-function playChime() {
+function playChime() {          // session marked done
   if (!soundOn) return;
-  tone(659.25, 0,    0.5, 0.16);   // E5
-  tone(880.00, 0.09, 0.6, 0.13);   // A5
+  tone(659.25, 0,    0.5, 0.16);
+  tone(880.00, 0.09, 0.6, 0.13);
 }
 
-function playFanfare() {
+function playTick() {           // tab switch — barely there
   if (!soundOn) return;
-  const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+  tone(1200, 0, 0.05, 0.05, 'square');
+}
+
+function playSuccess() {        // replan applied
+  if (!soundOn) return;
+  [587.33, 739.99, 987.77].forEach((f,i) => tone(f, i * 0.07, 0.45, 0.13, 'triangle'));
+}
+
+function playSwell() {          // recap opens
+  if (!soundOn) return;
+  tone(261.63, 0,    1.2, 0.07, 'sine');
+  tone(392.00, 0.05, 1.2, 0.06, 'sine');
+  tone(523.25, 0.10, 1.3, 0.05, 'sine');
+}
+
+function playFanfare() {        // week complete
+  if (!soundOn) return;
+  const notes = [523.25, 659.25, 783.99, 1046.50];
   notes.forEach((f, i) => tone(f, i * 0.11, 0.75, 0.15 - i * 0.015, 'triangle'));
   tone(1318.51, 0.5, 1.1, 0.09, 'sine');
+}
+
+function playMilestone() {      // personal best / phase change
+  if (!soundOn) return;
+  [392, 523.25, 659.25, 783.99, 1046.50].forEach((f,i) =>
+    tone(f, i * 0.08, 0.9, 0.13 - i * 0.012, 'triangle'));
+}
+
+function playThud() {           // something failed
+  if (!soundOn) return;
+  tone(180, 0, 0.28, 0.12, 'sine');
+  tone(120, 0.05, 0.35, 0.10, 'sine');
 }
 
 function toggleSound() {
@@ -1813,6 +1864,7 @@ async function runReplan(requestText) {
     pendingProposal = data;
     renderProposal(data, requestText);
   } catch (e) {
+    playThud();
     openSheet('<div class="sheet-title">Could not revise the plan</div>' +
       '<div class="sheet-sum">' + e.message + '</div>' +
       '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
@@ -1891,6 +1943,7 @@ async function applyProposal() {
       updated_at: new Date().toISOString()
     }).eq('id', currentPlan.id).eq('user_id', currentUser.id);
 
+    playSuccess();
     dismissReplan();
     closeSheet();
     pendingProposal = null;
@@ -1927,6 +1980,7 @@ function goView(name, btn) {
   if (view) view.classList.add('active');
   const tab = btn || document.querySelector('.tab[data-view="' + name + '"]');
   if (tab) tab.classList.add('active');
+  playTick();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'plan') { renderPlanView(); renderRevisions(); }
 
@@ -2104,7 +2158,7 @@ const REGIONS = {
   },
 
   bengaluru: {
-    label: 'Bengaluru',
+    label: 'Kannada · Bengaluru',
     nudge: {
       swim: [['Macha, your goggles are gathering dust.','🥽'],['Pool is waiting, boss. Been a while.','🏊']],
       bike: [['Macha, your saddle is getting lonely.','🚴'],['Nandi Hills is not going to climb itself.','⛰️']],
@@ -2121,7 +2175,7 @@ const REGIONS = {
   },
 
   mumbai: {
-    label: 'Mumbai',
+    label: 'Bambaiya · Mumbai',
     nudge: {
       swim: [['Boss, goggles pe dust jam gaya.','🥽'],['Pool is waiting, bhau. Kitne din ho gaye.','🏊']],
       bike: [['Cycle akela pada hai boss.','🚴'],['Marine Drive is not going to ride itself.','🌊']],
@@ -2138,7 +2192,7 @@ const REGIONS = {
   },
 
   delhi: {
-    label: 'Delhi NCR',
+    label: 'Dilli Hindi',
     nudge: {
       swim: [['Bhai, goggles pe dhool jam gayi.','🥽'],['Pool tera intezaar kar raha hai yaar.','🏊']],
       bike: [['Cycle akeli khadi hai bhai.','🚴'],['Aravalli climb khud nahi hogi.','⛰️']],
@@ -2155,7 +2209,7 @@ const REGIONS = {
   },
 
   punjab: {
-    label: 'Punjab',
+    label: 'Punjabi',
     nudge: {
       swim: [['Paaji, goggles te mitti jam gayi.','🥽'],['Pool tuhada wait kar reha hai.','🏊']],
       bike: [['Cycle kalli khadi hai paaji.','🚴'],['Oye, sadak tuhanu yaad kardi hai.','🛣️']],
@@ -2172,7 +2226,7 @@ const REGIONS = {
   },
 
   kolkata: {
-    label: 'Kolkata',
+    label: 'Bangla · Kolkata',
     nudge: {
       swim: [['Dada, goggles e dhulo jome gyache.','🥽'],['Pool tomar jonno wait korche.','🏊']],
       bike: [['Cycle ekla dariye ache dada.','🚴'],['Rasta tomake khunjche.','🛣️']],
@@ -2189,7 +2243,7 @@ const REGIONS = {
   },
 
   gujarat: {
-    label: 'Gujarat',
+    label: 'Gujarati',
     nudge: {
       swim: [['Bhai, goggles par dhool bethi gai.','🥽'],['Pool tamari waat jue chhe.','🏊']],
       bike: [['Cycle ekli ubhi chhe bhai.','🚴'],['Rasto tamne yaad kare chhe.','🛣️']],
@@ -2206,7 +2260,7 @@ const REGIONS = {
   },
 
   chennai: {
-    label: 'Chennai',
+    label: 'Tamil · Chennai',
     nudge: {
       swim: [['Machan, goggles la dust seranthiruchu.','🥽'],['Pool unna wait pannuthu, vaa.','🏊']],
       bike: [['Cycle thaniya nikkuthu machan.','🚴'],['ECR road unna kekkuthu da.','🛣️']],
@@ -2223,7 +2277,7 @@ const REGIONS = {
   },
 
   hyderabad: {
-    label: 'Hyderabad',
+    label: 'Hyderabadi',
     nudge: {
       swim: [['Anna, goggles pai dhool paddindi.','🥽'],['Pool nee kosam wait chestundi.','🏊']],
       bike: [['Cycle okkate nilabaddi undi anna.','🚴'],['Road nin gurthu chesukuntundi.','🛣️']],
