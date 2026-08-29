@@ -310,6 +310,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .sound-toggle{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)}
 
 
+
+/* ── RECAP CHIP ── */
+.recap-chip{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
+  background:linear-gradient(100deg,rgba(255,94,26,.08),rgba(74,158,202,.05));
+  border:1px solid var(--b1);border-radius:14px;padding:14px 16px;margin-bottom:16px;transition:border-color .16s}
+.recap-chip:hover{border-color:var(--b3)}
+.rc-left{display:flex;align-items:center;gap:12px}
+.rc-icon{font-size:19px}
+.rc-title{font-size:13.5px;font-weight:600}
+.rc-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.rc-arrow{color:var(--acc);font-size:15px}
+
+/* recap switch inside sheet */
+.recap-switch{display:flex;gap:6px;background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:4px;margin-bottom:18px}
+.recap-switch button{flex:1;background:none;border:none;color:var(--muted);padding:9px;border-radius:9px;
+  font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+.recap-switch button.active{background:var(--s3);color:var(--text)}
+.postcard{margin-bottom:0}
+
 /* ── RECAP POSTCARDS ── */
 .recap-switch{display:flex;gap:6px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:4px;margin-bottom:20px}
 .recap-switch button{flex:1;background:none;border:none;color:var(--muted);padding:9px;border-radius:9px;
@@ -741,6 +760,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 
   <div class="drawer-sec">Preferences</div>
+  <div style="padding:6px 12px 14px">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Coach's voice</div>
+    <select id="regionSelect" onchange="setRegion(this.value)"
+      style="width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
+             padding:11px 13px;border-radius:11px;font-family:var(--font);font-size:13px"></select>
+  </div>
   <div class="drawer-item" onclick="toggleSound()">
     <span id="soundIcon">🔊</span>
     <div style="flex:1">
@@ -751,6 +776,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 
   <div class="drawer-sec">Preferences</div>
+  <div style="padding:6px 12px 14px">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Coach's voice</div>
+    <select id="regionSelect" onchange="setRegion(this.value)"
+      style="width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
+             padding:11px 13px;border-radius:11px;font-family:var(--font);font-size:13px"></select>
+  </div>
   <div class="drawer-item sound-row" onclick="toggleSound()">
     <div style="display:flex;align-items:center;gap:11px">
       <span>🔊</span>
@@ -760,6 +791,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </div>
     </div>
     <div class="toggle on" id="soundToggle"></div>
+  </div>
+  <div class="drawer-item" onclick="event.stopPropagation();playFanfare()">
+    <span>🎵</span><div><div>Test sound</div><div class="drawer-item-sub">Play the week-complete fanfare</div></div>
   </div>
 
   <div class="drawer-sec">Account</div>
@@ -786,8 +820,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <button class="tab active" data-view="today" onclick="goView('today',this)">Today</button>
     <button class="tab" data-view="plan" onclick="goView('plan',this)">Plan</button>
     <button class="tab" data-view="progress" onclick="goView('progress',this)">Progress</button>
-    <button class="tab" data-view="recap" onclick="goView('recap',this)">Recap</button>
-    <button class="tab" data-view="recap" onclick="goView('recap',this)">Recap</button>
   </div>
 
   <!-- ══════ TODAY ══════ -->
@@ -835,6 +867,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <div class="stat-sub" id="statPhaseWeek">—</div>
         <div class="stat-hint">See progress →</div>
       </div>
+    </div>
+
+    <div class="recap-chip" id="recapChip" onclick="openRecapSheet('week')">
+      <div class="rc-left">
+        <div class="rc-icon">📊</div>
+        <div>
+          <div class="rc-title">Your week so far</div>
+          <div class="rc-sub" id="recapChipSub">—</div>
+        </div>
+      </div>
+      <div class="rc-arrow">→</div>
     </div>
 
     <div class="next-card" id="nextCard">
@@ -888,47 +931,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div id="planSessions"></div>
   </div>
 
-  <!-- ══════ RECAP ══════ -->
-  <div class="view" id="view-recap">
-    <div class="dash-hello" style="font-size:21px">Look back</div>
-    <div class="dash-day">Your weeks and months, in numbers</div>
-    <div id="recapContent"></div>
-  </div>
-
-  <!-- ══════ PROGRESS ══════ -->
-  <div class="view" id="view-progress">
-    <div class="dash-hello" style="font-size:21px">Progress</div>
-    <div class="dash-day" id="progressSubtitle">—</div>
-
-    <div class="card-block" id="analyticsCard" style="display:none">
-      <div class="act-head"><div class="act-title">This week</div><div class="act-count" id="weekRange">—</div></div>
-      <div id="volList"></div>
-      <div style="margin-top:18px">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="act-count" id="phaseLabel">—</div>
-          <div class="act-count" id="phasePct">—</div>
-        </div>
-        <div class="phase-bar-wrap"><div class="phase-bar" id="phaseBar" style="width:0%"></div></div>
-      </div>
-      <div class="quote-line" id="quoteLine">—<span class="quote-src" id="quoteSrc"></span></div>
-    </div>
-
-    <div class="card-block" id="actCard" style="display:none">
-      <div class="act-head"><div class="act-title">Recent activities</div><div class="act-count" id="actCount">—</div></div>
-      <div id="actList"></div>
-    </div>
-  </div>
-
-  <!-- ══════ RECAP ══════ -->
-  <div class="view" id="view-recap">
-    <div class="dash-hello" style="font-size:21px">Look back</div>
-    <div class="dash-day">Your week and month, in numbers</div>
-    <div class="recap-switch">
-      <button class="active" id="rcWeekBtn" onclick="setRecap('week')">This week</button>
-      <button id="rcMonthBtn" onclick="setRecap('month')">This month</button>
-    </div>
-    <div id="recapBody"></div>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1362,6 +1364,9 @@ async function loadDashboard() {
 
   renderDashboard(plan, goal, sessions || []);
   fillDrawer(goal);
+  fillRegionSelect();
+  updateRecapChip();
+  maybeShowWeeklyRecap();
   const st = document.getElementById('soundToggle');
   const ss = document.getElementById('soundSub');
   if (st) st.classList.toggle('on', soundOn);
@@ -1499,13 +1504,70 @@ function fillDrawer(goal) {
   }
 }
 
-const REPLAN_LOADING = [
-  'Swalpa adjust maadi…',
-  'Macha, hold on — coach is thinking.',
-  'Looking at what you planned vs what you actually did.',
-  'Doing the maths on your week.',
-  'Reshuffling, one second guru.'
-];
+
+// ═══════════════════════ REGION ═══════════════════════
+function setRegion(r) {
+  region = r;
+  localStorage.setItem('inertia_region', r);
+  renderNudgeAndAnalytics();
+}
+
+function fillRegionSelect() {
+  const sel = document.getElementById('regionSelect');
+  if (!sel) return;
+  sel.innerHTML = Object.keys(REGIONS)
+    .map(k => '<option value="' + k + '"' + (k === region ? ' selected' : '') + '>' + REGIONS[k].label + '</option>')
+    .join('');
+}
+
+// ═══════════════════════ RECAP POPUP ═══════════════════════
+async function openRecapSheet(mode) {
+  recapMode = mode || 'week';
+  openSheet('<div class="rp-load"><div class="rp-orbit"><span></span><span></span><span></span></div>' +
+            '<div class="rp-msg">Pulling your numbers…</div></div>');
+  const html = await buildRecapHtml();
+  openSheet(
+    '<div class="recap-switch">' +
+      '<button class="' + (recapMode === 'week' ? 'active' : '') + '" onclick="switchRecap(\'week\')">This week</button>' +
+      '<button class="' + (recapMode === 'month' ? 'active' : '') + '" onclick="switchRecap(\'month\')">This month</button>' +
+    '</div>' + html +
+    '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>'
+  );
+}
+
+async function switchRecap(mode) { openRecapSheet(mode); }
+
+// auto-show once when a new week starts
+async function maybeShowWeeklyRecap() {
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((dow + 6) % 7));
+  const key = 'inertia_recap_shown_' + mon.toISOString().split('T')[0];
+  if (localStorage.getItem(key)) return;
+  // only on Mon/Tue, and only if last week had activity
+  if (dow !== 1 && dow !== 2) return;
+  const lastMon = new Date(mon); lastMon.setDate(mon.getDate() - 7);
+  const lastSun = new Date(mon); lastSun.setDate(mon.getDate() - 1);
+  const { data } = await sb.from('strava_activities')
+    .select('id').eq('user_id', currentUser.id)
+    .gte('start_date', lastMon.toISOString()).lte('start_date', lastSun.toISOString()).limit(1);
+  if (!data || !data.length) return;
+  localStorage.setItem(key, '1');
+  setTimeout(() => { playChime(); openRecapSheet('week'); }, 900);
+}
+
+async function updateRecapChip() {
+  const sub = document.getElementById('recapChipSub');
+  if (!sub || !currentUser) return;
+  const now = new Date(); const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((dow + 6) % 7)); mon.setHours(0,0,0,0);
+  const { data } = await sb.from('strava_activities')
+    .select('distance_m,moving_time_s').eq('user_id', currentUser.id)
+    .gte('start_date', mon.toISOString());
+  const km = (data || []).reduce((t,a) => t + (a.distance_m||0), 0) / 1000;
+  const n = (data || []).length;
+  sub.textContent = n ? (km.toFixed(1) + ' km across ' + n + ' session' + (n>1?'s':'')) : 'Nothing logged yet this week';
+}
 
 // ═══════════════════════ SOUND ═══════════════════════
 let soundOn = localStorage.getItem('inertia_sound') !== 'off';
@@ -1580,16 +1642,8 @@ const RECAP_LINES = {
   ]
 };
 
-function setRecap(mode) {
-  recapMode = mode;
-  document.getElementById('rcWeekBtn').classList.toggle('active', mode === 'week');
-  document.getElementById('rcMonthBtn').classList.toggle('active', mode === 'month');
-  renderRecap();
-}
-
-async function renderRecap() {
-  const body = document.getElementById('recapBody');
-  if (!body || !currentUser) return;
+async function buildRecapHtml() {
+  if (!currentUser) return '';
 
   const now = new Date();
   let from, to, kicker, title;
@@ -1627,13 +1681,12 @@ async function renderRecap() {
   const fmt = d => d.toLocaleDateString('en-US', { day:'numeric', month:'short' });
 
   if (!list.length) {
-    body.innerHTML = '<div class="postcard"><div class="pc-inner">' +
+    return '<div class="postcard"><div class="pc-inner">' +
       '<div class="pc-kicker">' + kicker + '</div>' +
       '<div class="pc-title">' + title + '</div>' +
       '<div class="pc-range">' + fmt(from) + ' – ' + fmt(to) + '</div>' +
-      '<div class="pc-empty">Nothing logged yet for this ' + recapMode + '.<br>Sync Strava or go make something worth recapping, macha.</div>' +
+      '<div class="pc-empty">Nothing logged yet for this ' + recapMode + '.<br>Sync Strava or go make something worth recapping.</div>' +
       '</div></div>';
-    return;
   }
 
   const totalKm = list.reduce((t,a) => t + (a.distance_m || 0), 0) / 1000;
@@ -1672,10 +1725,10 @@ async function renderRecap() {
   const daySpan = recapMode === 'week' ? 7 : new Date(to).getDate();
   const ratio = activeDays / daySpan;
   const bucket = ratio >= 0.55 ? 'strong' : ratio >= 0.28 ? 'decent' : 'quiet';
-  const line = RECAP_LINES[bucket][Math.floor(Math.random() * RECAP_LINES[bucket].length)];
+  const RL = pack().recap;
+  const line = RL[bucket][Math.floor(Math.random() * RL[bucket].length)];
 
-  body.innerHTML =
-    '<div class="postcard"><div class="pc-inner">' +
+  return '<div class="postcard"><div class="pc-inner">' +
       '<div class="pc-kicker">' + kicker + '</div>' +
       '<div class="pc-title">' + title + '</div>' +
       '<div class="pc-range">' + fmt(from) + ' – ' + fmt(to) + '</div>' +
@@ -1725,7 +1778,8 @@ async function requestReplan() { runReplan(''); }
 async function runReplan(requestText) {
   if (!currentUser || !currentPlan) return;
 
-  const loadMsg = REPLAN_LOADING[Math.floor(Math.random() * REPLAN_LOADING.length)];
+  const RLoad = pack().loading;
+  const loadMsg = RLoad[Math.floor(Math.random() * RLoad.length)];
   openSheet(
     '<div class="rp-load">' +
       '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
@@ -1735,9 +1789,9 @@ async function runReplan(requestText) {
     '</div>');
   let li = 0;
   window._rpTimer = setInterval(() => {
-    li = (li + 1) % REPLAN_LOADING.length;
+    li = (li + 1) % RLoad.length;
     const m = document.getElementById('rpMsg');
-    if (m) { m.style.opacity = 0; setTimeout(() => { m.textContent = REPLAN_LOADING[li]; m.style.opacity = 1; }, 220); }
+    if (m) { m.style.opacity = 0; setTimeout(() => { m.textContent = RLoad[li]; m.style.opacity = 1; }, 220); }
   }, 2300);
 
   try {
@@ -1875,7 +1929,7 @@ function goView(name, btn) {
   if (tab) tab.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'plan') { renderPlanView(); renderRevisions(); }
-  if (name === 'recap') renderRecap();
+
 }
 
 function openDrawer() {
@@ -2031,36 +2085,163 @@ async function renderPlanView() {
 
 // ═══════════════════════ NUDGE · ANALYTICS · DRIFT ═══════════════════════
 
-const NUDGES = {
-  swim: [
-    ['Macha, your goggles are gathering dust.', '🥽'],
-    ['The pool is waiting, boss. It has been a while.', '🏊'],
-    ['Water has been suspiciously calm without you.', '💧'],
-    ['Swim day keeps getting postponed, guru.', '🏊']
-  ],
-  bike: [
-    ['Macha, your saddle is getting lonely.', '🚴'],
-    ['The cycle has been asking about you.', '🚲'],
-    ['Nandi Hills is not going to climb itself.', '⛰️'],
-    ['Two wheels, still parked, still hopeful.', '🚴']
-  ],
-  run: [
-    ['Shoes by the door, still hopeful macha.', '👟'],
-    ['Cubbon Park misses your footsteps.', '🌳'],
-    ['Sunrise has been running without you.', '🌅'],
-    ['The road remembers, boss. Go say hi.', '🏃']
-  ],
-  strength: [
-    ['The iron has been resting too, macha.', '🏋️'],
-    ['Strength fades quietly. Go remind it who you are.', '💪']
-  ],
-  allgood: [
-    ['Sakkath week macha. Everything moving.', '🔥'],
-    ['Swim, bike, run — full josh. Keep it rolling.', '⚡'],
-    ['Bombat consistency. This is what momentum feels like.', '✨'],
-    ['Every sport touched this week. One number, boss.', '🎯']
-  ]
+const REGIONS = {
+  neutral: {
+    label: 'Neutral English',
+    nudge: {
+      swim: [['Your goggles are gathering dust.','🥽'],['The pool has been quiet without you.','🏊']],
+      bike: [['Your saddle is waiting.','🚴'],['The road has been asking about you.','🛣️']],
+      run: [['Shoes by the door, still hopeful.','👟'],['Sunrise has been running without you.','🌅']],
+      strength: [['The iron has been resting too.','🏋️'],['Strength fades quietly. Go remind it.','💪']],
+      allgood: [['Every sport touched. This is momentum.','🔥'],['You showed up. Repeatedly. Keep going.','✨']]
+    },
+    recap: {
+      strong: ['A serious week. This is what a good block looks like.','You showed up again and again. That is the whole secret.'],
+      decent: ['Steady progress. Boring weeks build the strongest athletes.','You moved. That already beats last week you.'],
+      quiet: ['Quiet week. Happens to everyone — the next one is yours.','Small week, no drama. The shoes are still by the door.']
+    },
+    loading: ['Working on it…','Reading your plan and your actuals.','Doing the maths on your week.']
+  },
+
+  bengaluru: {
+    label: 'Bengaluru',
+    nudge: {
+      swim: [['Macha, your goggles are gathering dust.','🥽'],['Pool is waiting, boss. Been a while.','🏊']],
+      bike: [['Macha, your saddle is getting lonely.','🚴'],['Nandi Hills is not going to climb itself.','⛰️']],
+      run: [['Shoes by the door, still hopeful macha.','👟'],['Cubbon Park misses your footsteps.','🌳']],
+      strength: [['The iron has been resting too, macha.','🏋️'],['Strength fades quietly. Go remind it who you are.','💪']],
+      allgood: [['Sakkath week macha. Everything moving.','🔥'],['Full josh. Keep it rolling, guru.','⚡']]
+    },
+    recap: {
+      strong: ['Sakkath work macha. This is what a good block looks like.','Bombat. The plan is chasing you now, not the other way round.'],
+      decent: ['Solid enough macha. Not every week is a highlight reel.','Steady progress guru. Boring weeks build strong athletes.'],
+      quiet: ['Quiet week macha. Happens — next one is yours.','Small week, no drama boss. Shoes still by the door.']
+    },
+    loading: ['Swalpa adjust maadi…','Macha, hold on — coach is thinking.','One minute guru, doing the maths.']
+  },
+
+  mumbai: {
+    label: 'Mumbai',
+    nudge: {
+      swim: [['Boss, goggles pe dust jam gaya.','🥽'],['Pool is waiting, bhau. Kitne din ho gaye.','🏊']],
+      bike: [['Cycle akela pada hai boss.','🚴'],['Marine Drive is not going to ride itself.','🌊']],
+      run: [['Shoes ready hai, tu kidhar hai bhau?','👟'],['Shivaji Park misses your rounds.','🏃']],
+      strength: [['Weights bhi rest le rahe hain boss.','🏋️'],['Strength chup chaap chali jaati hai. Ja, yaad dila.','💪']],
+      allgood: [['Ekdum jhakaas week bhau. Sab chalu.','🔥'],['Full form mein hai boss. Aise hi rakh.','⚡']]
+    },
+    recap: {
+      strong: ['Jhakaas week bhau. Yehi hota hai solid block.','Ekdum first class. Plan ab tere peeche bhaag raha hai.'],
+      decent: ['Theek thaak boss. Har week highlight reel nahi hota.','Steady hai bhau. Boring weeks hi champion banate hain.'],
+      quiet: ['Halka week tha boss. Chalta hai — agla tera hai.','Chhota week, tension nahi. Shoes abhi bhi ready hain.']
+    },
+    loading: ['Thoda adjust kar raha hoon…','Ruk bhau, coach soch raha hai.','Ek minute boss, hisaab lag raha hai.']
+  },
+
+  delhi: {
+    label: 'Delhi NCR',
+    nudge: {
+      swim: [['Bhai, goggles pe dhool jam gayi.','🥽'],['Pool tera intezaar kar raha hai yaar.','🏊']],
+      bike: [['Cycle akeli khadi hai bhai.','🚴'],['Aravalli climb khud nahi hogi.','⛰️']],
+      run: [['Joote darwaze pe, umeed abhi zinda hai.','👟'],['Lodhi Garden tere rounds miss kar raha hai.','🌳']],
+      strength: [['Weights bhi aaram kar rahe hain bhai.','🏋️'],['Strength chupke se chali jaati hai. Ja, yaad dila.','💪']],
+      allgood: [['Full on week bhai. Sab kuch chal raha hai.','🔥'],['Scene set hai yaar. Aise hi rakh.','⚡']]
+    },
+    recap: {
+      strong: ['Solid week bhai. Yahi hota hai proper block.','Full on. Ab plan tere peeche bhaag raha hai.'],
+      decent: ['Theek hai yaar. Har week jhakaas nahi ho sakta.','Steady chal raha hai bhai. Boring weeks hi kaam aate hain.'],
+      quiet: ['Halka week tha bhai. Hota hai — agla tera.','Chhota week, koi tension nahi. Joote ready hain.']
+    },
+    loading: ['Thoda adjust kar raha hoon…','Ruk bhai, coach soch raha hai.','Ek minute yaar, hisaab laga raha hoon.']
+  },
+
+  punjab: {
+    label: 'Punjab',
+    nudge: {
+      swim: [['Paaji, goggles te mitti jam gayi.','🥽'],['Pool tuhada wait kar reha hai.','🏊']],
+      bike: [['Cycle kalli khadi hai paaji.','🚴'],['Oye, sadak tuhanu yaad kardi hai.','🛣️']],
+      run: [['Bootan darwaze te, ajj vi umeed naal.','👟'],['Sun rise tere bina bhaj reha hai.','🌅']],
+      strength: [['Weights vi aaram kar rahe ne paaji.','🏋️'],['Taakat chupke chali jaandi hai. Ja, yaad kara.','💪']],
+      allgood: [['Balle balle! Pura week chaldi rahi.','🔥'],['Chak de paaji. Ehi rakh rhythm.','⚡']]
+    },
+    recap: {
+      strong: ['Chak de paaji. Ehi hunda hai solid block.','Balle! Hun plan tuhade piche bhaj reha hai.'],
+      decent: ['Theek hai paaji. Har week dhamaka nahi hunda.','Steady challa hai. Boring weeks hi champion bandi ne.'],
+      quiet: ['Halka week si paaji. Hunda hai — agla tuhada.','Chhota week, koi gal nahi. Bootan taiyaar ne.']
+    },
+    loading: ['Thoda adjust kar reha haan…','Ruk paaji, coach soch reha hai.','Ik minute, hisaab laa reha haan.']
+  },
+
+  kolkata: {
+    label: 'Kolkata',
+    nudge: {
+      swim: [['Dada, goggles e dhulo jome gyache.','🥽'],['Pool tomar jonno wait korche.','🏊']],
+      bike: [['Cycle ekla dariye ache dada.','🚴'],['Rasta tomake khunjche.','🛣️']],
+      run: [['Juto darjay, ekhono asha niye.','👟'],['Victoria tomar footsteps miss korche.','🌳']],
+      strength: [['Weights o rest nichche dada.','🏋️'],['Strength chupchap chole jay. Giye mone koriye dao.','💪']],
+      allgood: [['Darun week dada. Sob cholche.','🔥'],['Ei rhythm ta dhore rakho. Bhalo hocche.','⚡']]
+    },
+    recap: {
+      strong: ['Darun week dada. Eitai holo asol block.','Osadharon. Ekhon plan tomar pichone chutche.'],
+      decent: ['Motamuti bhalo dada. Prottek week highlight hoy na.','Steady cholche. Boring week gulo-i champion baniye dey.'],
+      quiet: ['Halka week chilo dada. Hoy — porer ta tomar.','Choto week, chinta nei. Juto ekhono ready.']
+    },
+    loading: ['Ektu adjust korchi…','Dnaraan dada, coach bhabche.','Ek minute, hisheb korchi.']
+  },
+
+  gujarat: {
+    label: 'Gujarat',
+    nudge: {
+      swim: [['Bhai, goggles par dhool bethi gai.','🥽'],['Pool tamari waat jue chhe.','🏊']],
+      bike: [['Cycle ekli ubhi chhe bhai.','🚴'],['Rasto tamne yaad kare chhe.','🛣️']],
+      run: [['Boot darwaje, hju pan asha sathe.','👟'],['Riverfront tamara rounds miss kare chhe.','🌅']],
+      strength: [['Weights pan aaram kare chhe bhai.','🏋️'],['Takat chupchap jati rahe. Jaine yaad karavo.','💪']],
+      allgood: [['Saras week bhai. Badhu chalu chhe.','🔥'],['Majama! Aa rhythm rakho.','⚡']]
+    },
+    recap: {
+      strong: ['Saras week bhai. Aavu j hoy solid block.','Ekdum majama. Have plan tamari pachhal bhage chhe.'],
+      decent: ['Thik chhe bhai. Badha week highlight na hoy.','Steady chale chhe. Boring week j champion banave.'],
+      quiet: ['Halko week hato bhai. Thay — aavto tamaro.','Nano week, chinta nahi. Boot taiyar chhe.']
+    },
+    loading: ['Thodu adjust karu chhu…','Ubha raho bhai, coach vichare chhe.','Ek minute, hisab kari lau.']
+  },
+
+  chennai: {
+    label: 'Chennai',
+    nudge: {
+      swim: [['Machan, goggles la dust seranthiruchu.','🥽'],['Pool unna wait pannuthu, vaa.','🏊']],
+      bike: [['Cycle thaniya nikkuthu machan.','🚴'],['ECR road unna kekkuthu da.','🛣️']],
+      run: [['Shoes vaasal la, innum nambikkai oda.','👟'],['Marina unnoda footsteps miss pannuthu.','🌊']],
+      strength: [['Weights um rest edukkuthu machan.','🏋️'],['Strength summa poidum. Poi nyabagapaduthu.','💪']],
+      allgood: [['Semma week machan. Ellam nadakkuthu.','🔥'],['Vera level. Inda rhythm ah vidaadha.','⚡']]
+    },
+    recap: {
+      strong: ['Semma week machan. Idhu dhaan solid block.','Vera level da. Ippo plan un pinnadi odudhu.'],
+      decent: ['Paravaala machan. Ellaa week um highlight illa.','Steady ah poguthu. Boring weeks dhaan champion aakkum.'],
+      quiet: ['Chinna week machan. Nadakkum — adutha week un.','Konjam kammi, prachanai illa. Shoes ready dhaan.']
+    },
+    loading: ['Konjam adjust panren…','Iru machan, coach yosikkiran.','Oru nimisham, kanakku paakren.']
+  },
+
+  hyderabad: {
+    label: 'Hyderabad',
+    nudge: {
+      swim: [['Anna, goggles pai dhool paddindi.','🥽'],['Pool nee kosam wait chestundi.','🏊']],
+      bike: [['Cycle okkate nilabaddi undi anna.','🚴'],['Road nin gurthu chesukuntundi.','🛣️']],
+      run: [['Shoes gummam daggara, inka aasa tho.','👟'],['Tank Bund nee rounds miss authundi.','🌊']],
+      strength: [['Weights kuda rest teesukuntunnay anna.','🏋️'],['Strength nemmadiga poddi. Vellu, gurthu chey.','💪']],
+      allgood: [['Baap re, sakkatga undi week. Anni nadustunnay.','🔥'],['Bagundi anna. Ee rhythm vadalaku.','⚡']]
+    },
+    recap: {
+      strong: ['Sakkatga undi anna. Idhe solid block ante.','Baap re. Ippudu plan nee venaka paruguthundi.'],
+      decent: ['Parledu anna. Prathi week highlight kaadu.','Steady ga poddi. Boring weeks ye champion chestay.'],
+      quiet: ['Chinna week anna. Jarugutundi — next di nedi.','Thakkuva week, tension ledu. Shoes ready ga unnay.']
+    },
+    loading: ['Koncham adjust chestunna…','Aagu anna, coach alochistunnadu.','Oka nimisham, lekka chustunna.']
+  }
 };
+
+let region = localStorage.getItem('inertia_region') || 'bengaluru';
+function pack() { return REGIONS[region] || REGIONS.neutral; }
 
 const MOVIE_LINES = [
   ['Just keep swimming.', 'Finding Nemo'],
@@ -2110,11 +2291,12 @@ async function renderNudgeAndAnalytics() {
   const nb = document.getElementById('nudgeBanner');
   if (nb) {
     let msg, icon, dayTxt;
+    const P = pack().nudge;
     if (worstDays <= 2) {
-      const pick = NUDGES.allgood[Math.floor(Math.random() * NUDGES.allgood.length)];
+      const pick = P.allgood[Math.floor(Math.random() * P.allgood.length)];
       msg = pick[0]; icon = pick[1]; dayTxt = 'on it';
     } else {
-      const opts = NUDGES[worstSport] || NUDGES.run;
+      const opts = P[worstSport] || P.run;
       const pick = opts[Math.floor(Math.random() * opts.length)];
       msg = pick[0]; icon = pick[1];
       dayTxt = worstDays >= 99 ? 'not yet' : worstDays + 'd';
@@ -2336,7 +2518,7 @@ async function checkWeekComplete() {
         '</div>' +
         '<div class="sheet-actions">' +
           '<button class="btn-cancel" onclick="closeSheet()">Close</button>' +
-          '<button class="btn-apply" onclick="closeSheet();goView(\'recap\')">See recap</button>' +
+          '<button class="btn-apply" onclick="openRecapSheet(\'week\')">See recap</button>' +
         '</div>');
     }, 400);
   }
