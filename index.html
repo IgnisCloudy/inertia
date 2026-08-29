@@ -315,6 +315,55 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   border-radius:9px;font-family:var(--mono);font-size:10.5px;cursor:pointer;transition:.15s}
 .snd-test:hover{border-color:var(--acc);color:var(--acc)}
 
+
+/* ── NUTRITION ── */
+.macro-hero{background:linear-gradient(150deg,#1b1310,#120d10);border:1px solid var(--b2);
+  border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+.macro-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:190px;height:190px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,94,26,.17),transparent 68%)}
+.mh-inner{position:relative;z-index:1}
+.mh-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
+.mh-kcal{font-family:var(--mono);font-size:38px;font-weight:700;letter-spacing:-1.5px;
+  background:linear-gradient(120deg,var(--forge),var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.mh-target{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.mh-sub{font-size:11.5px;color:var(--muted);margin-bottom:18px}
+.mh-bar{height:8px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden;margin-bottom:20px}
+.mh-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--acc),var(--ember));transition:width .5s}
+.macro-row{display:flex;gap:10px}
+.macro-cell{flex:1;background:rgba(255,255,255,.035);border:1px solid var(--b1);border-radius:12px;padding:12px 13px}
+.mc-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.mc-val{font-family:var(--mono);font-size:15px;font-weight:700}
+.mc-goal{font-size:10px;color:var(--muted);margin-top:2px}
+.mc-bar{height:4px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:7px}
+.mc-fill{height:100%;border-radius:3px}
+
+.nut-actions{display:flex;gap:9px;margin-bottom:18px}
+.nut-btn{flex:1;padding:14px;border-radius:13px;font-family:var(--font);font-weight:700;font-size:13.5px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.nut-btn.scan{background:var(--acc);color:var(--bg);border:none}
+.nut-btn.lib{background:var(--s2);color:var(--text);border:1px solid var(--b2)}
+
+.meal-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--b1)}
+.meal-row:first-child{border-top:none}
+.meal-name{flex:1;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meal-serv{font-size:11px;color:var(--muted);margin-top:2px}
+.meal-kcal{font-family:var(--mono);font-size:12px;color:var(--text);flex-shrink:0}
+.meal-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0}
+.meal-del:hover{color:var(--red)}
+
+.scan-preview{width:100%;max-height:210px;object-fit:cover;border-radius:14px;margin-bottom:16px}
+.scan-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--b1)}
+.scan-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--acc);flex-shrink:0}
+.lib-search{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
+  padding:12px 14px;border-radius:11px;font-family:var(--font);font-size:13.5px;margin-bottom:14px}
+.lib-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--b1);cursor:pointer}
+.lib-row:hover{background:rgba(255,255,255,.02)}
+.conf-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;
+  padding:3px 8px;border-radius:5px;margin-left:auto}
+.conf-high{background:rgba(124,179,66,.15);color:var(--green)}
+.conf-medium{background:rgba(255,163,46,.15);color:var(--ember)}
+.conf-low{background:rgba(232,74,63,.13);color:var(--red)}
+
 /* ── RECAP CHIP ── */
 .recap-chip{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
   background:linear-gradient(100deg,rgba(255,94,26,.08),rgba(74,158,202,.05));
@@ -817,6 +866,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <button class="tab active" data-view="today" onclick="goView('today',this)">Today</button>
     <button class="tab" data-view="plan" onclick="goView('plan',this)">Plan</button>
     <button class="tab" data-view="progress" onclick="goView('progress',this)">Progress</button>
+    <button class="tab" data-view="fuel" onclick="goView('fuel',this)">Fuel</button>
   </div>
 
   <!-- ══════ TODAY ══════ -->
@@ -949,6 +999,54 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div class="card-block" id="actCard" style="display:none">
       <div class="act-head"><div class="act-title">Recent activities</div><div class="act-count" id="actCount">—</div></div>
       <div id="actList"></div>
+    </div>
+  </div>
+
+  <!-- ══════ FUEL ══════ -->
+  <div class="view" id="view-fuel">
+    <div class="dash-hello" style="font-size:21px">Fuel</div>
+    <div class="dash-day" id="fuelDay">—</div>
+
+    <div class="macro-hero">
+      <div class="mh-inner">
+        <div class="mh-top">
+          <div class="mh-kcal" id="kcalNow">0</div>
+          <div class="mh-target">/ <span id="kcalTarget">—</span> kcal</div>
+        </div>
+        <div class="mh-sub" id="kcalSub">—</div>
+        <div class="mh-bar"><div class="mh-fill" id="kcalFill" style="width:0%"></div></div>
+        <div class="macro-row">
+          <div class="macro-cell">
+            <div class="mc-label" style="color:#e8506b">Protein</div>
+            <div class="mc-val" id="pNow">0g</div>
+            <div class="mc-goal">of <span id="pTarget">—</span></div>
+            <div class="mc-bar"><div class="mc-fill" id="pFill" style="width:0%;background:#e8506b"></div></div>
+          </div>
+          <div class="macro-cell">
+            <div class="mc-label" style="color:#ffa32e">Carbs</div>
+            <div class="mc-val" id="cNow">0g</div>
+            <div class="mc-goal">of <span id="cTarget">—</span></div>
+            <div class="mc-bar"><div class="mc-fill" id="cFill" style="width:0%;background:#ffa32e"></div></div>
+          </div>
+          <div class="macro-cell">
+            <div class="mc-label" style="color:#4a9eca">Fat</div>
+            <div class="mc-val" id="fNow">0g</div>
+            <div class="mc-goal">of <span id="fTarget">—</span></div>
+            <div class="mc-bar"><div class="mc-fill" id="fFill" style="width:0%;background:#4a9eca"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nut-actions">
+      <button class="nut-btn scan" onclick="document.getElementById('foodPhoto').click()">📷 Scan food</button>
+      <button class="nut-btn lib" onclick="openLibrary()">🍲 My foods</button>
+    </div>
+    <input type="file" id="foodPhoto" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
+
+    <div class="card-block">
+      <div class="act-head"><div class="act-title">Today's meals</div><div class="act-count" id="mealCount">—</div></div>
+      <div id="mealList"></div>
     </div>
   </div>
 
@@ -1181,6 +1279,7 @@ let currentUser = null;
 let currentProfile = null;
 let currentPlan = null;
 let currentSessions = [];
+let currentGoal = null;
 let onbData = { sports: [], level: null, goal: null, days: null };
 
 function startOnboarding(user) {
@@ -1384,6 +1483,7 @@ async function loadDashboard() {
   currentSessions = sessions || [];
 
   renderDashboard(plan, goal, sessions || []);
+  currentGoal = goal;
   fillDrawer(goal);
   fillRegionSelect();
   updateRecapChip();
@@ -1589,6 +1689,287 @@ async function updateRecapChip() {
   const km = (data || []).reduce((t,a) => t + (a.distance_m||0), 0) / 1000;
   const n = (data || []).length;
   sub.textContent = n ? (km.toFixed(1) + ' km across ' + n + ' session' + (n>1?'s':'')) : 'Nothing logged yet this week';
+}
+
+// ═══════════════════════ FUEL ═══════════════════════
+let todayMeals = [];
+let pendingScan = null;
+
+// Targets adapt to bodyweight, goal and TODAY's planned training load
+function computeTargets(sessionsToday) {
+  const p = currentProfile || {};
+  const kg = p.weight_kg || 70;
+  const cm = p.height_cm || 172;
+  const age = p.age || 30;
+  const male = (p.sex || 'male') !== 'female';
+
+  const bmr = 10 * kg + 6.25 * cm - 5 * age + (male ? 5 : -161);
+  let kcal = Math.round(bmr * 1.4);
+
+  const burn = { run: 11, bike: 8.5, swim: 9.5, strength: 5, rest: 0 };
+  let trainMin = 0;
+  (sessionsToday || []).forEach(s => {
+    const m = (s.planned && s.planned.duration_min) || 0;
+    trainMin += m;
+    kcal += Math.round(m * (burn[s.sport] || 6));
+  });
+
+  const goalType = (currentGoal && currentGoal.goal_type) || 'healthy';
+  const proteinPerKg = goalType === 'healthy' ? 1.6 : 1.9;
+  const protein = Math.round(kg * proteinPerKg);
+  const fat = Math.round(kg * 0.9);
+  const carbs = Math.max(120, Math.round((kcal - protein * 4 - fat * 9) / 4));
+
+  return { kcal, protein, carbs, fat, trainMin };
+}
+
+async function renderFuel() {
+  if (!currentUser) return;
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('fuelDay').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' });
+
+  const [{ data: meals }, { data: sess }] = await Promise.all([
+    sb.from('meals').select('*').eq('user_id', currentUser.id).eq('meal_date', today).order('created_at'),
+    sb.from('sessions').select('sport,planned').eq('user_id', currentUser.id).eq('session_date', today)
+  ]);
+
+  todayMeals = meals || [];
+  const t = computeTargets(sess || []);
+
+  const sum = todayMeals.reduce((a, m) => ({
+    kcal: a.kcal + (m.calories || 0),
+    p: a.p + (m.protein_g || 0),
+    c: a.c + (m.carbs_g || 0),
+    f: a.f + (m.fat_g || 0)
+  }), { kcal:0, p:0, c:0, f:0 });
+
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  const bar = (id, now, target) => {
+    const e = document.getElementById(id);
+    if (e) e.style.width = Math.min(100, Math.round((now / Math.max(1,target)) * 100)) + '%';
+  };
+
+  set('kcalNow', Math.round(sum.kcal));
+  set('kcalTarget', t.kcal);
+  set('kcalSub', t.trainMin
+    ? t.trainMin + ' min of training today — targets adjusted up'
+    : 'Rest day targets');
+  bar('kcalFill', sum.kcal, t.kcal);
+
+  set('pNow', Math.round(sum.p) + 'g'); set('pTarget', t.protein + 'g'); bar('pFill', sum.p, t.protein);
+  set('cNow', Math.round(sum.c) + 'g'); set('cTarget', t.carbs + 'g');  bar('cFill', sum.c, t.carbs);
+  set('fNow', Math.round(sum.f) + 'g'); set('fTarget', t.fat + 'g');    bar('fFill', sum.f, t.fat);
+
+  const list = document.getElementById('mealList');
+  set('mealCount', todayMeals.length ? todayMeals.length + ' logged' : 'nothing yet');
+  list.innerHTML = todayMeals.length
+    ? todayMeals.map(m =>
+        '<div class="meal-row">' +
+          '<div class="meal-name">' + (m.name || 'Food') +
+            '<div class="meal-serv">' + (m.serving || '') +
+            ' · P' + Math.round(m.protein_g||0) + ' C' + Math.round(m.carbs_g||0) + ' F' + Math.round(m.fat_g||0) + '</div>' +
+          '</div>' +
+          '<div class="meal-kcal">' + Math.round(m.calories||0) + '</div>' +
+          '<button class="meal-del" onclick="deleteMeal(\'' + m.id + '\')">✕</button>' +
+        '</div>').join('')
+    : '<div style="text-align:center;padding:26px 10px;color:var(--muted);font-size:13px">' +
+      'Nothing logged yet. Snap a photo of your next meal.</div>';
+}
+
+async function deleteMeal(id) {
+  await sb.from('meals').delete().eq('id', id).eq('user_id', currentUser.id);
+  playTick();
+  renderFuel();
+}
+
+// ── photo: compress in-browser before sending ──
+function compressImage(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width: w, height: h } = img;
+        if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else if (h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFoodPhoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  const dataUrl = await compressImage(file, 800, 0.72);
+  const base64 = dataUrl.split(',')[1];
+  const kb = Math.round(base64.length * 0.75 / 1024);
+
+  openSheet('<img src="' + dataUrl + '" class="scan-preview">' +
+    '<div class="rp-load" style="padding:12px 0 4px">' +
+      '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
+      '<div class="rp-msg">Looking at your plate…</div>' +
+      '<div class="rp-sub">Compressed to ' + kb + ' KB before sending</div>' +
+    '</div>');
+
+  try {
+    const res = await fetch('/api/scan-food', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image: base64,
+        media_type: 'image/jpeg',
+        diet: (currentProfile && currentProfile.diet) || 'unspecified'
+      })
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('That took too long — try again.');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not read the photo');
+    if (!data.items || !data.items.length) {
+      playThud();
+      openSheet('<div class="sheet-title">No food spotted</div>' +
+        '<div class="sheet-sum">' + (data.note || 'Try a clearer, closer photo.') + '</div>' +
+        '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+      return;
+    }
+    pendingScan = { items: data.items, dataUrl: dataUrl };
+    renderScanResult(data, dataUrl);
+  } catch (e) {
+    playThud();
+    openSheet('<div class="sheet-title">Scan failed</div>' +
+      '<div class="sheet-sum">' + e.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+  }
+}
+
+function renderScanResult(data, dataUrl) {
+  const conf = (data.confidence || 'medium').toLowerCase();
+  const rows = data.items.map((it, i) =>
+    '<div class="scan-item">' +
+      '<input type="checkbox" id="si' + i + '" checked>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13.5px">' + it.name + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (it.serving || '') +
+          ' · P' + (it.protein_g||0) + ' C' + (it.carbs_g||0) + ' F' + (it.fat_g||0) + '</div>' +
+      '</div>' +
+      '<div style="font-family:var(--mono);font-size:12.5px">' + (it.calories||0) + '</div>' +
+    '</div>').join('');
+
+  openSheet(
+    '<img src="' + dataUrl + '" class="scan-preview">' +
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">' +
+      '<div class="sheet-title" style="margin:0">' + (data.total ? Math.round(data.total.calories) : 0) + ' kcal</div>' +
+      '<span class="conf-tag conf-' + conf + '">' + conf + ' confidence</span>' +
+    '</div>' +
+    (data.note ? '<div class="sheet-rat">' + data.note + '</div>' : '') +
+    rows +
+    '<div class="sheet-actions">' +
+      '<button class="btn-cancel" onclick="closeSheet()">Discard</button>' +
+      '<button class="btn-apply" onclick="saveScan()">Log it</button>' +
+    '</div>');
+}
+
+async function saveScan() {
+  if (!pendingScan) return;
+  const today = new Date().toISOString().split('T')[0];
+  const chosen = pendingScan.items.filter((_, i) => {
+    const box = document.getElementById('si' + i);
+    return box && box.checked;
+  });
+  if (!chosen.length) { closeSheet(); return; }
+
+  const rows = chosen.map(it => ({
+    user_id: currentUser.id, meal_date: today, slot: 'logged',
+    name: it.name, serving: it.serving || null,
+    calories: it.calories || 0, protein_g: it.protein_g || 0,
+    carbs_g: it.carbs_g || 0, fat_g: it.fat_g || 0
+  }));
+  await sb.from('meals').insert(rows);
+
+  // remember these foods so they never need re-entering
+  for (const it of chosen) {
+    const { data: exists } = await sb.from('food_library')
+      .select('id').eq('user_id', currentUser.id).eq('name', it.name).maybeSingle();
+    if (!exists) {
+      await sb.from('food_library').insert({
+        user_id: currentUser.id, name: it.name, serving: it.serving || null,
+        calories: it.calories || 0, protein_g: it.protein_g || 0,
+        carbs_g: it.carbs_g || 0, fat_g: it.fat_g || 0, source: 'photo'
+      });
+    }
+  }
+
+  playChime();
+  pendingScan = null;
+  closeSheet();
+  renderFuel();
+}
+
+// ── saved foods ──
+async function openLibrary() {
+  playSwell();
+  openSheet('<div class="rp-load"><div class="rp-orbit"><span></span><span></span><span></span></div>' +
+            '<div class="rp-msg">Opening your foods…</div></div>');
+  const { data } = await sb.from('food_library')
+    .select('*').eq('user_id', currentUser.id).order('name');
+  const foods = data || [];
+  if (!foods.length) {
+    openSheet('<div class="sheet-title">No saved foods yet</div>' +
+      '<div class="sheet-sum">Scan a meal and anything you log gets saved here automatically. Next time it is one tap.</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+    return;
+  }
+  window._lib = foods;
+  openSheet(
+    '<div class="sheet-title">My foods</div>' +
+    '<input class="lib-search" id="libSearch" placeholder="Search…" oninput="filterLib(this.value)">' +
+    '<div id="libList">' + libRows(foods) + '</div>' +
+    '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+}
+
+function libRows(foods) {
+  return foods.map(f =>
+    '<div class="lib-row" onclick="logFromLibrary(\'' + f.id + '\')">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13.5px">' + f.name + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (f.serving || '') +
+          ' · P' + Math.round(f.protein_g||0) + ' C' + Math.round(f.carbs_g||0) + ' F' + Math.round(f.fat_g||0) + '</div>' +
+      '</div>' +
+      '<div style="font-family:var(--mono);font-size:12.5px">' + Math.round(f.calories||0) + '</div>' +
+      '<div style="color:var(--acc);font-size:16px;margin-left:8px">+</div>' +
+    '</div>').join('');
+}
+
+function filterLib(q) {
+  const list = (window._lib || []).filter(f => f.name.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('libList').innerHTML = list.length
+    ? libRows(list)
+    : '<div style="padding:20px 0;text-align:center;color:var(--muted);font-size:13px">Nothing matches.</div>';
+}
+
+async function logFromLibrary(id) {
+  const f = (window._lib || []).find(x => x.id === id);
+  if (!f) return;
+  await sb.from('meals').insert({
+    user_id: currentUser.id, meal_date: new Date().toISOString().split('T')[0], slot: 'logged',
+    name: f.name, serving: f.serving, calories: f.calories,
+    protein_g: f.protein_g, carbs_g: f.carbs_g, fat_g: f.fat_g
+  });
+  playChime();
+  closeSheet();
+  renderFuel();
 }
 
 // ═══════════════════════ SOUND ═══════════════════════
@@ -1983,6 +2364,7 @@ function goView(name, btn) {
   playTick();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'plan') { renderPlanView(); renderRevisions(); }
+  if (name === 'fuel') renderFuel();
 
 }
 
