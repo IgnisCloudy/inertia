@@ -221,6 +221,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .action-btn.primary{background:var(--acc);color:var(--bg);border-color:var(--acc)}
 
 
+
+/* ── REPLAN SHEET ── */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:900;opacity:0;visibility:hidden;transition:.22s}
+.sheet-overlay.open{opacity:1;visibility:visible}
+.sheet{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);z-index:901;
+  width:min(520px,92vw);max-height:84vh;overflow-y:auto;background:var(--s1);border:1px solid var(--b2);
+  border-radius:20px;padding:26px 24px;opacity:0;visibility:hidden;transition:.24s cubic-bezier(.3,1,.4,1)}
+.sheet.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+.sheet-title{font-size:19px;font-weight:700;margin-bottom:8px}
+.sheet-sum{font-size:14px;line-height:1.6;color:var(--text);opacity:.92;margin-bottom:12px}
+.sheet-rat{font-size:13px;line-height:1.65;color:var(--muted);padding:13px 15px;background:var(--s2);
+  border-radius:11px;margin-bottom:18px}
+.diff{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--b1);font-size:12.5px}
+.diff-date{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;flex-shrink:0}
+.diff-body{flex:1;min-width:0}
+.diff-before{color:var(--dim);text-decoration:line-through;font-size:12px}
+.diff-after{color:var(--text);margin-top:3px}
+.diff-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;
+  padding:3px 7px;border-radius:4px;background:rgba(255,94,26,.15);color:var(--acc);flex-shrink:0}
+.sheet-actions{display:flex;gap:9px;margin-top:22px;position:sticky;bottom:0;background:var(--s1);padding-top:14px}
+.sheet-actions button{flex:1;padding:13px;border-radius:11px;font-family:var(--font);font-weight:700;font-size:14px;cursor:pointer}
+.btn-apply{background:var(--acc);color:var(--bg);border:none}
+.btn-cancel{background:var(--s2);color:var(--text);border:1px solid var(--b2);font-weight:600}
+.sheet-loading{text-align:center;padding:30px 0;color:var(--muted);font-size:13px}
+
+/* ── ASK COACH BOX ── */
+.ask-box{display:flex;gap:8px;margin-bottom:20px}
+.ask-box input{flex:1;background:var(--s2);border:1px solid var(--b2);color:var(--text);
+  padding:12px 15px;border-radius:11px;font-family:var(--font);font-size:13.5px}
+.ask-box input:focus{outline:none;border-color:var(--acc)}
+.ask-box button{background:var(--s3);color:var(--text);border:1px solid var(--b2);padding:12px 18px;
+  border-radius:11px;font-family:var(--font);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+.ask-hint{font-size:11.5px;color:var(--dim);margin-bottom:18px;line-height:1.5}
+
+/* ── REVISION LOG ── */
+.rev{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--b1);font-size:12px}
+.rev-date{font-family:var(--mono);font-size:10px;color:var(--muted);width:52px;flex-shrink:0}
+.rev-text{color:var(--muted);line-height:1.5}
+
 /* ── TABS ── */
 .tabs{display:flex;gap:6px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:5px;margin-bottom:22px}
 .tab{flex:1;background:none;border:none;color:var(--muted);padding:10px 8px;border-radius:10px;
@@ -567,6 +606,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <div class="gen-bar"></div>
 </div>
 
+<!-- ═══════════════════════ REPLAN SHEET ═══════════════════════ -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="sheet" id="replanSheet">
+  <div id="sheetContent"></div>
+</div>
+
 <!-- ═══════════════════════ DRAWER ═══════════════════════ -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
@@ -705,6 +750,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <div class="view" id="view-plan">
     <div class="dash-hello" style="font-size:21px">Your plan</div>
     <div class="dash-day" id="planSubtitle">—</div>
+
+    <div class="ask-box">
+      <input id="askInput" type="text" placeholder="Tell your coach what changed…"
+        onkeydown="if(event.key==='Enter')askCoachReplan()">
+      <button onclick="askCoachReplan()">Adjust</button>
+    </div>
+    <div class="ask-hint">Try: "I'm sick today, lighten the week" · "No pool access until Friday" · "Work trip Thursday and Friday"</div>
+
+    <div class="card-block" id="revisionCard" style="display:none">
+      <div class="act-head"><div class="act-title">Revision history</div><div class="act-count" id="revCount">—</div></div>
+      <div id="revList"></div>
+    </div>
     <div class="card-block" id="phaseOverview" style="display:none">
       <div class="act-head"><div class="act-title">Phases</div><div class="act-count" id="planRange">—</div></div>
       <div id="phaseList"></div>
@@ -1301,6 +1358,156 @@ function fillDrawer(goal) {
   }
 }
 
+// ═══════════════════════ ADAPTIVE REPLANNING ═══════════════════════
+let pendingProposal = null;
+
+function openSheet(html) {
+  document.getElementById('sheetContent').innerHTML = html;
+  document.getElementById('replanSheet').classList.add('open');
+  document.getElementById('sheetOverlay').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('replanSheet').classList.remove('open');
+  document.getElementById('sheetOverlay').classList.remove('open');
+}
+
+function askCoachReplan() {
+  const input = document.getElementById('askInput');
+  const txt = input.value.trim();
+  if (!txt) return;
+  input.value = '';
+  runReplan(txt);
+}
+
+async function requestReplan() { runReplan(''); }
+
+async function runReplan(requestText) {
+  if (!currentUser || !currentPlan) return;
+
+  openSheet('<div class="sheet-title">Rethinking your plan…</div>' +
+    '<div class="sheet-loading">Your coach is looking at what you planned, what you actually did, and what is coming up.</div>');
+
+  try {
+    const res = await fetch('/api/replan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: currentUser.id,
+        plan_id: currentPlan.id,
+        request: requestText || ''
+      })
+    });
+
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('That took too long — please try again.');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not build a revision');
+
+    pendingProposal = data;
+    renderProposal(data, requestText);
+  } catch (e) {
+    openSheet('<div class="sheet-title">Could not revise the plan</div>' +
+      '<div class="sheet-sum">' + e.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+  }
+}
+
+function renderProposal(data, requestText) {
+  const changed = (data.changes || []).filter(c => c.changed);
+
+  if (!changed.length) {
+    openSheet('<div class="sheet-title">No changes needed</div>' +
+      '<div class="sheet-sum">' + (data.summary || 'Your coach thinks the plan still fits.') + '</div>' +
+      (data.rationale ? '<div class="sheet-rat">' + data.rationale + '</div>' : '') +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Got it</button></div>');
+    return;
+  }
+
+  const fmt = d => new Date(d).toLocaleDateString('en-US', { weekday:'short', day:'numeric' });
+  const rows = changed.map(c =>
+    '<div class="diff">' +
+      '<div class="diff-date">' + fmt(c.date) + '</div>' +
+      '<div class="diff-body">' +
+        '<div class="diff-before">' + c.before.sport + ' · ' + c.before.title + ' · ' + c.before.duration_min + 'min</div>' +
+        '<div class="diff-after">' + c.after.sport + ' · ' + c.after.title + ' · ' + c.after.duration_min + 'min · ' + c.after.intensity + '</div>' +
+      '</div>' +
+      '<div class="diff-tag">changed</div>' +
+    '</div>'
+  ).join('');
+
+  openSheet(
+    '<div class="sheet-title">' + changed.length + ' session' + (changed.length > 1 ? 's' : '') + ' updated</div>' +
+    '<div class="sheet-sum">' + (data.summary || '') + '</div>' +
+    (data.rationale ? '<div class="sheet-rat">' + data.rationale + '</div>' : '') +
+    rows +
+    '<div class="sheet-actions">' +
+      '<button class="btn-cancel" onclick="closeSheet()">Keep original</button>' +
+      '<button class="btn-apply" onclick="applyProposal()">Apply changes</button>' +
+    '</div>'
+  );
+}
+
+async function applyProposal() {
+  if (!pendingProposal || !currentUser || !currentPlan) return;
+  const changed = (pendingProposal.changes || []).filter(c => c.changed);
+
+  openSheet('<div class="sheet-title">Updating your plan…</div><div class="sheet-loading">One moment.</div>');
+
+  try {
+    for (const ch of changed) {
+      await sb.from('sessions').update({
+        sport: ch.after.sport,
+        title: ch.after.title,
+        planned: {
+          duration_min: ch.after.duration_min,
+          intensity: ch.after.intensity,
+          notes: ch.after.notes
+        },
+        source: 'replan'
+      }).eq('id', ch.id).eq('user_id', currentUser.id);
+    }
+
+    // append to revision history on the plan
+    const meta = currentPlan.meta || {};
+    const revisions = meta.revisions || [];
+    revisions.push({
+      at: new Date().toISOString(),
+      summary: pendingProposal.summary || 'Plan revised',
+      count: changed.length
+    });
+    await sb.from('plans').update({
+      meta: Object.assign({}, meta, { revisions: revisions }),
+      updated_at: new Date().toISOString()
+    }).eq('id', currentPlan.id).eq('user_id', currentUser.id);
+
+    dismissReplan();
+    closeSheet();
+    pendingProposal = null;
+    await loadDashboard();
+    renderPlanView();
+  } catch (e) {
+    openSheet('<div class="sheet-title">Could not save changes</div>' +
+      '<div class="sheet-sum">' + e.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+  }
+}
+
+function renderRevisions() {
+  if (!currentPlan) return;
+  const revs = (currentPlan.meta && currentPlan.meta.revisions) || [];
+  const card = document.getElementById('revisionCard');
+  const list = document.getElementById('revList');
+  if (!card || !list) return;
+  if (!revs.length) { card.style.display = 'none'; return; }
+  document.getElementById('revCount').textContent = revs.length + ' change' + (revs.length > 1 ? 's' : '');
+  list.innerHTML = revs.slice().reverse().map(r => {
+    const d = new Date(r.at).toLocaleDateString('en-US', { day:'numeric', month:'short' });
+    return '<div class="rev"><div class="rev-date">' + d + '</div>' +
+      '<div class="rev-text">' + (r.summary || 'Revised') + ' · ' + (r.count || 0) + ' sessions</div></div>';
+  }).join('');
+  card.style.display = 'block';
+}
+
 // ═══════════════════════ VIEWS & DRAWER ═══════════════════════
 function goView(name, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1310,7 +1517,7 @@ function goView(name, btn) {
   const tab = btn || document.querySelector('.tab[data-view="' + name + '"]');
   if (tab) tab.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (name === 'plan') renderPlanView();
+  if (name === 'plan') { renderPlanView(); renderRevisions(); }
 }
 
 function openDrawer() {
@@ -1656,11 +1863,6 @@ function checkDrift(weekSessions, weekActs) {
 function dismissReplan() {
   localStorage.setItem('inertia_replan_dismissed', new Date().toISOString().split('T')[0]);
   document.getElementById('replanBanner').style.display = 'none';
-}
-
-async function requestReplan() {
-  alert('Replan engine lands in the next build — this button will rebuild your week.');
-  dismissReplan();
 }
 
 // ═══════════════════════ STRAVA ═══════════════════════
