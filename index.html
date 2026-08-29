@@ -345,6 +345,49 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .leg i{width:8px;height:8px;border-radius:2px;display:block}
 .chart-empty{text-align:center;padding:34px 16px;color:var(--muted);font-size:13px}
 
+
+/* ── MEAL SLOTS ── */
+.slot-card{background:var(--s1);border:1px solid var(--b1);border-radius:15px;margin-bottom:11px;overflow:hidden}
+.slot-head{display:flex;align-items:center;gap:11px;padding:14px 16px;cursor:pointer}
+.slot-emoji{font-size:16px}
+.slot-name{font-size:13.5px;font-weight:600;flex:1}
+.slot-kcal{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.slot-chev{color:var(--dim);font-size:11px;transition:transform .2s}
+.slot-card.open .slot-chev{transform:rotate(90deg)}
+.slot-body{display:none;padding:0 16px 12px}
+.slot-card.open .slot-body{display:block}
+.slot-add{width:100%;background:var(--s2);border:1px dashed var(--b2);color:var(--muted);padding:10px;
+  border-radius:10px;font-family:var(--font);font-size:12px;cursor:pointer;margin-top:8px}
+.slot-add:hover{border-color:var(--acc);color:var(--acc)}
+.slot-empty{color:var(--dim);font-size:12px;padding:6px 0}
+
+/* macro chips */
+.mchip{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;margin-right:4px}
+.mchip.p{background:rgba(232,80,107,.15);color:#e8506b}
+.mchip.c{background:rgba(255,163,46,.15);color:#ffa32e}
+.mchip.f{background:rgba(74,158,202,.15);color:#4a9eca}
+
+/* add-food chooser */
+.choose-row{display:flex;align-items:center;gap:13px;padding:15px 14px;background:var(--s2);
+  border:1px solid var(--b1);border-radius:13px;margin-bottom:9px;cursor:pointer;transition:border-color .15s}
+.choose-row:hover{border-color:var(--acc)}
+.choose-icon{font-size:20px}
+.choose-title{font-size:13.5px;font-weight:600}
+.choose-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+/* manual entry */
+.mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mf-field label{display:block;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted);margin-bottom:6px}
+.mf-field input{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);
+  padding:11px 13px;border-radius:10px;font-family:var(--font);font-size:13.5px}
+.mf-field input:focus{outline:none;border-color:var(--acc)}
+
+/* suggestion rows */
+.sug-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--b1);cursor:pointer}
+.sug-row:first-child{border-top:none}
+.sug-why{font-size:11px;color:var(--acc);margin-top:2px}
+
 /* ── NUTRITION ── */
 .macro-hero{background:linear-gradient(150deg,#1b1310,#120d10);border:1px solid var(--b2);
   border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
@@ -1091,17 +1134,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </div>
     </div>
 
-    <div class="nut-actions">
-      <button class="nut-btn scan" onclick="document.getElementById('foodCamera').click()">📷 Camera</button>
-      <button class="nut-btn lib" onclick="document.getElementById('foodGallery').click()">🖼️ Gallery</button>
-      <button class="nut-btn lib" onclick="openLibrary()">🍲 My foods</button>
-    </div>
+    <button class="nut-btn scan" style="width:100%;margin-bottom:16px" onclick="openAddFood()">+ Add food</button>
     <input type="file" id="foodCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
     <input type="file" id="foodGallery" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
 
-    <div class="card-block">
-      <div class="act-head"><div class="act-title">Today's meals</div><div class="act-count" id="mealCount">—</div></div>
-      <div id="mealList"></div>
+    <div class="card-block" id="suggestCard" style="display:none">
+      <div class="act-head"><div class="act-title">What to eat next</div><div class="act-count" id="gapNote">—</div></div>
+      <div id="suggestList"></div>
+    </div>
+
+    <div id="slotList"></div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Protein vs target</div>
+        <div class="chart-legend"><div class="leg"><i style="background:#e8506b"></i>Last 14 days</div></div>
+      </div>
+      <div id="proteinChart"></div>
     </div>
   </div>
 
@@ -2008,6 +2057,29 @@ function computeTargets(sessionsToday) {
   return { kcal, protein, carbs, fat, trainMin };
 }
 
+const SLOTS = [
+  { id:'breakfast', name:'Breakfast', emoji:'🌅', from:4,  to:11 },
+  { id:'lunch',     name:'Lunch',     emoji:'☀️', from:11, to:16 },
+  { id:'snack',     name:'Snack',     emoji:'🍎', from:16, to:19 },
+  { id:'dinner',    name:'Dinner',    emoji:'🌙', from:19, to:4  }
+];
+
+function currentSlot() {
+  const h = new Date().getHours();
+  if (h >= 4 && h < 11) return 'breakfast';
+  if (h >= 11 && h < 16) return 'lunch';
+  if (h >= 16 && h < 19) return 'snack';
+  return 'dinner';
+}
+
+function macroChips(p, c2, f) {
+  return '<span class="mchip p">' + Math.round(p||0) + 'g protein</span>' +
+         '<span class="mchip c">' + Math.round(c2||0) + 'g carbs</span>' +
+         '<span class="mchip f">' + Math.round(f||0) + 'g fat</span>';
+}
+
+let dayTargets = null;
+
 async function renderFuel() {
   if (!currentUser) return;
   const today = new Date().toISOString().split('T')[0];
@@ -2017,55 +2089,272 @@ async function renderFuel() {
 
   const [{ data: meals }, { data: sess }] = await Promise.all([
     sb.from('meals').select('*').eq('user_id', currentUser.id).eq('meal_date', today).order('created_at'),
-    sb.from('sessions').select('sport,planned').eq('user_id', currentUser.id).eq('session_date', today)
+    sb.from('sessions').select('sport,planned,title').eq('user_id', currentUser.id).eq('session_date', today)
   ]);
 
   todayMeals = meals || [];
   const t = computeTargets(sess || []);
+  dayTargets = t;
 
   const sum = todayMeals.reduce((a, m) => ({
-    kcal: a.kcal + (m.calories || 0),
-    p: a.p + (m.protein_g || 0),
-    c: a.c + (m.carbs_g || 0),
-    f: a.f + (m.fat_g || 0)
+    kcal: a.kcal + (m.calories || 0), p: a.p + (m.protein_g || 0),
+    c: a.c + (m.carbs_g || 0), f: a.f + (m.fat_g || 0)
   }), { kcal:0, p:0, c:0, f:0 });
 
-  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  const set = (id, v) => { const e2 = document.getElementById(id); if (e2) e2.textContent = v; };
   const bar = (id, now, target) => {
-    const e = document.getElementById(id);
-    if (e) e.style.width = Math.min(100, Math.round((now / Math.max(1,target)) * 100)) + '%';
+    const e2 = document.getElementById(id);
+    if (e2) e2.style.width = Math.min(100, Math.round((now / Math.max(1,target)) * 100)) + '%';
   };
 
   set('kcalNow', Math.round(sum.kcal));
   set('kcalTarget', t.kcal);
-  set('kcalSub', t.trainMin
-    ? t.trainMin + ' min of training today — targets adjusted up'
-    : 'Rest day targets');
+  const todaySport = (sess || []).filter(x => x.sport !== 'rest').map(x => x.sport).join(' + ');
+  set('kcalSub', t.trainMin ? (t.trainMin + ' min of ' + (todaySport || 'training') + ' today — targets adjusted up')
+                            : 'Rest day targets');
   bar('kcalFill', sum.kcal, t.kcal);
-
   set('pNow', Math.round(sum.p) + 'g'); set('pTarget', t.protein + 'g'); bar('pFill', sum.p, t.protein);
   set('cNow', Math.round(sum.c) + 'g'); set('cTarget', t.carbs + 'g');  bar('cFill', sum.c, t.carbs);
   set('fNow', Math.round(sum.f) + 'g'); set('fTarget', t.fat + 'g');    bar('fFill', sum.f, t.fat);
 
-  const list = document.getElementById('mealList');
-  set('mealCount', todayMeals.length ? todayMeals.length + ' logged' : 'nothing yet');
-  list.innerHTML = todayMeals.length
-    ? todayMeals.map(m =>
-        '<div class="meal-row">' +
-          '<div class="meal-name">' + (m.name || 'Food') +
-            '<div class="meal-serv">' + (m.serving || '') +
-            ' · P' + Math.round(m.protein_g||0) + ' C' + Math.round(m.carbs_g||0) + ' F' + Math.round(m.fat_g||0) + '</div>' +
-          '</div>' +
-          '<div class="meal-kcal">' + Math.round(m.calories||0) + '</div>' +
-          '<button class="meal-del" onclick="deleteMeal(\'' + m.id + '\')">✕</button>' +
-        '</div>').join('')
-    : '<div style="text-align:center;padding:26px 10px;color:var(--muted);font-size:13px">' +
-      'Nothing logged yet. Snap a photo of your next meal.</div>';
+  renderSlots();
+  renderSuggestions(sum, t);
+  renderProteinChart();
+}
+
+function renderSlots() {
+  const wrap = document.getElementById('slotList');
+  if (!wrap) return;
+  const nowSlot = currentSlot();
+
+  wrap.innerHTML = SLOTS.map(s2 => {
+    const items = todayMeals.filter(m => (m.slot || 'lunch') === s2.id);
+    const kcal = Math.round(items.reduce((t2, m) => t2 + (m.calories || 0), 0));
+    const open = items.length || s2.id === nowSlot;
+    const rows = items.length
+      ? items.map(m =>
+          '<div class="meal-row">' +
+            '<div class="meal-name">' + (m.name || 'Food') +
+              '<div class="meal-serv">' + (m.serving || '') + '</div>' +
+              '<div style="margin-top:5px">' + macroChips(m.protein_g, m.carbs_g, m.fat_g) + '</div>' +
+            '</div>' +
+            '<div class="meal-kcal">' + Math.round(m.calories||0) + '</div>' +
+            '<button class="meal-del" onclick="event.stopPropagation();deleteMeal(\'' + m.id + '\')">✕</button>' +
+          '</div>').join('')
+      : '<div class="slot-empty">Nothing logged</div>';
+    return '<div class="slot-card' + (open ? ' open' : '') + '" id="slot-' + s2.id + '">' +
+      '<div class="slot-head" onclick="toggleSlot(\'' + s2.id + '\')">' +
+        '<div class="slot-emoji">' + s2.emoji + '</div>' +
+        '<div class="slot-name">' + s2.name + '</div>' +
+        '<div class="slot-kcal">' + (kcal || '—') + (kcal ? ' kcal' : '') + '</div>' +
+        '<div class="slot-chev">▶</div>' +
+      '</div>' +
+      '<div class="slot-body">' + rows +
+        '<button class="slot-add" onclick="openAddFood(\'' + s2.id + '\')">+ Add to ' + s2.name.toLowerCase() + '</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+function toggleSlot(id) {
+  const el = document.getElementById('slot-' + id);
+  if (el) { el.classList.toggle('open'); playTick(); }
+}
+
+// ── suggestions: close today's biggest gap from foods you actually have ──
+function renderSuggestions(sum, t) {
+  const card = document.getElementById('suggestCard');
+  const list = document.getElementById('suggestList');
+  if (!card || !list) return;
+
+  const gapP = Math.max(0, t.protein - sum.p);
+  const gapC = Math.max(0, t.carbs - sum.c);
+  const gapK = Math.max(0, t.kcal - sum.kcal);
+
+  if (gapK < 120) {
+    document.getElementById('gapNote').textContent = 'targets met';
+    list.innerHTML = '<div style="padding:14px 0;color:var(--muted);font-size:13px">' +
+      'You are on target for today. Nice work.</div>';
+    card.style.display = 'block';
+    return;
+  }
+
+  const needProtein = gapP > 15;
+  document.getElementById('gapNote').textContent =
+    Math.round(gapK) + ' kcal · ' + Math.round(gapP) + 'g protein left';
+
+  const pool = [
+    ...(window._lib || []).map(f => ({ n:f.name, s:f.serving, k:f.calories, p:f.protein_g, c:f.carbs_g, f2:f.fat_g, own:true, id:f.id })),
+    ...starterFoods().map(f => ({ n:f.n, s:f.s, k:f.k, p:f.p, c:f.c, f2:f.f, idx:STARTER_FOODS.indexOf(f) }))
+  ];
+
+  const scored = pool.map(f => {
+    const pFit = needProtein ? (f.p / Math.max(1, f.k)) * 400 : 0;
+    const cFit = !needProtein ? (f.c / Math.max(1, f.k)) * 100 : 0;
+    const over = f.k > gapK * 1.4 ? -25 : 0;
+    return { f, score: pFit + cFit + over };
+  }).sort((a,b) => b.score - a.score).slice(0, 3);
+
+  list.innerHTML = scored.map(({ f }) =>
+    '<div class="sug-row" onclick="' +
+      (f.own ? 'logFromLibrary(\'' + f.id + '\')' : 'logStarter(' + f.idx + ')') + '">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13.5px">' + f.n + '</div>' +
+        '<div class="sug-why">' + (needProtein
+          ? '+' + Math.round(f.p) + 'g protein toward your gap'
+          : '+' + Math.round(f.c) + 'g carbs to fuel today') + '</div>' +
+      '</div>' +
+      '<div style="font-family:var(--mono);font-size:12.5px">' + Math.round(f.k) + '</div>' +
+      '<div style="color:var(--acc);font-size:16px;margin-left:8px">+</div>' +
+    '</div>').join('');
+  card.style.display = 'block';
+}
+
+// ── protein adherence, last 14 days ──
+async function renderProteinChart() {
+  const el = document.getElementById('proteinChart');
+  if (!el || !currentUser) return;
+  const from = new Date(); from.setDate(from.getDate() - 13); from.setHours(0,0,0,0);
+
+  const { data } = await sb.from('meals')
+    .select('meal_date,protein_g').eq('user_id', currentUser.id)
+    .gte('meal_date', from.toISOString().split('T')[0]);
+
+  const byDay = {};
+  (data || []).forEach(m => {
+    byDay[m.meal_date] = (byDay[m.meal_date] || 0) + (m.protein_g || 0);
+  });
+
+  const target = (dayTargets && dayTargets.protein) || 140;
+  const days = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(from); d.setDate(from.getDate() + i);
+    const key = d.toISOString().split('T')[0];
+    days.push({ d, v: byDay[key] || 0 });
+  }
+  if (!days.some(x => x.v > 0)) {
+    el.innerHTML = '<div class="chart-empty">Log a few days and your protein trend shows here.</div>';
+    return;
+  }
+
+  const W = 340, H = 130, padL = 6, padB = 20, padT = 10;
+  const innerW = W - padL * 2, innerH = H - padB - padT;
+  const max = Math.max(target * 1.15, ...days.map(x => x.v));
+  const bw = innerW / days.length;
+
+  const bars = days.map((x, i) => {
+    const h = (x.v / max) * innerH;
+    const y = H - padB - h;
+    const hit = x.v >= target * 0.9;
+    return '<rect x="' + (padL + i * bw + bw * 0.2).toFixed(1) + '" y="' + y.toFixed(1) +
+           '" width="' + (bw * 0.6).toFixed(1) + '" height="' + Math.max(0, h).toFixed(1) +
+           '" rx="2" fill="#e8506b" opacity="' + (hit ? '0.95' : '0.4') + '"/>';
+  }).join('');
+
+  const ty = H - padB - (target / max) * innerH;
+  const targetLine = '<line x1="' + padL + '" y1="' + ty.toFixed(1) + '" x2="' + (W - padL) + '" y2="' + ty.toFixed(1) +
+    '" stroke="#e8506b" stroke-width="1" stroke-dasharray="3 3" opacity="0.65"/>' +
+    '<text x="' + (W - padL) + '" y="' + (ty - 4).toFixed(1) + '" fill="#e8506b" font-size="8.5" ' +
+    'font-family="monospace" text-anchor="end">target ' + target + 'g</text>';
+
+  const hits = days.filter(x => x.v >= target * 0.9).length;
+  const logged = days.filter(x => x.v > 0).length;
+  const labels = '<text x="' + padL + '" y="' + (H - 5) + '" fill="#6b6259" font-size="8.5" font-family="monospace">' +
+    hits + ' of ' + logged + ' logged days on target</text>';
+
+  el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' +
+    bars + targetLine + labels + '</svg>';
 }
 
 async function deleteMeal(id) {
   await sb.from('meals').delete().eq('id', id).eq('user_id', currentUser.id);
   playTick();
+  renderFuel();
+}
+
+// ── one entry point for adding food ──
+let targetSlot = null;
+
+function openAddFood(slot) {
+  targetSlot = slot || currentSlot();
+  const slotName = (SLOTS.find(s => s.id === targetSlot) || {}).name || 'meal';
+  playSwell();
+  openSheet(
+    '<div class="sheet-title">Add to ' + slotName.toLowerCase() + '</div>' +
+    '<div class="sheet-sum" style="margin-bottom:16px">How do you want to log it?</div>' +
+    '<div class="choose-row" onclick="closeSheet();document.getElementById(\'foodCamera\').click()">' +
+      '<div class="choose-icon">📷</div><div><div class="choose-title">Take a photo</div>' +
+      '<div class="choose-sub">Snap your plate, we read the macros</div></div></div>' +
+    '<div class="choose-row" onclick="closeSheet();document.getElementById(\'foodGallery\').click()">' +
+      '<div class="choose-icon">🖼️</div><div><div class="choose-title">From gallery</div>' +
+      '<div class="choose-sub">Pick an existing photo</div></div></div>' +
+    '<div class="choose-row" onclick="openLibrary()">' +
+      '<div class="choose-icon">🍲</div><div><div class="choose-title">My foods</div>' +
+      '<div class="choose-sub">Saved items and suggestions for your diet</div></div></div>' +
+    '<div class="choose-row" onclick="openManualFood()">' +
+      '<div class="choose-icon">✏️</div><div><div class="choose-title">Enter manually</div>' +
+      '<div class="choose-sub">Type the name and macros yourself</div></div></div>' +
+    '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Cancel</button></div>');
+}
+
+function openManualFood() {
+  openSheet(
+    '<div class="sheet-title">Add food</div>' +
+    '<div class="sheet-sum" style="margin-bottom:16px">Enter what you had. Grams for the macros.</div>' +
+    '<div class="mf-field" style="margin-bottom:12px"><label>Food name</label>' +
+      '<input id="mfName" placeholder="e.g. Curd rice"></div>' +
+    '<div class="mf-field" style="margin-bottom:12px"><label>Serving</label>' +
+      '<input id="mfServing" placeholder="e.g. 1 bowl"></div>' +
+    '<div class="mf-grid">' +
+      '<div class="mf-field"><label>Calories</label><input id="mfKcal" type="number" inputmode="numeric" placeholder="250"></div>' +
+      '<div class="mf-field"><label>Protein (g)</label><input id="mfP" type="number" inputmode="numeric" placeholder="12"></div>' +
+      '<div class="mf-field"><label>Carbs (g)</label><input id="mfC" type="number" inputmode="numeric" placeholder="35"></div>' +
+      '<div class="mf-field"><label>Fat (g)</label><input id="mfF" type="number" inputmode="numeric" placeholder="8"></div>' +
+    '</div>' +
+    '<div style="font-size:11.5px;color:var(--dim);line-height:1.5;margin-bottom:4px">' +
+      'Leave calories blank and we will work it out from the macros.</div>' +
+    '<div class="sheet-actions">' +
+      '<button class="btn-cancel" onclick="closeSheet()">Cancel</button>' +
+      '<button class="btn-apply" onclick="saveManualFood()">Save & log</button>' +
+    '</div>');
+  setTimeout(() => { const n = document.getElementById('mfName'); if (n) n.focus(); }, 120);
+}
+
+async function saveManualFood() {
+  const val = id => document.getElementById(id).value.trim();
+  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
+  const name = val('mfName');
+  if (!name) { document.getElementById('mfName').focus(); return; }
+
+  const p = num('mfP'), cb = num('mfC'), f = num('mfF');
+  let k = num('mfKcal');
+  if (!k) k = Math.round(p * 4 + cb * 4 + f * 9);   // derive if left blank
+
+  const row = {
+    user_id: currentUser.id, meal_date: new Date().toISOString().split('T')[0],
+    slot: targetSlot || currentSlot(), name: name, serving: val('mfServing') || null,
+    calories: k, protein_g: p, carbs_g: cb, fat_g: f
+  };
+
+  const { error } = await sb.from('meals').insert(row);
+  if (error) {
+    playThud();
+    openSheet('<div class="sheet-title">Could not save</div>' +
+      '<div class="sheet-sum">' + error.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+    return;
+  }
+
+  const { data: exists } = await sb.from('food_library')
+    .select('id').eq('user_id', currentUser.id).eq('name', name).maybeSingle();
+  if (!exists) {
+    await sb.from('food_library').insert({
+      user_id: currentUser.id, name: name, serving: row.serving,
+      calories: k, protein_g: p, carbs_g: cb, fat_g: f, source: 'manual'
+    });
+  }
+
+  playChime();
+  closeSheet();
   renderFuel();
 }
 
@@ -2147,7 +2436,7 @@ function renderScanResult(data, dataUrl) {
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:13.5px">' + it.name + '</div>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (it.serving || '') +
-          ' · P' + (it.protein_g||0) + ' C' + (it.carbs_g||0) + ' F' + (it.fat_g||0) + '</div>' +
+          '</div><div style="margin-top:5px">' + macroChips(it.protein_g, it.carbs_g, it.fat_g) + '</div>' +
       '</div>' +
       '<div style="font-family:var(--mono);font-size:12.5px">' + (it.calories||0) + '</div>' +
     '</div>').join('');
@@ -2187,7 +2476,7 @@ async function saveScan() {
 
   const mult = window._scanMult || 1;
   const rows = chosen.map(it => ({
-    user_id: currentUser.id, meal_date: today, slot: 'logged',
+    user_id: currentUser.id, meal_date: today, slot: targetSlot || currentSlot(),
     name: it.name, serving: it.serving || null,
     calories: Math.round((it.calories || 0) * mult),
     protein_g: Math.round((it.protein_g || 0) * mult),
@@ -2268,7 +2557,7 @@ function libRows(foods) {
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:13.5px">' + f.name + '</div>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (f.serving || '') +
-          ' · P' + Math.round(f.protein_g||0) + ' C' + Math.round(f.carbs_g||0) + ' F' + Math.round(f.fat_g||0) + '</div>' +
+          '</div><div style="margin-top:5px">' + macroChips(f.protein_g, f.carbs_g, f.fat_g) + '</div>' +
       '</div>' +
       '<div style="font-family:var(--mono);font-size:12.5px">' + Math.round(f.calories||0) + '</div>' +
       '<div style="color:var(--acc);font-size:16px;margin-left:8px">+</div>' +
@@ -2283,7 +2572,7 @@ function starterRows(foods) {
         '<div style="font-size:13.5px;display:flex;align-items:center;gap:7px">' + f.n +
           '<span class="role-dot" style="background:' + roleColor[f.r] + '"></span></div>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + f.s +
-          ' · P' + f.p + ' C' + f.c + ' F' + f.f + '</div>' +
+          '</div><div style="margin-top:5px">' + macroChips(f.p, f.c, f.f) + '</div>' +
       '</div>' +
       '<div style="font-family:var(--mono);font-size:12.5px">' + f.k + '</div>' +
       '<div style="color:var(--acc);font-size:16px;margin-left:8px">+</div>' +
@@ -2307,7 +2596,7 @@ async function logStarter(idx) {
   const today = new Date().toISOString().split('T')[0];
 
   const { error } = await sb.from('meals').insert({
-    user_id: currentUser.id, meal_date: today, slot: 'logged',
+    user_id: currentUser.id, meal_date: today, slot: targetSlot || currentSlot(),
     name: f.n, serving: f.s, calories: f.k,
     protein_g: f.p, carbs_g: f.c, fat_g: f.f
   });
@@ -2338,7 +2627,7 @@ async function logFromLibrary(id) {
   const f = (window._lib || []).find(x => x.id === id);
   if (!f) return;
   const { error: lErr } = await sb.from('meals').insert({
-    user_id: currentUser.id, meal_date: new Date().toISOString().split('T')[0], slot: 'logged',
+    user_id: currentUser.id, meal_date: new Date().toISOString().split('T')[0], slot: targetSlot || currentSlot(),
     name: f.name, serving: f.serving, calories: f.calories,
     protein_g: f.protein_g, carbs_g: f.carbs_g, fat_g: f.fat_g
   });
