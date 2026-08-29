@@ -338,8 +338,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .mc-fill{height:100%;border-radius:3px}
 
 .nut-actions{display:flex;gap:9px;margin-bottom:18px}
-.nut-btn{flex:1;padding:14px;border-radius:13px;font-family:var(--font);font-weight:700;font-size:13.5px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.nut-btn{flex:1;padding:13px 8px;border-radius:13px;font-family:var(--font);font-weight:700;font-size:12.5px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 .nut-btn.scan{background:var(--acc);color:var(--bg);border:none}
 .nut-btn.lib{background:var(--s2);color:var(--text);border:1px solid var(--b2)}
 
@@ -1039,10 +1039,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
 
     <div class="nut-actions">
-      <button class="nut-btn scan" onclick="document.getElementById('foodPhoto').click()">📷 Scan food</button>
+      <button class="nut-btn scan" onclick="document.getElementById('foodCamera').click()">📷 Camera</button>
+      <button class="nut-btn lib" onclick="document.getElementById('foodGallery').click()">🖼️ Gallery</button>
       <button class="nut-btn lib" onclick="openLibrary()">🍲 My foods</button>
     </div>
-    <input type="file" id="foodPhoto" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
+    <input type="file" id="foodCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
+    <input type="file" id="foodGallery" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
 
     <div class="card-block">
       <div class="act-head"><div class="act-title">Today's meals</div><div class="act-count" id="mealCount">—</div></div>
