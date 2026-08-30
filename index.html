@@ -1201,6 +1201,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     <button class="nut-btn scan" style="width:100%;margin-bottom:16px" onclick="openAddFood()">+ Add food</button>
     <input type="file" id="foodCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
     <input type="file" id="foodGallery" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
+    <input type="file" id="labelCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this,'label')">
 
     <div class="card-block" id="insightCard" style="display:none">
       <div class="act-head"><div class="act-title">Today's fuel notes</div><div class="act-count">from your coach</div></div>
@@ -2556,6 +2557,9 @@ function openAddFood(slot) {
     '<div class="choose-row" onclick="closeSheet();document.getElementById(\'foodGallery\').click()">' +
       '<div class="choose-icon">🖼️</div><div><div class="choose-title">From gallery</div>' +
       '<div class="choose-sub">Pick an existing photo</div></div></div>' +
+    '<div class="choose-row" onclick="closeSheet();scanLabel()">' +
+      '<div class="choose-icon">🏷️</div><div><div class="choose-title">Scan a label</div>' +
+      '<div class="choose-sub">Protein bars, shakes, packaged food — reads the panel</div></div></div>' +
     '<div class="choose-row" onclick="openLibrary()">' +
       '<div class="choose-icon">🍲</div><div><div class="choose-title">My foods</div>' +
       '<div class="choose-sub">Saved items and suggestions for your diet</div></div></div>' +
@@ -2650,19 +2654,24 @@ function compressImage(file, maxDim, quality) {
   });
 }
 
-async function handleFoodPhoto(input) {
+function scanLabel() {
+  document.getElementById('labelCamera').click();
+}
+
+async function handleFoodPhoto(input, mode) {
   const file = input.files && input.files[0];
   if (!file) return;
   input.value = '';
+  const scanMode = mode === 'label' ? 'label' : 'plate';
 
-  const dataUrl = await compressImage(file, 800, 0.72);
+  const dataUrl = await compressImage(file, scanMode === 'label' ? 1100 : 800, scanMode === 'label' ? 0.82 : 0.72);
   const base64 = dataUrl.split(',')[1];
   const kb = Math.round(base64.length * 0.75 / 1024);
 
   openSheet('<img src="' + dataUrl + '" class="scan-preview">' +
     '<div class="rp-load" style="padding:12px 0 4px">' +
       '<div class="rp-orbit"><span></span><span></span><span></span></div>' +
-      '<div class="rp-msg">' + (pack().plate || 'Looking at your plate…') + '</div>' +
+      '<div class="rp-msg">' + (scanMode === 'label' ? 'Reading the label…' : (pack().plate || 'Looking at your plate…')) + '</div>' +
       '<div class="rp-sub">Compressed to ' + kb + ' KB before sending</div>' +
     '</div>');
 
@@ -2673,6 +2682,7 @@ async function handleFoodPhoto(input) {
       body: JSON.stringify({
         image: base64,
         media_type: 'image/jpeg',
+        mode: scanMode,
         diet: (currentProfile && currentProfile.diet) || 'unspecified'
       })
     });
@@ -2682,13 +2692,13 @@ async function handleFoodPhoto(input) {
     if (!res.ok) throw new Error(data.error || 'Could not read the photo');
     if (!data.items || !data.items.length) {
       playThud();
-      openSheet('<div class="sheet-title">No food spotted</div>' +
+      openSheet('<div class="sheet-title">' + (scanMode === 'label' ? 'Could not read the label' : 'No food spotted') + '</div>' +
         '<div class="sheet-sum">' + (data.note || 'Try a clearer, closer photo.') + '</div>' +
         '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
       return;
     }
     pendingScan = { items: data.items, dataUrl: dataUrl };
-    renderScanResult(data, dataUrl);
+    renderScanResult(data, dataUrl, scanMode);
   } catch (e) {
     playThud();
     openSheet('<div class="sheet-title">Scan failed</div>' +
@@ -2697,7 +2707,7 @@ async function handleFoodPhoto(input) {
   }
 }
 
-function renderScanResult(data, dataUrl) {
+function renderScanResult(data, dataUrl, scanMode) {
   const conf = (data.confidence || 'medium').toLowerCase();
   const rows = data.items.map((it, i) =>
     '<div class="scan-item">' +
@@ -2718,6 +2728,7 @@ function renderScanResult(data, dataUrl) {
     '</div>' +
     (data.note ? '<div class="sheet-rat">' + data.note + '</div>' : '') +
     rows +
+    (scanMode === 'label' ? '' :
     '<div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--b1)">' +
       '<div style="font-size:11.5px;color:var(--muted);margin-bottom:9px">Portion looks off? Scale it.</div>' +
       '<div style="display:flex;gap:6px">' +
@@ -2725,7 +2736,7 @@ function renderScanResult(data, dataUrl) {
           '<button class="mult-btn' + (m === '1' ? ' active' : '') + '" data-m="' + m + '" ' +
           'onclick="setScanMult(' + m + ',this)">' + m + '×</button>').join('') +
       '</div>' +
-    '</div>' +
+    '</div>') +
     '<div class="sheet-actions">' +
       '<button class="btn-cancel" onclick="closeSheet()">Discard</button>' +
       '<button class="btn-apply" onclick="saveScan()">Log it</button>' +
