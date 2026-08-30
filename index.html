@@ -329,6 +329,18 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .mult-btn.active{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
 
 
+.streak-card{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  background:linear-gradient(120deg,rgba(255,94,26,.15),rgba(255,163,46,.06));
+  border:1px solid rgba(255,94,26,.26);border-radius:16px;padding:17px 19px;margin-bottom:14px}
+.sk-left{display:flex;align-items:center;gap:13px}
+.sk-flame{font-size:27px}
+.sk-val{font-family:var(--mono);font-size:31px;font-weight:700;letter-spacing:-1.5px;line-height:1;
+  background:linear-gradient(120deg,var(--forge),var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sk-label{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin-top:3px}
+.sk-sub{font-size:11.5px;color:var(--muted);text-align:right;max-width:44%;line-height:1.45}
+.hm-key{display:flex;align-items:center;font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:10px;padding:0 2px}
+.hm-sw{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}
+
 /* ── ANALYTICS CHARTS ── */
 .range-switch{display:flex;gap:5px;background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:4px;margin-bottom:16px}
 .range-switch button{flex:1;background:none;border:none;color:var(--muted);padding:8px;border-radius:8px;
@@ -353,6 +365,16 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .leg i{width:8px;height:8px;border-radius:2px;display:block}
 .chart-empty{text-align:center;padding:34px 16px;color:var(--muted);font-size:13px}
 
+
+.ins-open{font-size:13.5px;color:var(--acc);font-weight:600;margin-bottom:13px}
+.ins-tip{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--b1)}
+.ins-tip:first-of-type{border-top:none;padding-top:2px}
+.ins-icon{font-size:17px;flex-shrink:0;line-height:1.3}
+.ins-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.ins-text{font-size:12.5px;line-height:1.6;color:var(--muted)}
+.ins-close{margin-top:14px;padding-top:13px;border-top:1px solid var(--b1);
+  font-size:12.5px;font-style:italic;color:var(--text);opacity:.85}
+.ins-close span{color:var(--acc);font-style:normal}
 
 /* ── MEAL SLOTS ── */
 .slot-card{background:linear-gradient(160deg,rgba(30,26,22,.66),rgba(18,15,13,.66));backdrop-filter:blur(8px);border:1px solid var(--b1);border-radius:15px;margin-bottom:11px;overflow:hidden}
@@ -733,6 +755,11 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
       <div class="field"><label>Weight (kg)</label><input type="number" id="onb-weight" placeholder="70"></div>
     </div>
     <div class="onb-row single">
+      <div class="field"><label>How should your coach speak?</label>
+        <select id="onb-region" class="onb-select" onchange="setRegion(this.value)"></select>
+      </div>
+    </div>
+    <div class="onb-row single">
       <div class="field"><label>Diet</label>
         <select id="onb-diet" class="onb-select">
           <option value="omnivore">Omnivore</option>
@@ -1084,6 +1111,24 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
       <button data-r="90" onclick="setRange(90,this)">90 DAYS</button>
     </div>
 
+    <div class="streak-card">
+      <div class="sk-left">
+        <div class="sk-flame">🔥</div>
+        <div>
+          <div class="sk-val" id="streakVal">0</div>
+          <div class="sk-label">day streak</div>
+        </div>
+      </div>
+      <div class="sk-sub" id="streakSub">—</div>
+    </div>
+
+    <div class="chart-card" style="padding:16px">
+      <div class="chart-head" style="padding:0 2px;margin-bottom:10px">
+        <div class="chart-title">Consistency</div>
+      </div>
+      <div id="heatmap"></div>
+    </div>
+
     <div class="metric-grid" id="metricGrid"></div>
 
     <div class="chart-card">
@@ -1156,6 +1201,11 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     <button class="nut-btn scan" style="width:100%;margin-bottom:16px" onclick="openAddFood()">+ Add food</button>
     <input type="file" id="foodCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
     <input type="file" id="foodGallery" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
+
+    <div class="card-block" id="insightCard" style="display:none">
+      <div class="act-head"><div class="act-title">Today's fuel notes</div><div class="act-count">from your coach</div></div>
+      <div id="insightBody"></div>
+    </div>
 
     <div class="card-block" id="suggestCard" style="display:none">
       <div class="act-head"><div class="act-title">What to eat next</div><div class="act-count" id="gapNote">—</div></div>
@@ -1407,6 +1457,12 @@ let onbData = { sports: [], level: null, goal: null, days: null };
 
 function startOnboarding(user) {
   document.getElementById('onboarding').classList.add('active');
+  const rs = document.getElementById('onb-region');
+  if (rs) {
+    rs.innerHTML = Object.keys(REGIONS)
+      .map(k => '<option value="' + k + '"' + (k === region ? ' selected' : '') + '>' + REGIONS[k].label + '</option>')
+      .join('');
+  }
   goStep(1);
   // Wire chip groups
   wireChips('sport-chips', true, v => { onbData.sports = v; });
@@ -1610,6 +1666,7 @@ async function loadDashboard() {
   fillDrawer(goal);
   fillRegionSelect();
   updateRecapChip();
+  renderStreak();
   maybeShowWeeklyRecap();
   const st = document.getElementById('soundToggle');
   const ss = document.getElementById('soundSub');
@@ -1789,10 +1846,12 @@ async function maybeShowWeeklyRecap() {
   const mon = new Date(now); mon.setDate(now.getDate() - ((dow + 6) % 7));
   const key = 'inertia_recap_shown_' + mon.toISOString().split('T')[0];
   if (localStorage.getItem(key)) return;
-  // only on Mon/Tue, and only if last week had activity
-  if (dow !== 1 && dow !== 2) return;
-  const lastMon = new Date(mon); lastMon.setDate(mon.getDate() - 7);
-  const lastSun = new Date(mon); lastSun.setDate(mon.getDate() - 1);
+  // Sunday evening through Tuesday — the natural "week just ended" window
+  const sundayEvening = (dow === 0 && now.getHours() >= 18);
+  if (!sundayEvening && dow !== 1 && dow !== 2) return;
+  let lastMon, lastSun;
+  if (dow === 0) { lastMon = new Date(mon); lastSun = new Date(mon); lastSun.setDate(mon.getDate() + 6); }
+  else { lastMon = new Date(mon); lastMon.setDate(mon.getDate() - 7); lastSun = new Date(mon); lastSun.setDate(mon.getDate() - 1); }
   const { data } = await sb.from('strava_activities')
     .select('id').eq('user_id', currentUser.id)
     .gte('start_date', lastMon.toISOString()).lte('start_date', lastSun.toISOString()).limit(1);
@@ -1812,6 +1871,123 @@ async function updateRecapChip() {
   const km = (data || []).reduce((t,a) => t + (a.distance_m||0), 0) / 1000;
   const n = (data || []).length;
   sub.textContent = n ? (km.toFixed(1) + ' km across ' + n + ' session' + (n>1?'s':'')) : 'Nothing logged yet this week';
+}
+
+// ═══════════════════════ STREAK & MILESTONES ═══════════════════════
+const MILESTONES = [
+  { d:3,   t:'Three days in',      r:'Text someone right now and tell them you started. Saying it out loud makes it real.', e:'📣' },
+  { d:7,   t:'One full week',      r:'Go buy that chocolatey protein bar. You have earned the cocoa, fair and square.', e:'🍫' },
+  { d:14,  t:'Two weeks straight', r:'Treat yourself to a proper meal out tonight. No macro guilt, no logging. Just eat.', e:'🍽️' },
+  { d:21,  t:'Three weeks',        r:'Habits form around here. Buy new socks or a cap — small reward, big signal.', e:'🧦' },
+  { d:30,  t:'A full month',       r:'Buy the thing you have been eyeing. Jersey, goggles, bottle. Your call, you earned it.', e:'🎁' },
+  { d:50,  t:'Fifty days',         r:'Take a photo at your favourite training spot and send it to someone who doubted you.', e:'📸' },
+  { d:75,  t:'Seventy-five days',  r:'Book a sports massage. Your legs have carried you this far — pay them back.', e:'💆' },
+  { d:100, t:'One hundred days',   r:'Post it. Tell everyone. Very few people get here and you are one of them.', e:'🏆' },
+  { d:150, t:'150 days',           r:'Plan a destination ride or run. Somewhere new. You are fit enough now.', e:'🗺️' },
+  { d:200, t:'200 days',           r:'Sign up for the next race, whatever it is. You are not the same athlete who started.', e:'🎫' }
+];
+
+async function computeStreak() {
+  if (!currentUser) return { streak: 0, best: 0, days: [] };
+  const from = new Date(); from.setDate(from.getDate() - 220); from.setHours(0,0,0,0);
+  const fromKey = from.toISOString().split('T')[0];
+
+  const [{ data: acts }, { data: sess }] = await Promise.all([
+    sb.from('strava_activities').select('start_date').eq('user_id', currentUser.id).gte('start_date', from.toISOString()),
+    sb.from('sessions').select('session_date,sport,status').eq('user_id', currentUser.id).gte('session_date', fromKey)
+  ]);
+
+  const active = new Set((acts || []).map(a => (a.start_date || '').split('T')[0]));
+  (sess || []).forEach(s => { if (s.status === 'done') active.add(s.session_date); });
+  const restDays = new Set((sess || []).filter(s => s.sport === 'rest').map(s => s.session_date));
+
+  // a day counts if you trained, or it was a scheduled rest day
+  const counts = d => active.has(d) || restDays.has(d);
+
+  let streak = 0;
+  const cur = new Date(); cur.setHours(0,0,0,0);
+  // today not yet done shouldn't break the streak
+  if (!counts(cur.toISOString().split('T')[0])) cur.setDate(cur.getDate() - 1);
+  while (counts(cur.toISOString().split('T')[0])) {
+    streak++; cur.setDate(cur.getDate() - 1);
+    if (streak > 400) break;
+  }
+
+  // 90-day grid for the heatmap
+  const days = [];
+  for (let i = 89; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    const k = d.toISOString().split('T')[0];
+    days.push({ k, d, on: active.has(k), rest: restDays.has(k) && !active.has(k) });
+  }
+
+  return { streak, days };
+}
+
+async function renderStreak() {
+  const { streak, days } = await computeStreak();
+  window._streak = streak;
+
+  const el = document.getElementById('streakVal');
+  if (el) el.textContent = streak;
+  const sub = document.getElementById('streakSub');
+  if (sub) {
+    const next = MILESTONES.find(m => m.d > streak);
+    sub.textContent = next ? (next.d - streak) + ' days to ' + next.t.toLowerCase() : 'uncharted territory';
+  }
+
+  renderHeatmap(days);
+  checkMilestone(streak);
+}
+
+function renderHeatmap(days) {
+  const el = document.getElementById('heatmap');
+  if (!el) return;
+  const cols = 13, cell = 11, gap = 3;
+  const W = cols * (cell + gap), H = 7 * (cell + gap) + 16;
+
+  // pad so the grid starts on a Monday
+  const first = days[0].d.getDay();
+  const pad = (first + 6) % 7;
+
+  let rects = '';
+  days.forEach((x, i) => {
+    const idx = i + pad;
+    const col = Math.floor(idx / 7), row = idx % 7;
+    const fill = x.on ? '#ff5e1a' : x.rest ? '#3a322a' : '#1c1815';
+    const op = x.on ? '0.95' : '1';
+    rects += '<rect x="' + (col * (cell + gap)) + '" y="' + (row * (cell + gap) + 14) +
+             '" width="' + cell + '" height="' + cell + '" rx="2.5" fill="' + fill + '" opacity="' + op + '"/>';
+  });
+
+  const labels = '<text x="0" y="8" fill="#6b6259" font-size="8.5" font-family="monospace">90 DAYS</text>' +
+    '<text x="' + W + '" y="8" fill="#6b6259" font-size="8.5" font-family="monospace" text-anchor="end">TODAY</text>';
+
+  el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet">' +
+    labels + rects + '</svg>' +
+    '<div class="hm-key"><span class="hm-sw" style="background:#1c1815"></span>none' +
+    '<span class="hm-sw" style="background:#3a322a;margin-left:12px"></span>rest' +
+    '<span class="hm-sw" style="background:#ff5e1a;margin-left:12px"></span>trained</div>';
+}
+
+function checkMilestone(streak) {
+  const hit = MILESTONES.filter(m => m.d <= streak).pop();
+  if (!hit) return;
+  const key = 'inertia_ms_' + hit.d;
+  if (localStorage.getItem(key)) return;
+  localStorage.setItem(key, '1');
+  setTimeout(() => {
+    playMilestone();
+    openSheet(
+      '<div style="text-align:center;padding:14px 6px 4px">' +
+        '<div style="font-size:52px;margin-bottom:10px">' + hit.e + '</div>' +
+        '<div class="sheet-title" style="font-size:23px">' + hit.t + '</div>' +
+        '<div style="font-family:var(--mono);font-size:11px;color:var(--acc);letter-spacing:2px;' +
+          'text-transform:uppercase;margin-top:6px">' + hit.d + ' day streak</div>' +
+      '</div>' +
+      '<div class="sheet-rat" style="margin-top:18px;font-size:14px;line-height:1.65">' + hit.r + '</div>' +
+      '<div class="sheet-actions"><button class="btn-apply" onclick="closeSheet()">Claimed</button></div>');
+  }, 700);
 }
 
 // ═══════════════════════ ANALYTICS CHARTS ═══════════════════════
@@ -2137,6 +2313,7 @@ async function renderFuel() {
   set('fNow', Math.round(sum.f) + 'g'); set('fTarget', t.fat + 'g');    bar('fFill', sum.f, t.fat);
 
   renderSlots();
+  renderFuelInsight(sum, t, sess || []);
   renderSuggestions(sum, t);
   renderProteinChart();
 }
@@ -2177,6 +2354,79 @@ function renderSlots() {
 function toggleSlot(id) {
   const el = document.getElementById('slot-' + id);
   if (el) { el.classList.toggle('open'); playTick(); }
+}
+
+// ═══════════════════════ FUEL INSIGHTS ═══════════════════════
+function buildFuelInsight(sum, t, sessions) {
+  const P = pack();
+  const h = new Date().getHours();
+  const gapP = Math.round(Math.max(0, t.protein - sum.p));
+  const gapC = Math.round(Math.max(0, t.carbs - sum.c));
+  const gapK = Math.round(Math.max(0, t.kcal - sum.kcal));
+  const real = (sessions || []).filter(s => s.sport !== 'rest');
+  const sport = real.length ? real[0].sport : null;
+  const mins = real.reduce((a, s) => a + ((s.planned && s.planned.duration_min) || 0), 0);
+  const diet = (currentProfile && currentProfile.diet) || 'omnivore';
+  const eggOk = ['eggetarian','pescatarian','omnivore'].includes(diet);
+
+  const tips = [];
+
+  // training-specific
+  if (sport === 'bike' && mins >= 60) {
+    tips.push(['🚴','Long ride today', 'Eat 60–90g of carbs per hour on the bike. Bananas, dates or a simple electrolyte drink beat anything fancy. Start fuelling at 20 minutes, not when you feel empty.']);
+  } else if (sport === 'run' && mins >= 45) {
+    tips.push(['🏃','Running today', 'Keep the pre-run meal small and low fibre — poha, banana with peanut butter, or two slices of toast about 90 minutes before. Heavy dal right before a run is a bad idea.']);
+  } else if (sport === 'swim') {
+    tips.push(['🏊','Pool session', 'Swimming makes you hungrier than you expect. Have something within 30 minutes of getting out — curd, a shake, or ' + (eggOk ? 'two boiled eggs' : 'sprouts') + ' works.']);
+  } else if (sport === 'strength') {
+    tips.push(['🏋️','Strength day', 'Protein matters more today than carbs. Spread it across meals rather than dumping it all at dinner — your body can only use so much at once.']);
+  } else if (!real.length) {
+    tips.push(['😴','Rest day', 'Lower carbs, keep protein high. Recovery is when the adaptation actually happens, and protein is what builds it.']);
+  }
+
+  // macro gaps
+  if (gapP > 40) {
+    tips.push(['🥛','Protein is lagging', gapP + 'g still to go. ' + (eggOk ? 'Three eggs, ' : '') + 'a scoop of whey, 150g paneer or a bowl of soya chunks each get you a big chunk of that in one go.']);
+  } else if (gapP > 15 && h >= 18) {
+    tips.push(['🌙','Evening protein top-up', 'You are ' + gapP + 'g short. Hung curd or a shake before bed closes it without sitting heavy on your stomach.']);
+  }
+  if (gapC > 120 && mins >= 45) {
+    tips.push(['🍚','Carbs are low for the load', 'You trained ' + mins + ' minutes today and are ' + gapC + 'g of carbs short. Rice, roti or khichdi at the next meal, no guilt — this is fuel, not indulgence.']);
+  }
+  if (gapK < 100 && sum.kcal > 0) {
+    tips.push(['✅','You are on target', 'Calories and macros are close to where they should be. Nothing to fix — just keep hydrating.']);
+  }
+
+  // time-of-day nudge
+  if (h >= 11 && sum.kcal < t.kcal * 0.2) {
+    tips.push(['⏰','Eating late today', 'You are well behind on intake for this hour. Skipping meals then cramming at night is the fastest way to sleep badly and train worse tomorrow.']);
+  }
+
+  // generic wisdom if nothing else fired
+  if (!tips.length) {
+    tips.push(['💧','Hydration counts too', 'Aim for 3 litres on training days. Add a pinch of salt and lime to one bottle — Bengaluru heat pulls more out of you than you think.']);
+  }
+
+  return { opener: P.fuelOpen || 'Right then —', closer: P.fuelClose || 'Eat well, train well.',
+           quip: P.fuelQuip || '', tips: tips.slice(0, 3) };
+}
+
+function renderFuelInsight(sum, t, sessions) {
+  const card = document.getElementById('insightCard');
+  const body = document.getElementById('insightBody');
+  if (!card || !body) return;
+  const ins = buildFuelInsight(sum, t, sessions);
+
+  body.innerHTML =
+    '<div class="ins-open">' + ins.opener + '</div>' +
+    ins.tips.map(t2 =>
+      '<div class="ins-tip">' +
+        '<div class="ins-icon">' + t2[0] + '</div>' +
+        '<div><div class="ins-title">' + t2[1] + '</div>' +
+        '<div class="ins-text">' + t2[2] + '</div></div>' +
+      '</div>').join('') +
+    '<div class="ins-close">' + ins.closer + (ins.quip ? ' <span>' + ins.quip + '</span>' : '') + '</div>';
+  card.style.display = 'block';
 }
 
 // ── suggestions: close today's biggest gap from foods you actually have ──
@@ -2877,6 +3127,15 @@ async function buildRecapHtml() {
     '</div>').join('');
 
   const longest = list.slice().sort((a,b) => (b.distance_m||0) - (a.distance_m||0))[0];
+  const missed = (sess || []).filter(s => s.sport !== 'rest' && s.status !== 'done');
+  const shortfall = missed.length
+    ? '<div class="pc-standout" style="border-left-color:#e8506b">' +
+      '<div class="pc-standout-label" style="color:#e8506b">Fell short</div>' +
+      '<div class="pc-standout-text">' + missed.length + ' session' + (missed.length > 1 ? 's' : '') +
+      ' did not happen — ' + [...new Set(missed.map(m => m.sport))].join(', ') +
+      '. Not a disaster. Just information.</div></div>'
+    : '';
+
   const standout = longest
     ? '<div class="pc-standout"><div class="pc-standout-label">Standout</div>' +
       '<div class="pc-standout-text">' + (longest.name || longest.sport) + ' — ' +
@@ -2907,7 +3166,7 @@ async function buildRecapHtml() {
           doneCount + ' / ' + plannedCount + '</div></div>' +
       '</div>' +
       '<div class="pc-sports">' + sportRows + '</div>' +
-      standout +
+      standout + shortfall +
       '<div class="pc-line">' + line + '</div>' +
     '</div></div>';
 }
@@ -3095,7 +3354,7 @@ function goView(name, btn) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (name === 'plan') { renderPlanView(); renderRevisions(); }
   if (name === 'fuel') renderFuel();
-  if (name === 'progress') renderCharts();
+  if (name === 'progress') { renderCharts(); renderStreak(); }
 
 }
 
@@ -3274,7 +3533,8 @@ const REGIONS = {
       quiet: ['Quiet week. Happens to everyone — the next one is yours.','Small week, no drama. The shoes are still by the door.']
     },
     loading: ['Working on it…','Reading your plan and your actuals.','Doing the maths on your week.'],
-    food: 'Opening your foods…', plate: 'Looking at your plate…', saving: 'Locking it in…'
+    food: 'Opening your foods…', plate: 'Looking at your plate…', saving: 'Locking it in…',
+    fuelOpen: 'Right then —', fuelClose: 'Eat well, train well.', fuelQuip: 'Fuel first, hero later.'
   },
 
   bengaluru: {
@@ -3292,7 +3552,8 @@ const REGIONS = {
       quiet: ['Quiet week macha. Happens — next one is yours.','Small week, no drama boss. Shoes still by the door.']
     },
     loading: ['Swalpa adjust maadi…','Macha, hold on — coach is thinking.','One minute guru, doing the maths.'],
-    food: 'Pulling up your food macha…', plate: 'Nodta idini… what is on the plate?', saving: 'Locking it in macha…'
+    food: 'Pulling up your food macha…', plate: 'Nodta idini… what is on the plate?', saving: 'Locking it in macha…',
+    fuelOpen: 'Macha, listen —', fuelClose: 'Full meals, full josh.', fuelQuip: 'Sakkath training needs sakkath food.'
   },
 
   mumbai: {
@@ -3310,7 +3571,8 @@ const REGIONS = {
       quiet: ['Halka week tha boss. Chalta hai — agla tera hai.','Chhota week, tension nahi. Shoes abhi bhi ready hain.']
     },
     loading: ['Thoda adjust kar raha hoon…','Ruk bhau, coach soch raha hai.','Ek minute boss, hisaab lag raha hai.'],
-    food: 'Khana nikal raha hoon boss…', plate: 'Plate dekh raha hoon…', saving: 'Save kar raha hoon bhau…'
+    food: 'Khana nikal raha hoon boss…', plate: 'Plate dekh raha hoon…', saving: 'Save kar raha hoon bhau…',
+    fuelOpen: 'Bhau, dhyan de —', fuelClose: 'Khaana solid, training solid.', fuelQuip: 'Bhook mein koi PR nahi hota.'
   },
 
   delhi: {
@@ -3328,7 +3590,8 @@ const REGIONS = {
       quiet: ['Halka week tha bhai. Hota hai — agla tera.','Chhota week, koi tension nahi. Joote ready hain.']
     },
     loading: ['Thoda adjust kar raha hoon…','Ruk bhai, coach soch raha hai.','Ek minute yaar, hisaab laga raha hoon.'],
-    food: 'Khana nikal raha hoon bhai…', plate: 'Plate dekh raha hoon…', saving: 'Save kar raha hoon yaar…'
+    food: 'Khana nikal raha hoon bhai…', plate: 'Plate dekh raha hoon…', saving: 'Save kar raha hoon yaar…',
+    fuelOpen: 'Bhai, sun —', fuelClose: 'Khaana pura, scene pura.', fuelQuip: 'Khaali pet pe kuch nahi hota yaar.'
   },
 
   punjab: {
@@ -3346,7 +3609,8 @@ const REGIONS = {
       quiet: ['Halka week si paaji. Hunda hai — agla tuhada.','Chhota week, koi gal nahi. Bootan taiyaar ne.']
     },
     loading: ['Thoda adjust kar reha haan…','Ruk paaji, coach soch reha hai.','Ik minute, hisaab laa reha haan.'],
-    food: 'Khana kadh reha haan paaji…', plate: 'Thali vekh reha haan…', saving: 'Save kar reha haan paaji…'
+    food: 'Khana kadh reha haan paaji…', plate: 'Thali vekh reha haan…', saving: 'Save kar reha haan paaji…',
+    fuelOpen: 'Paaji, sun —', fuelClose: 'Khaana changa, training changi.', fuelQuip: 'Bhukhe pet chak de nahi hunda.'
   },
 
   kolkata: {
@@ -3364,7 +3628,8 @@ const REGIONS = {
       quiet: ['Halka week chilo dada. Hoy — porer ta tomar.','Choto week, chinta nei. Juto ekhono ready.']
     },
     loading: ['Ektu adjust korchi…','Dnaraan dada, coach bhabche.','Ek minute, hisheb korchi.'],
-    food: 'Tomar khabar ber korchi dada…', plate: 'Plate ta dekhchi…', saving: 'Save korchi dada…'
+    food: 'Tomar khabar ber korchi dada…', plate: 'Plate ta dekhchi…', saving: 'Save korchi dada…',
+    fuelOpen: 'Dada, shono —', fuelClose: 'Bhalo khao, bhalo cholo.', fuelQuip: 'Khali pete kichu hoy na.'
   },
 
   gujarat: {
@@ -3382,7 +3647,8 @@ const REGIONS = {
       quiet: ['Halko week hato bhai. Thay — aavto tamaro.','Nano week, chinta nahi. Boot taiyar chhe.']
     },
     loading: ['Thodu adjust karu chhu…','Ubha raho bhai, coach vichare chhe.','Ek minute, hisab kari lau.'],
-    food: 'Tamaru khavanu kadhu chhu bhai…', plate: 'Thali joi rahyo chhu…', saving: 'Save karu chhu bhai…'
+    food: 'Tamaru khavanu kadhu chhu bhai…', plate: 'Thali joi rahyo chhu…', saving: 'Save karu chhu bhai…',
+    fuelOpen: 'Bhai, sambhal —', fuelClose: 'Saru khao, saru chalo.', fuelQuip: 'Bhukhya pet kai na thay.'
   },
 
   chennai: {
@@ -3400,7 +3666,8 @@ const REGIONS = {
       quiet: ['Chinna week machan. Nadakkum — adutha week un.','Konjam kammi, prachanai illa. Shoes ready dhaan.']
     },
     loading: ['Konjam adjust panren…','Iru machan, coach yosikkiran.','Oru nimisham, kanakku paakren.'],
-    food: 'Un saapadu edukkuren machan…', plate: 'Plate ah paakren…', saving: 'Save panren machan…'
+    food: 'Un saapadu edukkuren machan…', plate: 'Plate ah paakren…', saving: 'Save panren machan…',
+    fuelOpen: 'Machan, kelu —', fuelClose: 'Nalla saapdu, nalla training.', fuelQuip: 'Pasi la enna panna mudiyum?'
   },
 
   hyderabad: {
@@ -3418,7 +3685,8 @@ const REGIONS = {
       quiet: ['Chinna week anna. Jarugutundi — next di nedi.','Thakkuva week, tension ledu. Shoes ready ga unnay.']
     },
     loading: ['Koncham adjust chestunna…','Aagu anna, coach alochistunnadu.','Oka nimisham, lekka chustunna.'],
-    food: 'Nee food teestunna anna…', plate: 'Plate chustunna…', saving: 'Save chestunna anna…'
+    food: 'Nee food teestunna anna…', plate: 'Plate chustunna…', saving: 'Save chestunna anna…',
+    fuelOpen: 'Anna, vinu —', fuelClose: 'Manchiga tinu, manchiga train chey.', fuelQuip: 'Aakali tho em cheyyalevu.'
   }
 };
 
