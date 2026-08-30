@@ -28,9 +28,32 @@ export async function onRequestPost(context) {
   const mediaType = body.media_type || 'image/jpeg';
   const diet = body.diet || 'unspecified';
   const hint = (body.hint || '').slice(0, 120);
+  const mode = body.mode === 'label' ? 'label' : 'plate';
   if (!image) return json({ error: 'No image provided' }, 400);
 
-  const systemPrompt = [
+  const labelPrompt = [
+    'You read nutrition labels from packaged food photos.',
+    'Return ONLY JSON — no prose, no markdown, no code fences.',
+    '',
+    'SCHEMA:',
+    '{',
+    '  "items": [{"name":"Brand + product name","serving":"the serving size printed on the pack",',
+    '             "calories":N,"protein_g":N,"carbs_g":N,"fat_g":N}],',
+    '  "total": {"calories":N,"protein_g":N,"carbs_g":N,"fat_g":N},',
+    '  "confidence": "high|medium|low",',
+    '  "note": "one short sentence"',
+    '}',
+    '',
+    'RULES:',
+    '- Read the printed nutrition panel. Do not estimate if the numbers are legible.',
+    '- Use the PER SERVING column when both per-serving and per-100g are shown. State which in note.',
+    '- name must include the brand if visible, e.g. "Yoga Bar 20g Protein Bar - Chocolate".',
+    '- Return exactly one item: the product itself.',
+    '- If the panel is blurred or cropped, say so in note and set confidence low.',
+    '- Numbers are integers. Round sensibly.'
+  ].join('\n');
+
+  const platePrompt = [
     'You identify food from a photo and estimate its nutrition.',
     'Return ONLY JSON — no prose, no markdown, no code fences.',
     '',
@@ -52,8 +75,12 @@ export async function onRequestPost(context) {
     '- Be honest in confidence. Portion estimation from a photo is genuinely imprecise.'
   ].join('\n');
 
-  const userText = 'Identify this meal and estimate its nutrition.'
-    + (diet !== 'unspecified' ? ' The person eats ' + diet + '.' : '')
+  const systemPrompt = mode === 'label' ? labelPrompt : platePrompt;
+
+  const userText = (mode === 'label'
+      ? 'Read the nutrition label on this package and return the per-serving values.'
+      : 'Identify this meal and estimate its nutrition.')
+    + (mode === 'plate' && diet !== 'unspecified' ? ' The person eats ' + diet + '.' : '')
     + (hint ? ' They say it is: ' + hint : '');
 
   try {
