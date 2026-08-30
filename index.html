@@ -1743,6 +1743,8 @@ async function loadDashboard() {
   currentGoal = goal;
   fillDrawer(goal);
   fillRegionSelect();
+  const fab = document.getElementById('coachFab');
+  if (fab) fab.classList.remove('hidden');
   updateRecapChip();
   renderStreak();
   maybeShowWeeklyRecap();
