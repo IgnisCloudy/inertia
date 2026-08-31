@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Inertia</title>
+<meta name="description" content="Adaptive training and nutrition for endurance athletes.">
+<meta name="theme-color" content="#0a0806">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Inertia">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -471,6 +480,21 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .conf-low{background:rgba(232,74,63,.13);color:var(--red)}
 
 
+.install-bar{position:fixed;left:14px;right:14px;bottom:14px;z-index:760;display:none;
+  align-items:center;gap:13px;padding:14px 16px;border-radius:16px;
+  background:linear-gradient(120deg,rgba(40,30,22,.97),rgba(24,18,14,.97));
+  backdrop-filter:blur(14px);border:1px solid rgba(255,94,26,.3);
+  box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.install-bar.show{display:flex}
+.ib-icon{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,var(--forge),var(--acc));
+  display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.ib-title{font-size:13.5px;font-weight:600}
+.ib-sub{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.ib-actions{display:flex;gap:7px;margin-left:auto;flex-shrink:0}
+.ib-btn{background:var(--acc);color:var(--bg);border:none;padding:9px 15px;border-radius:10px;
+  font-family:var(--font);font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.ib-x{background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:0 3px}
+
 /* ── COACH ── */
 .coach-fab{position:fixed;right:18px;bottom:20px;z-index:700;width:56px;height:56px;border-radius:19px;
   background:linear-gradient(140deg,var(--forge),var(--acc));border:none;cursor:pointer;
@@ -628,6 +652,8 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .ps-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);
   border:1px solid var(--b1);border-radius:11px;margin-bottom:7px}
 .ps-row.done{opacity:.55}
+.ps-row.missed{opacity:.5;border-color:rgba(232,74,63,.25)}
+.ps-miss{font-size:12px;color:var(--red);flex-shrink:0}
 .ps-row.today{border-color:var(--acc);background:linear-gradient(100deg,rgba(255,94,26,.07),var(--s1))}
 .ps-day{font-family:var(--mono);font-size:10px;color:var(--muted);width:44px;flex-shrink:0}
 .ps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -939,6 +965,19 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
 <div class="sheet" id="replanSheet">
   <div id="sheetContent"></div>
+</div>
+
+<!-- ═══════════════════════ INSTALL ═══════════════════════ -->
+<div class="install-bar" id="installBar">
+  <div class="ib-icon">🔥</div>
+  <div>
+    <div class="ib-title" id="ibTitle">Add Inertia to your home screen</div>
+    <div class="ib-sub" id="ibSub">Opens full screen, launches like an app</div>
+  </div>
+  <div class="ib-actions">
+    <button class="ib-btn" id="ibBtn" onclick="doInstall()">Install</button>
+    <button class="ib-x" onclick="dismissInstall()">✕</button>
+  </div>
 </div>
 
 <!-- ═══════════════════════ COACH ═══════════════════════ -->
@@ -1727,7 +1766,10 @@ async function loadDashboard() {
   const today = new Date();
   document.getElementById('dashDay').textContent = today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' });
 
+  await reconcileMissed();
+
   // Fetch active plan
+
   const { data: plan } = await sb.from('plans').select('*').eq('user_id', currentUser.id).eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle();
   currentPlan = plan;
   if (!plan) return;
@@ -1745,6 +1787,7 @@ async function loadDashboard() {
   fillRegionSelect();
   const fab = document.getElementById('coachFab');
   if (fab) fab.classList.remove('hidden');
+  setTimeout(maybeShowInstall, 3500);
   updateRecapChip();
   renderStreak();
   maybeShowWeeklyRecap();
@@ -1951,6 +1994,102 @@ async function updateRecapChip() {
   const km = (data || []).reduce((t,a) => t + (a.distance_m||0), 0) / 1000;
   const n = (data || []).length;
   sub.textContent = n ? (km.toFixed(1) + ' km across ' + n + ' session' + (n>1?'s':'')) : 'Nothing logged yet this week';
+}
+
+// ── mark past training days that never happened as missed ──
+async function reconcileMissed() {
+  if (!currentUser || !currentPlan) return;
+  const today = new Date().toISOString().split('T')[0];
+  const back = new Date(); back.setDate(back.getDate() - 45);
+  const backKey = back.toISOString().split('T')[0];
+
+  const { data: stale } = await sb.from('sessions')
+    .select('id,session_date,sport')
+    .eq('user_id', currentUser.id)
+    .eq('status', 'planned')
+    .gte('session_date', backKey)
+    .lt('session_date', today);
+
+  if (!stale || !stale.length) return;
+
+  // a day is covered if Strava logged anything that day
+  const { data: acts } = await sb.from('strava_activities')
+    .select('start_date').eq('user_id', currentUser.id)
+    .gte('start_date', back.toISOString());
+  const trained = new Set((acts || []).map(a => (a.start_date || '').split('T')[0]));
+
+  const toMiss = stale.filter(s => s.sport !== 'rest' && !trained.has(s.session_date)).map(s => s.id);
+  const toRest = stale.filter(s => s.sport === 'rest').map(s => s.id);
+
+  if (toMiss.length) {
+    await sb.from('sessions').update({ status: 'missed' })
+      .in('id', toMiss).eq('user_id', currentUser.id);
+  }
+  if (toRest.length) {
+    await sb.from('sessions').update({ status: 'done' })
+      .in('id', toRest).eq('user_id', currentUser.id);
+  }
+}
+
+// ═══════════════════════ INSTALL (PWA) ═══════════════════════
+let deferredPrompt = null;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  maybeShowInstall();
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const bar = document.getElementById('installBar');
+  if (bar) bar.classList.remove('show');
+  playMilestone();
+});
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function maybeShowInstall() {
+  if (isStandalone()) return;
+  if (localStorage.getItem('inertia_install_dismissed') === '1') return;
+  if (!currentUser) return;
+
+  const bar = document.getElementById('installBar');
+  if (!bar) return;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIOS) {
+    // iOS gives no install prompt — walk them through it
+    document.getElementById('ibTitle').textContent = 'Add Inertia to your home screen';
+    document.getElementById('ibSub').textContent = 'Tap Share, then "Add to Home Screen"';
+    document.getElementById('ibBtn').textContent = 'Got it';
+    document.getElementById('ibBtn').onclick = dismissInstall;
+    bar.classList.add('show');
+    return;
+  }
+  if (deferredPrompt) bar.classList.add('show');
+}
+
+async function doInstall() {
+  if (!deferredPrompt) { dismissInstall(); return; }
+  deferredPrompt.prompt();
+  try { await deferredPrompt.userChoice; } catch {}
+  deferredPrompt = null;
+  document.getElementById('installBar').classList.remove('show');
+}
+
+function dismissInstall() {
+  localStorage.setItem('inertia_install_dismissed', '1');
+  const bar = document.getElementById('installBar');
+  if (bar) bar.classList.remove('show');
 }
 
 // ═══════════════════════ AI COACH ═══════════════════════
@@ -3721,13 +3860,14 @@ async function renderPlanView() {
         const day = d.toLocaleDateString('en-US', { weekday:'short' });
         const isToday = s.session_date === todayStr;
         const done = s.status === 'done';
+        const miss = s.status === 'missed';
         const dur = (s.planned && s.planned.duration_min) ? s.planned.duration_min + 'm' : '';
-        return '<div class="ps-row' + (done ? ' done' : '') + (isToday ? ' today' : '') + '">' +
+        return '<div class="ps-row' + (done ? ' done' : '') + (miss ? ' missed' : '') + (isToday ? ' today' : '') + '">' +
           '<div class="ps-day">' + day + ' ' + d.getDate() + '</div>' +
           '<div class="ps-dot" style="background:' + (colors[s.sport] || '#666') + '"></div>' +
           '<div class="ps-title">' + (s.title || s.sport) + '</div>' +
           '<div class="ps-dur">' + dur + '</div>' +
-          (done ? '<div class="ps-check">✓</div>' : '') +
+          (done ? '<div class="ps-check">✓</div>' : miss ? '<div class="ps-miss">✕</div>' : '') +
           '</div>';
       }).join('');
       const doneCount = byWeek[wk].filter(s => s.status === 'done').length;
