@@ -495,6 +495,24 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   font-family:var(--font);font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
 .ib-x{background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:0 3px}
 
+.ds-head{margin-bottom:18px}
+.ds-kicker{font-size:13px;color:var(--acc);font-weight:600}
+.ds-row{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:13px 0;border-top:1px solid var(--b1)}
+.ds-row:first-of-type{border-top:none}
+.ds-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
+.ds-val{font-family:var(--mono);font-size:13.5px;font-weight:700}
+.ds-sign{margin-top:18px;padding-top:16px;border-top:1px solid var(--b1);
+  font-size:14px;font-style:italic;opacity:.9;text-align:center}
+
+.pick-row{display:flex;gap:6px;flex-wrap:wrap}
+.pick{flex:1;min-width:62px;background:var(--s2);border:1px solid var(--b2);color:var(--muted);
+  padding:10px 6px;border-radius:10px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:.15s}
+.pick.on{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
+.es-delete{width:100%;background:none;border:1px solid rgba(232,74,63,.3);color:var(--red);
+  padding:11px;border-radius:11px;font-family:var(--font);font-size:12.5px;cursor:pointer;margin-top:9px}
+.es-delete:hover{background:rgba(232,74,63,.08)}
+
 /* ── COACH ── */
 .coach-fab{position:fixed;right:18px;bottom:20px;z-index:700;width:56px;height:56px;border-radius:19px;
   background:linear-gradient(140deg,var(--forge),var(--acc));border:none;cursor:pointer;
@@ -651,6 +669,8 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
 .ps-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);
   border:1px solid var(--b1);border-radius:11px;margin-bottom:7px}
+.ps-row.editable{cursor:pointer;transition:border-color .15s}
+.ps-row.editable:hover{border-color:var(--b3)}
 .ps-row.done{opacity:.55}
 .ps-row.missed{opacity:.5;border-color:rgba(232,74,63,.25)}
 .ps-miss{font-size:12px;color:var(--red);flex-shrink:0}
@@ -1211,6 +1231,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
       <div class="act-head"><div class="act-title">Phases</div><div class="act-count" id="planRange">—</div></div>
       <div id="phaseList"></div>
     </div>
+    <div style="font-size:11.5px;color:var(--dim);margin-bottom:12px">Tap any session to edit it.</div>
     <div id="planSessions"></div>
   </div>
 
@@ -1788,6 +1809,7 @@ async function loadDashboard() {
   const fab = document.getElementById('coachFab');
   if (fab) fab.classList.remove('hidden');
   setTimeout(maybeShowInstall, 3500);
+  maybeShowDaySummary();
   updateRecapChip();
   renderStreak();
   maybeShowWeeklyRecap();
@@ -2029,6 +2051,178 @@ async function reconcileMissed() {
     await sb.from('sessions').update({ status: 'done' })
       .in('id', toRest).eq('user_id', currentUser.id);
   }
+}
+
+// ═══════════════════════ EDIT A SESSION ═══════════════════════
+let editingSession = null;
+
+async function openSessionEdit(id) {
+  if (!currentUser) return;
+  playTick();
+  const { data } = await sb.from('sessions').select('*').eq('id', id).eq('user_id', currentUser.id).maybeSingle();
+  if (!data) return;
+  editingSession = data;
+
+  const p = data.planned || {};
+  const sports = ['run','bike','swim','strength','rest'];
+  const inten = ['easy','moderate','hard','rest'];
+  const d = new Date(data.session_date);
+
+  openSheet(
+    '<div class="sheet-title">Edit session</div>' +
+    '<div class="sheet-sum" style="margin-bottom:18px">' +
+      d.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' }) + '</div>' +
+
+    '<div class="mf-field" style="margin-bottom:13px"><label>Sport</label>' +
+      '<div class="pick-row">' + sports.map(s =>
+        '<button class="pick' + (s === data.sport ? ' on' : '') + '" data-sport="' + s + '" ' +
+        'onclick="pickSport(this)">' + s + '</button>').join('') + '</div></div>' +
+
+    '<div class="mf-field" style="margin-bottom:13px"><label>Session name</label>' +
+      '<input id="esTitle" value="' + String(data.title || '').replace(/"/g, '&quot;') + '"></div>' +
+
+    '<div class="mf-grid">' +
+      '<div class="mf-field"><label>Duration (min)</label>' +
+        '<input id="esDur" type="number" inputmode="numeric" value="' + (p.duration_min || 0) + '"></div>' +
+      '<div class="mf-field"><label>Distance (km)</label>' +
+        '<input id="esDist" type="number" inputmode="decimal" value="' + (p.distance_km || '') + '" placeholder="optional"></div>' +
+    '</div>' +
+
+    '<div class="mf-field" style="margin-bottom:13px"><label>Intensity</label>' +
+      '<div class="pick-row">' + inten.map(s =>
+        '<button class="pick' + (s === (p.intensity || 'easy') ? ' on' : '') + '" data-int="' + s + '" ' +
+        'onclick="pickIntensity(this)">' + s + '</button>').join('') + '</div></div>' +
+
+    '<div class="mf-field" style="margin-bottom:6px"><label>Notes</label>' +
+      '<input id="esNotes" value="' + String(p.notes || '').replace(/"/g, '&quot;') + '"></div>' +
+
+    '<div class="sheet-actions">' +
+      '<button class="btn-cancel" onclick="closeSheet()">Cancel</button>' +
+      '<button class="btn-apply" onclick="saveSessionEdit()">Save</button>' +
+    '</div>' +
+    '<button class="es-delete" onclick="deleteSession()">Remove this session</button>');
+}
+
+function pickSport(btn) {
+  document.querySelectorAll('.pick[data-sport]').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on'); playTick();
+}
+function pickIntensity(btn) {
+  document.querySelectorAll('.pick[data-int]').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on'); playTick();
+}
+
+async function saveSessionEdit() {
+  if (!editingSession) return;
+  const sport = (document.querySelector('.pick[data-sport].on') || {}).dataset?.sport || editingSession.sport;
+  const intensity = (document.querySelector('.pick[data-int].on') || {}).dataset?.int || 'easy';
+  const dur = parseInt(document.getElementById('esDur').value) || 0;
+  const distRaw = document.getElementById('esDist').value;
+  const dist = distRaw === '' ? null : parseFloat(distRaw);
+
+  const planned = Object.assign({}, editingSession.planned || {}, {
+    duration_min: dur,
+    intensity: sport === 'rest' ? 'rest' : intensity,
+    notes: document.getElementById('esNotes').value.trim()
+  });
+  if (dist !== null && !isNaN(dist)) planned.distance_km = dist; else delete planned.distance_km;
+
+  const { error } = await sb.from('sessions').update({
+    sport: sport,
+    title: document.getElementById('esTitle').value.trim() || sport,
+    planned: planned,
+    source: 'manual'
+  }).eq('id', editingSession.id).eq('user_id', currentUser.id);
+
+  if (error) {
+    playThud();
+    openSheet('<div class="sheet-title">Could not save</div><div class="sheet-sum">' + error.message + '</div>' +
+      '<div class="sheet-actions"><button class="btn-cancel" onclick="closeSheet()">Close</button></div>');
+    return;
+  }
+  playSuccess();
+  editingSession = null;
+  closeSheet();
+  await loadDashboard();
+  renderPlanView();
+}
+
+async function deleteSession() {
+  if (!editingSession) return;
+  const { error } = await sb.from('sessions').delete()
+    .eq('id', editingSession.id).eq('user_id', currentUser.id);
+  if (error) { playThud(); return; }
+  playTick();
+  editingSession = null;
+  closeSheet();
+  await loadDashboard();
+  renderPlanView();
+}
+
+// ═══════════════════════ END OF DAY SUMMARY ═══════════════════════
+const DAY_SIGNOFF = {
+  great: ['Sleep well. You earned it.','Solid day. Do it again tomorrow.','That is how it is done. Rest up.'],
+  ok:    ['Decent day. Tomorrow is another one.','Not perfect, but you moved. That counts.','Good enough. Keep the chain going.'],
+  thin:  ['Tomorrow is right there. No drama.','One quiet day does not undo anything.','Rest, reset, go again.']
+};
+
+async function maybeShowDaySummary() {
+  if (!currentUser) return;
+  const now = new Date();
+  if (now.getHours() < 20) return;                      // evenings only
+  const key = 'inertia_day_' + now.toISOString().split('T')[0];
+  if (localStorage.getItem(key)) return;
+
+  const today = now.toISOString().split('T')[0];
+  const [{ data: sess }, { data: meals }, { data: acts }] = await Promise.all([
+    sb.from('sessions').select('sport,title,status,planned').eq('user_id', currentUser.id).eq('session_date', today),
+    sb.from('meals').select('calories,protein_g,carbs_g,fat_g').eq('user_id', currentUser.id).eq('meal_date', today),
+    sb.from('strava_activities').select('sport,name,distance_m,moving_time_s')
+      .eq('user_id', currentUser.id).gte('start_date', today + 'T00:00:00')
+  ]);
+
+  const planned = (sess || []).filter(s => s.sport !== 'rest');
+  const done = planned.filter(s => s.status === 'done');
+  const nut = (meals || []).reduce((a, m) => ({
+    k: a.k + (m.calories||0), p: a.p + (m.protein_g||0)
+  }), { k:0, p:0 });
+
+  // nothing happened at all — don't bother them
+  if (!planned.length && !(acts || []).length && !(meals || []).length) return;
+  localStorage.setItem(key, '1');
+
+  const t = computeTargets(sess || []);
+  const pPct = Math.round((nut.p / Math.max(1, t.protein)) * 100);
+  const kPct = Math.round((nut.k / Math.max(1, t.kcal)) * 100);
+  const trainedKm = (acts || []).reduce((a, x) => a + (x.distance_m||0), 0) / 1000;
+
+  const sessionOk = !planned.length || done.length === planned.length;
+  const fuelOk = pPct >= 80;
+  const bucket = (sessionOk && fuelOk) ? 'great' : (sessionOk || fuelOk || trainedKm > 0) ? 'ok' : 'thin';
+  const sign = DAY_SIGNOFF[bucket][Math.floor(Math.random() * DAY_SIGNOFF[bucket].length)];
+  const P = pack();
+
+  const row = (label, value, ok) =>
+    '<div class="ds-row"><div class="ds-label">' + label + '</div>' +
+    '<div class="ds-val" style="color:' + (ok ? 'var(--green)' : 'var(--muted)') + '">' + value + '</div></div>';
+
+  setTimeout(() => {
+    playSwell();
+    openSheet(
+      '<div class="ds-head">' +
+        '<div class="ds-kicker">' + (P.fuelOpen || 'Right then —') + '</div>' +
+        '<div class="sheet-title" style="font-size:22px;margin-top:4px">How today went</div>' +
+        '<div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px">' +
+          now.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' }) + '</div>' +
+      '</div>' +
+      row('Sessions', planned.length ? done.length + ' of ' + planned.length + ' done' : 'rest day', sessionOk) +
+      (trainedKm > 0 ? row('Distance', trainedKm.toFixed(1) + ' km logged', true) : '') +
+      row('Calories', Math.round(nut.k) + ' / ' + t.kcal + '  (' + kPct + '%)', kPct >= 80) +
+      row('Protein', Math.round(nut.p) + 'g / ' + t.protein + 'g  (' + pPct + '%)', fuelOk) +
+      row('Streak', (window._streak || 0) + ' days', (window._streak || 0) > 0) +
+      '<div class="ds-sign">' + sign + '</div>' +
+      '<div class="sheet-actions"><button class="btn-apply" onclick="closeSheet()">Goodnight</button></div>');
+  }, 1200);
 }
 
 // ═══════════════════════ INSTALL (PWA) ═══════════════════════
@@ -3862,7 +4056,8 @@ async function renderPlanView() {
         const done = s.status === 'done';
         const miss = s.status === 'missed';
         const dur = (s.planned && s.planned.duration_min) ? s.planned.duration_min + 'm' : '';
-        return '<div class="ps-row' + (done ? ' done' : '') + (miss ? ' missed' : '') + (isToday ? ' today' : '') + '">' +
+        return '<div class="ps-row editable' + (done ? ' done' : '') + (miss ? ' missed' : '') + (isToday ? ' today' : '') +
+          '" onclick="openSessionEdit(\'' + s.id + '\')">' +
           '<div class="ps-day">' + day + ' ' + d.getDate() + '</div>' +
           '<div class="ps-dot" style="background:' + (colors[s.sport] || '#666') + '"></div>' +
           '<div class="ps-title">' + (s.title || s.sport) + '</div>' +
