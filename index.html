@@ -1079,6 +1079,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   <div style="padding:4px 12px 12px">
     <div style="font-size:11px;color:var(--dim);margin-bottom:9px">Tap to preview</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="snd-test" onclick="event.stopPropagation();playIntro()">Intro</button>
       <button class="snd-test" onclick="event.stopPropagation();playTick()">Tick</button>
       <button class="snd-test" onclick="event.stopPropagation();playChime()">Session</button>
       <button class="snd-test" onclick="event.stopPropagation();playSuccess()">Applied</button>
@@ -1447,7 +1448,22 @@ function stopForgeLoop() {
 }
 
 // ─── SPLASH → AUTH ───
+function armIntroSound() {
+  if (window._introPlayed) return;
+  window._introPlayed = true;
+  const a = ctx();
+  if (a && a.state === 'suspended') a.resume().then(playIntro).catch(() => {});
+  else playIntro();
+}
+// browsers block audio until the user interacts, so arm on first touch
+['pointerdown','keydown','touchstart'].forEach(ev =>
+  window.addEventListener(ev, armIntroSound, { once: true, passive: true }));
+
 window.addEventListener('load', async () => {
+  setTimeout(() => {
+    const a = ctx();
+    if (a && a.state === 'running') armIntroSound();
+  }, 120);
   const { data: { session } } = await sb.auth.getSession();
   setTimeout(() => {
     document.getElementById('splash').classList.add('hide');
@@ -3523,6 +3539,59 @@ function voice(freq, at, dur, vol, opts) {
     gain.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(a.destination);
   }
   gain.connect(a.destination);
+}
+
+function playIntro() {                       // splash — whoosh into impact
+  if (!soundOn) return;
+  const a = ctx(); if (!a) return;
+  const t0 = a.currentTime;
+
+  // ── the whoosh: filtered noise sweeping upward ──
+  const len = Math.floor(a.sampleRate * 0.9);
+  const buf = a.createBuffer(1, len, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+
+  const noise = a.createBufferSource();
+  noise.buffer = buf;
+  const nf = a.createBiquadFilter();
+  nf.type = 'bandpass';
+  nf.Q.value = 1.4;
+  nf.frequency.setValueAtTime(280, t0);
+  nf.frequency.exponentialRampToValueAtTime(4200, t0 + 0.52);
+  nf.frequency.exponentialRampToValueAtTime(900, t0 + 0.85);
+
+  const ng = a.createGain();
+  ng.gain.setValueAtTime(0.0001, t0);
+  ng.gain.exponentialRampToValueAtTime(0.16, t0 + 0.34);
+  ng.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.9);
+
+  noise.connect(nf); nf.connect(ng); ng.connect(a.destination);
+  noise.start(t0); noise.stop(t0 + 0.95);
+
+  // ── rising tone under the whoosh ──
+  const sweep = a.createOscillator();
+  sweep.type = 'sawtooth';
+  sweep.frequency.setValueAtTime(90, t0);
+  sweep.frequency.exponentialRampToValueAtTime(660, t0 + 0.5);
+  const sf = a.createBiquadFilter();
+  sf.type = 'lowpass';
+  sf.frequency.setValueAtTime(500, t0);
+  sf.frequency.exponentialRampToValueAtTime(3200, t0 + 0.5);
+  const sg = a.createGain();
+  sg.gain.setValueAtTime(0.0001, t0);
+  sg.gain.exponentialRampToValueAtTime(0.075, t0 + 0.4);
+  sg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.62);
+  sweep.connect(sf); sf.connect(sg); sg.connect(a.destination);
+  sweep.start(t0); sweep.stop(t0 + 0.7);
+
+  // ── impact, timed to the letters landing ──
+  voice(65.41,  0.5,  1.1, 0.13, { type:'sine', detune:0, attack:0.006 });
+  voice(130.81, 0.5,  1.0, 0.09, { type:'triangle', attack:0.006 });
+  voice(261.63, 0.52, 1.5, 0.085,{ type:'triangle', echo:0.19 });
+  voice(392.00, 0.56, 1.5, 0.07, { type:'triangle', echo:0.19 });
+  voice(523.25, 0.60, 1.7, 0.06, { type:'sine',     echo:0.21 });
+  voice(1046.5, 0.66, 1.4, 0.035,{ type:'sine',     echo:0.24 });
 }
 
 function playChime() {                       // session done — warm, resolved
