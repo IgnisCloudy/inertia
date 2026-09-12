@@ -1,7 +1,7 @@
 // Inertia service worker — shell caching only.
 // Never caches API or Supabase calls, so training data is always live.
-const CACHE = 'inertia-v1';
-const SHELL = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'inertia-v2';
+const SHELL = ['/', '/index.html', '/manifest.json', '/legal.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
