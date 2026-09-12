@@ -11,7 +11,7 @@ window.LEGAL = {
 <p class="muted">Last updated: 6 September 2026</p>
 
 <h3>Who runs Inertia</h3>
-<p>Inertia is operated by <strong>[T SHUBHAM]</strong>, based in [Bengaluru, Karnataka, India]. For any privacy question or complaint, contact <strong>[tshubhamagarwal@gmail.com]</strong>. This address also serves as the grievance contact required under India's Digital Personal Data Protection Act, 2023.</p>
+<p>Inertia is operated by <strong>T SHUBHAM</strong>, based in Bengaluru, Karnataka, India. For any privacy question or complaint, contact <strong>tshubhamagarwal@gmail.com</strong>. This address also serves as the grievance contact required under India's Digital Personal Data Protection Act, 2023.</p>
 
 <h3>The short version</h3>
 <p>Inertia collects the information needed to build you a training plan and track it. It is not sold, not shared with advertisers, and not used to profile you for marketing. There is no advertising and no third-party analytics.</p>
@@ -61,7 +61,7 @@ window.LEGAL = {
 
   terms: `
 <h2>Terms of Use</h2>
-<p class="muted">Last updated: REPLACE_DATE</p>
+<p class="muted">Last updated: 6 September 2026</p>
 
 <h3>Agreement</h3>
 <p>By creating an account you agree to these terms. If you do not agree, do not use Inertia.</p>
