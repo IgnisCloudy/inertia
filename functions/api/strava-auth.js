@@ -12,7 +12,7 @@ export async function onRequestGet(context) {
   const userId = url.searchParams.get('state');
   const denied = url.searchParams.get('error');
 
-  const back = q => Response.redirect(origin + '/?' + q, 302);
+  const back = q => Response.redirect(origin + '/app.html?' + q, 302);
 
   if (denied) return back('strava=denied');
   if (!code || !userId) return back('strava=error&msg=' + encodeURIComponent('Missing code or user'));

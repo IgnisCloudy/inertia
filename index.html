@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Inertia · Adaptive training for endurance athletes</title>
+<meta name="description" content="Inertia builds a training block around your race date, then rebuilds it when you miss sessions, travel, or turn up flat. Your fuelling targets move with it.">
+<link rel="canonical" href="https://inertia.app/">
+<meta name="theme-color" content="#0a0806">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Inertia">
+<meta property="og:title" content="Inertia · Adaptive training for endurance athletes">
+<meta property="og:description" content="A training plan that rebuilds itself around the week you actually had, not the one you planned in January.">
+<meta property="og:url" content="https://inertia.app/">
+<meta property="og:image" content="https://inertia.app/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Inertia · Adaptive training for endurance athletes">
+<meta name="twitter:description" content="A training plan that rebuilds itself around the week you actually had, not the one you planned in January.">
+<meta name="twitter:image" content="https://inertia.app/icon-512.png">
+
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/tokens.css">
+<link rel="stylesheet" href="/styles/app.css">
+<link rel="stylesheet" href="/styles/landing.css">
+</head>
+
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="/" aria-label="Inertia home">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><linearGradient id="navRing" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffc857"/><stop offset="1" stop-color="#ff5e1a"/>
+        </linearGradient></defs>
+        <circle cx="16" cy="16" r="13.5" fill="none" stroke="url(#navRing)" stroke-width="1.6" opacity=".55"/>
+        <path d="M 6 10.5 L 19 10.5"  stroke="#ffc857" stroke-width="2.6" stroke-linecap="round" opacity=".75"/>
+        <path d="M 8 16 L 26 16"      stroke="#ff5e1a" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M 11 21.5 L 22 21.5" stroke="#ffa32e" stroke-width="2.6" stroke-linecap="round" opacity=".75"/>
+        <circle cx="24.5" cy="10.5" r="1.7" fill="#ffc857"/>
+      </svg>
+      <span>inertia</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#adapts">How it adapts</a>
+      <a href="#inside">What is inside</a>
+      <a href="#strava">Strava</a>
+      <a href="#questions">Questions</a>
+    </nav>
+    <a class="nav-cta" href="/app.html" data-app-link>Create an account</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero page">
+    <div class="hero-grid">
+      <div class="reveal-up">
+        <p class="eyebrow eyebrow-accent hero-eyebrow">Adaptive endurance training</p>
+        <h1>Your plan moves when <em>your week</em> does.</h1>
+        <p class="hero-sub">Inertia builds your block around race day, then rebuilds it when you
+          miss sessions, travel, or turn up flat.</p>
+        <div class="hero-actions">
+          <a class="cta cta-primary" href="/app.html" data-app-link>Create an account</a>
+          <a class="cta cta-ghost" href="#adapts">See how it adapts</a>
+        </div>
+      </div>
+
+      <!-- Not a mock-up. These are the app's own components, rendered from
+           styles/app.css with representative content. -->
+      <div class="preview reveal-up" aria-label="Example of the Inertia dashboard">
+        <div class="preview-chrome">
+          <span class="preview-label">Example week</span>
+          <span class="preview-label" style="margin-left:auto">Tue, week 7 of 16</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-label">Day of plan</div>
+            <div class="stat-value accent">47</div>
+            <div class="stat-sub">Build phase</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">To goal</div>
+            <div class="stat-value">63d</div>
+            <div class="stat-sub">Outlaw Half</div>
+          </div>
+        </div>
+        <article class="next-card" style="--session-hue:var(--sport-bike)">
+          <p class="next-label">Next session</p>
+          <span class="next-sport bike">Bike</span>
+          <h2 class="next-title">Sweet spot, 3 x 12 min</h2>
+          <p class="next-meta"><span>75 min</span><span>Zone 3</span></p>
+          <p class="next-notes">Moved from Monday. You rode 94 minutes on Sunday, so this one
+            comes in shorter and the intervals stay where they were.</p>
+          <div class="effort">
+            <p class="effort-label">Effort</p>
+            <p class="effort-line">Comfortably hard. You should be able to say four or five words.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PREMISE ═══════════ -->
+  <section class="premise band">
+    <div class="premise-media" aria-hidden="true">
+      <!-- TODO: replace with real photography of an athlete training -->
+      <img src="https://picsum.photos/seed/inertia-open-road-cycling/1920/1080" alt="" loading="lazy" decoding="async" width="1920" height="1080">
+    </div>
+    <div class="page">
+      <div class="premise-inner reveal-up">
+        <p class="premise-statement">Most plans are written once, for an athlete who <b>never has a bad Tuesday</b>.</p>
+        <p class="premise-note">Then work runs late, a cold goes round the house, a flight gets moved,
+          and by week five the plan and your life have stopped speaking to each other. You either
+          follow a schedule that no longer fits, or you stop following one at all.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ HOW IT ADAPTS ═══════════ -->
+  <section class="band page" id="adapts">
+    <div class="seq-grid">
+      <div class="seq-head reveal-up">
+        <h2 class="h2">What happens when the week goes wrong</h2>
+        <p>Nothing silent. Every change to your plan is proposed, explained, and shown as a
+          before and after before it is applied.</p>
+      </div>
+
+      <ol class="seq stagger">
+        <li class="seq-item">
+          <span class="seq-num">01</span>
+          <div>
+            <h3>You describe the race and the life around it</h3>
+            <p>Distance, date, current volume, the days you can train, injuries to work around,
+              and how much time you honestly have. Four steps, once.</p>
+          </div>
+        </li>
+        <li class="seq-item">
+          <span class="seq-num">02</span>
+          <div>
+            <h3>Inertia writes the block and shows its reasoning</h3>
+            <p>Phases, weekly volume, and every session down to the interval, with the thinking
+              behind the structure written in plain language rather than coach shorthand.</p>
+          </div>
+        </li>
+        <li class="seq-item">
+          <span class="seq-num">03</span>
+          <div>
+            <h3>It reads what you actually did</h3>
+            <p>Completed sessions, skipped ones, and anything that landed in Strava. Planned
+              against actual, session by session, with no manual logging.</p>
+          </div>
+        </li>
+        <li class="seq-item">
+          <span class="seq-num">04</span>
+          <div>
+            <h3>It rebuilds, and tells you exactly what changed</h3>
+            <p>When you have drifted far enough to matter, you get a diff. Old session on one
+              side, new session on the other, and the reason it moved. You apply it or you do not.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══════════ WHAT IS INSIDE ═══════════ -->
+  <section class="band page" id="inside">
+    <h2 class="h2 reveal-up" style="margin-bottom:var(--sp-10)">What is inside</h2>
+
+    <div class="bento stagger">
+      <div class="cell cell-lead">
+        <h3>A coach that has already read your plan</h3>
+        <p>Ask why Thursday is easy, whether to race through a training week, or what to do about
+          a calf that has been complaining since Sunday. It answers with your block, your recent
+          sessions and your goal already in front of it, so you are not explaining yourself from
+          scratch every time.</p>
+      </div>
+
+      <div class="cell cell-demo">
+        <div class="macro-hero">
+          <div class="mh-inner">
+            <div class="mh-top">
+              <span class="mh-kcal">2,840</span>
+              <span class="mh-target">of 3,150</span>
+            </div>
+            <p class="mh-sub">Higher today. You have a 75 minute bike and a swim.</p>
+            <div class="mh-bar"><div class="mh-fill" style="width:90%"></div></div>
+            <div class="macro-row">
+              <div class="macro-cell">
+                <div class="mc-label" style="color:var(--macro-p)">Protein</div>
+                <div class="mc-val">142g</div>
+                <div class="mc-goal">of 155g</div>
+                <div class="mc-bar"><div class="mc-fill" style="width:92%;background:var(--macro-p)"></div></div>
+              </div>
+              <div class="macro-cell">
+                <div class="mc-label" style="color:var(--macro-c)">Carbs</div>
+                <div class="mc-val">310g</div>
+                <div class="mc-goal">of 380g</div>
+                <div class="mc-bar"><div class="mc-fill" style="width:82%;background:var(--macro-c)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:var(--sp-4);color:var(--text-2);font-size:var(--fs-sm)">
+          Fuelling targets track the week's load. Photograph a plate or a label to log it.</p>
+      </div>
+
+      <figure class="cell cell-figure">
+        <!-- TODO: replace with real photography, ideally open water or a masters lane -->
+        <img src="https://picsum.photos/seed/inertia-open-water-swim/1200/700" alt="Open water at dawn" loading="lazy" decoding="async" width="1200" height="700">
+        <figcaption>Swim, bike, run and strength in one block, with the sessions balanced against
+          each other rather than stacked side by side.</figcaption>
+      </figure>
+
+      <div class="cell cell-stat">
+        <p class="figure">90 days</p>
+        <p>of training history in a single view, so a rough fortnight reads as a rough fortnight
+          instead of the end of the block.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STRAVA ═══════════ -->
+  <section class="band page" id="strava">
+    <div class="split">
+      <div class="split-media reveal-up">
+        <!-- TODO: replace with real photography of a rider or runner mid-session -->
+        <img src="https://picsum.photos/seed/inertia-long-ride-hills/1000/750" alt="A climb on a long ride" loading="lazy" decoding="async" width="1000" height="750">
+      </div>
+
+      <div class="split-body reveal-up">
+        <div class="strava-lockup">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fc4c02" d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L8.379 0 0 13.828h4.172"/></svg>
+          <span>Connects to Strava</span>
+        </div>
+        <h2 class="h2">Planned against actual, without logging anything</h2>
+        <p>Your activities arrive on their own and land against the session they were meant to be.
+          You see the gap, and so does the plan the next time it rebuilds. Pace, heart rate zones,
+          splits and the route come with them.</p>
+
+        <div class="split-demo">
+          <article class="card-block" style="margin-bottom:0">
+            <div class="act-head">
+              <span class="act-title">Sunday long run</span>
+              <span class="done-badge">Done</span>
+            </div>
+            <div class="pva" style="margin-top:0;padding-top:0;border-top:none">
+              <div class="pva-row">
+                <span class="pva-tag">Planned</span>
+                <span class="pva-val">18.0 km</span>
+              </div>
+              <div class="pva-row">
+                <span class="pva-tag">Actual</span>
+                <span class="pva-val actual">19.4 km</span>
+                <span class="pva-delta over">+1.4 km</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUESTIONS ═══════════ -->
+  <section class="band page" id="questions">
+    <p class="eyebrow eyebrow-accent reveal-up" style="margin-bottom:var(--sp-4)">Before you start</p>
+    <h2 class="h2 reveal-up" style="margin-bottom:var(--sp-10)">Questions worth asking first</h2>
+
+    <div class="qa stagger">
+      <div class="qa-item">
+        <h3>Is this coaching or medical advice?</h3>
+        <p>Neither. Plans are generated by a model and can be wrong. Inertia is not a substitute
+          for a coach, a physiotherapist or a doctor, and you train at your own risk. You are asked
+          to acknowledge this before your first plan is built.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>Do I need a power meter or a heart rate strap?</h3>
+        <p>No. Sessions are prescribed by effort in plain language, so you can run them on feel.
+          If you do wear a monitor, the zone and split detail is there when you want it.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>What happens if I miss a whole week?</h3>
+        <p>The plan notices the drift and offers to rebuild around what is left before race day.
+          Missed work is not simply piled onto next week, and nothing changes until you accept it.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>Which sports does it cover?</h3>
+        <p>Swim, bike, run and strength, as a single block rather than four schedules competing
+          for the same week. Single sport goals work the same way.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>Can I get my data out, or delete it?</h3>
+        <p>Yes to both, from the menu, without writing to anyone. Download exports every row held
+          about you as JSON. Delete removes those rows and clears local storage.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>Are you tracking me?</h3>
+        <p>No advertising, analytics or tracking cookies are set. Storage is used for your login
+          session, your preferences and your coach history. Details in the
+          <a href="/cookies.html">cookie notice</a> and the <a href="/privacy.html">privacy policy</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CLOSE ═══════════ -->
+  <section class="close band page">
+    <div class="reveal-up">
+      <h2>Build the block. Then let it move.</h2>
+      <p>Four questions about your race and your week, and the first version of your plan is
+        waiting on the other side.</p>
+      <div class="hero-actions">
+        <a class="cta cta-primary" href="/app.html" data-app-link>Create an account</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="page foot-inner">
+    <div class="foot-brand">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="16" cy="16" r="13.5" fill="none" stroke="#ff5e1a" stroke-width="1.6" opacity=".5"/>
+        <path d="M 6 10.5 L 19 10.5"  stroke="#ffc857" stroke-width="2.6" stroke-linecap="round" opacity=".75"/>
+        <path d="M 8 16 L 26 16"      stroke="#ff5e1a" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M 11 21.5 L 22 21.5" stroke="#ffa32e" stroke-width="2.6" stroke-linecap="round" opacity=".75"/>
+      </svg>
+      <span>inertia</span>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="/app.html" data-app-link>Open the app</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/cookies.html">Cookies</a>
+    </nav>
+    <p class="foot-legal">Inertia generates training and nutrition guidance using AI. It is not
+      medical advice, it can be wrong, and it does not replace a coach or a clinician. Speak to a
+      doctor before starting a new training programme, and stop if something hurts.</p>
+  </div>
+</footer>
+
+<script>
+/* Nav hairline appears only once the page has moved. */
+const nav = document.getElementById('nav');
+const navSentinel = document.createElement('div');
+navSentinel.setAttribute('aria-hidden', 'true');
+document.body.prepend(navSentinel);
+new IntersectionObserver(
+  ([entry]) => nav.classList.toggle('stuck', !entry.isIntersecting),
+  { rootMargin: '0px' }
+).observe(navSentinel);
+
+/* Scroll reveal. IntersectionObserver rather than a scroll listener, and it
+   does nothing at all when the visitor asks for reduced motion. */
+const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const targets = document.querySelectorAll('.reveal-up, .stagger');
+if (still) {
+  targets.forEach(el => el.classList.add('shown'));
+} else {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('shown');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+  targets.forEach(el => io.observe(el));
+}
+
+/* If there is already a session on this device, the call to action is not
+   "create an account". Reads the stored token key only; no SDK is loaded
+   here, so the landing page stays cheap to render. */
+try {
+  const signedIn = Object.keys(localStorage).some(k => /^sb-.*-auth-token$/.test(k));
+  if (signedIn) {
+    document.querySelectorAll('[data-app-link]').forEach(el => {
+      if (el.classList.contains('foot-links') || el.closest('.foot-links')) return;
+      el.textContent = 'Open Inertia';
+    });
+  }
+} catch (e) { /* storage blocked; the default label is correct anyway */ }
+</script>
+</body>
+</html>

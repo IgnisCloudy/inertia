@@ -67,8 +67,8 @@
 
   /* ── TYPE ──────────────────────────────────────────────────────────────
      Eleven steps replacing the 32 ad-hoc pixel values this app grew. */
-  --font:'Space Grotesk',system-ui,-apple-system,sans-serif;
-  --mono:'Space Mono',ui-monospace,SFMono-Regular,monospace;
+  --font:'Space Grotesk','Grotesk Fallback',system-ui,-apple-system,sans-serif;
+  --mono:'Space Mono','Mono Fallback',ui-monospace,SFMono-Regular,monospace;
 
   --fs-2xs:0.6875rem;  /* 11px — mono labels          */
   --fs-xs:0.75rem;     /* 12px — meta, captions       */
@@ -155,6 +155,23 @@
 }
 
 /* ============================================================================
+   FONT FALLBACK METRICS
+   Space Grotesk arrives from a CDN. Without a metric-matched fallback the
+   page reflows when it swaps in, which is most of the layout shift on a
+   cold load. These overrides make the fallback occupy the same space.
+   ========================================================================= */
+@font-face{
+  font-family:'Grotesk Fallback';
+  src:local('Arial'),local('Helvetica Neue'),local('Liberation Sans');
+  size-adjust:96%;ascent-override:98%;descent-override:24%;line-gap-override:0%;
+}
+@font-face{
+  font-family:'Mono Fallback';
+  src:local('Menlo'),local('Consolas'),local('DejaVu Sans Mono'),local('Courier New');
+  size-adjust:98%;ascent-override:100%;descent-override:26%;line-gap-override:0%;
+}
+
+/* ============================================================================
    BASE
    ========================================================================= */
 
@@ -191,7 +208,7 @@ body::after{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
 
-img,svg,video{max-width:100%;display:block}
+img,svg,video{max-width:100%;height:auto;display:block}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:none}
 a{color:inherit}

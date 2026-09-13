@@ -40,7 +40,7 @@
        first and only thing a new athlete saw. -->
   <aside class="auth-aside">
     <p class="eyebrow eyebrow-accent">Adaptive endurance training</p>
-    <h1 class="auth-aside-title">Your plan changes when <em>your week</em> does.</h1>
+    <h1 class="auth-aside-title">Your plan moves when <em>your week</em> does.</h1>
     <p class="auth-aside-body">Inertia builds a training block around your race date, then rebuilds
       it when you miss a session, travel, or turn up tired. Your fuelling targets move with it.</p>
     <ul class="auth-proof">
@@ -502,7 +502,7 @@
       </div>
       <div class="stat clickable" onclick="goView('plan')">
         <div class="stat-label">To goal</div>
-        <div class="stat-value swim" id="statCountdown">—</div>
+        <div class="stat-value" id="statCountdown">—</div>
         <div class="stat-sub" id="statGoal">—</div>
         <div class="stat-hint">See full plan →</div>
       </div>
@@ -733,6 +733,57 @@ const C = {
   text2:cssToken('--text-2'), text3:cssToken('--text-3'),
 };
 const SPORT_COLORS = { swim:C.swim, bike:C.bike, run:C.run, strength:C.strength };
+
+/* ────────────────────────────────────────────────────────────────────────────
+   MESSAGING
+   Replaces window.alert(). Transient results become toasts; validation
+   answers in place, next to the step the athlete is actually looking at.
+   ──────────────────────────────────────────────────────────────────────── */
+function toast(message, kind) {
+  let wrap = document.querySelector('.toast-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.className = 'toast-wrap';
+    wrap.setAttribute('role', 'status');
+    wrap.setAttribute('aria-live', 'polite');
+    document.body.appendChild(wrap);
+  }
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' ' + kind : '');
+  const body = document.createElement('div');
+  body.className = 'toast-body';
+  body.textContent = message;
+  const x = document.createElement('button');
+  x.className = 'toast-x';
+  x.setAttribute('aria-label', 'Dismiss');
+  x.textContent = '\u00d7';
+  const close = () => {
+    el.classList.add('leaving');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  };
+  x.onclick = close;
+  el.append(body, x);
+  wrap.appendChild(el);
+  setTimeout(close, kind === 'err' ? 7000 : 4500);
+}
+
+function stepMsg(message) {
+  const step = document.querySelector('.onb-step.active');
+  if (!step) { toast(message, 'err'); return; }
+  let el = step.querySelector('.step-msg');
+  if (!el) {
+    el = document.createElement('p');
+    el.className = 'step-msg';
+    el.setAttribute('role', 'alert');
+    const actions = step.querySelector('.onb-actions');
+    actions ? step.insertBefore(el, actions) : step.appendChild(el);
+  }
+  el.textContent = message;
+  el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function clearStepMsg() {
+  document.querySelectorAll('.step-msg').forEach(el => el.remove());
+}
 // ─── SUPABASE CONFIG ───
 const SUPABASE_URL = 'https://wihwxunxgrrkasdnejdg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_EPZ1hVBz7zRAKHN5BnQlJQ_gsJQJjf8';
@@ -1079,6 +1130,7 @@ function wireChips(containerId, multi, cb) {
 }
 
 function goStep(n) {
+  clearStepMsg();
   document.querySelectorAll('.onb-step').forEach(el => el.classList.remove('active'));
   document.querySelector('.onb-step[data-step="' + n + '"]').classList.add('active');
   document.querySelectorAll('.onb-dot').forEach(el => {
@@ -1090,12 +1142,13 @@ function goStep(n) {
 }
 
 function onbNext(from) {
+  clearStepMsg();
   if (from === 1) {
     const age = document.getElementById('onb-age').value;
     const sex = document.getElementById('onb-sex').value;
     const height = document.getElementById('onb-height').value;
     const weight = document.getElementById('onb-weight').value;
-    if (!age || !height || !weight) { alert('Please fill in age, height, and weight'); return; }
+    if (!age || !height || !weight) { stepMsg('Add your age, height and weight so the plan can be scaled to you.'); return; }
     onbData.age = parseInt(age);
     onbData.sex = sex || null;
     onbData.height_cm = parseFloat(height);
@@ -1103,15 +1156,15 @@ function onbNext(from) {
     onbData.diet = document.getElementById('onb-diet').value;
     goStep(2);
   } else if (from === 2) {
-    if (!onbData.sports || onbData.sports.length === 0) { alert('Pick at least one sport'); return; }
-    if (!onbData.level) { alert('Pick your current fitness level'); return; }
+    if (!onbData.sports || onbData.sports.length === 0) { stepMsg('Pick at least one sport to train.'); return; }
+    if (!onbData.level) { stepMsg('Pick the fitness level that describes you today.'); return; }
     goStep(3);
   } else if (from === 3) {
-    if (!onbData.goal) { alert('Pick a goal'); return; }
+    if (!onbData.goal) { stepMsg('Pick a goal so the block has something to build towards.'); return; }
     if (onbData.goal !== 'healthy') {
       onbData.goal_name = document.getElementById('onb-goalname').value.trim();
       onbData.goal_date = document.getElementById('onb-goaldate').value;
-      if (!onbData.goal_date) { alert('Please set a target date for your goal'); return; }
+      if (!onbData.goal_date) { stepMsg('Set the date of your goal so the phases can be timed against it.'); return; }
     }
     goStep(4);
   }
@@ -1129,7 +1182,7 @@ async function onbFinish() {
       '</div>');
     return;
   }
-  if (!onbData.days) { alert('Pick how many days per week you train now'); return; }
+  if (!onbData.days) { stepMsg('Tell us how many days a week you train now.'); return; }
   onbData.injuries = document.getElementById('onb-injuries').value.trim() || 'none';
   onbData.notes = document.getElementById('onb-notes').value.trim();
 
@@ -1220,7 +1273,7 @@ async function onbFinish() {
   } catch (err) {
     stopForgeLoop();
     document.getElementById('generating').classList.remove('active');
-    alert('Something went wrong: ' + err.message + '\n\nYou can try again from your profile.');
+    toast('We could not finish that: ' + err.message + '\nYou can try again from your profile.', 'err');
     document.getElementById('onboarding').classList.add('active');
     goStep(4);
   }
@@ -4264,8 +4317,8 @@ function handleStravaReturn() {
   if (!s) return;
   window.history.replaceState({}, '', window.location.pathname);
   if (s === 'connected') setTimeout(() => syncStrava(), 900);
-  else if (s === 'denied') alert('Strava connection was cancelled.');
-  else if (s === 'error') alert('Strava error: ' + (p.get('msg') || 'unknown'));
+  else if (s === 'denied') toast('Strava connection was cancelled.', 'err');
+  else if (s === 'error') toast('Strava could not connect: ' + (p.get('msg') || 'unknown reason'), 'err');
 }
 
 async function markSessionDone() {

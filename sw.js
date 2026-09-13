@@ -1,10 +1,27 @@
 // Inertia service worker — shell caching only.
 // Never caches API or Supabase calls, so training data is always live.
-const CACHE = 'inertia-v2';
-const SHELL = ['/', '/index.html', '/manifest.json', '/legal.js'];
+const CACHE = 'inertia-v3';
+const SHELL = [
+  '/',
+  '/index.html',
+  '/app.html',
+  '/offline.html',
+  '/manifest.json',
+  '/legal.js',
+  '/styles/tokens.css',
+  '/styles/app.css',
+  '/styles/landing.css',
+  '/styles/legal.css'
+];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      // One missing file must not fail the whole install, so each is added
+      // on its own and a failure is tolerated.
+      .then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => null))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
@@ -32,6 +49,17 @@ self.addEventListener('fetch', e => {
         }
         return res;
       })
-      .catch(() => caches.match(e.request).then(r => r || caches.match('/index.html')))
+      .catch(() =>
+        caches.match(e.request).then(hit => {
+          if (hit) return hit;
+          // A navigation that missed the cache falls back to the right shell:
+          // the app for app routes, the marketing page for everything else.
+          if (e.request.mode === 'navigate') {
+            const shell = url.pathname.startsWith('/app') ? '/app.html' : '/index.html';
+            return caches.match(shell).then(s => s || caches.match('/offline.html'));
+          }
+          return undefined;
+        })
+      )
   );
 });

@@ -86,7 +86,7 @@
   text-wrap:balance;margin-bottom:var(--sp-5);
 }
 .auth-aside-title em{font-style:normal;color:var(--ember-500)}
-.auth-aside-body{color:var(--text-2);font-size:var(--fs-md);max-width:38ch;margin-bottom:var(--sp-8)}
+.auth-aside-body{color:var(--text-2);font-size:var(--fs-md);max-width:48ch;margin-bottom:var(--sp-8)}
 .auth-proof{display:flex;flex-direction:column;gap:var(--sp-4);padding:0;list-style:none}
 .auth-proof li{display:flex;gap:var(--sp-3);align-items:flex-start;font-size:var(--fs-base);color:var(--text-2)}
 .auth-proof b{display:block;color:var(--text-1);font-weight:var(--w-semi);margin-bottom:2px}
@@ -1269,3 +1269,43 @@
 /* ── Utilities that replace one-off inline styles in the markup ──────────── */
 .dash-top-spacer{width:38px;flex-shrink:0}
 .stat-value-sm{font-size:var(--fs-md)}
+
+/* ============================================================================
+   16. MESSAGING
+   The app reported every failure through window.alert(), which is modal,
+   unstyled, and unreadable on a phone mid-session.
+   ========================================================================= */
+.toast-wrap{
+  position:fixed;left:50%;bottom:var(--sp-6);transform:translateX(-50%);
+  z-index:var(--z-toast);display:flex;flex-direction:column;gap:var(--sp-2);
+  width:min(440px,calc(100vw - var(--sp-8)));pointer-events:none;
+}
+.toast{
+  display:flex;align-items:flex-start;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-4);border-radius:var(--r-md);
+  background:var(--ink-2);border:1px solid var(--line-2);box-shadow:var(--el-3);
+  font-size:var(--fs-sm);line-height:var(--lh-snug);color:var(--text-1);
+  pointer-events:auto;animation:toastIn var(--dur-3) var(--ease-spring);
+}
+.toast.leaving{animation:toastOut var(--dur-2) var(--ease-out) forwards}
+.toast.err{border-color:rgba(224,75,63,.4);background:linear-gradient(var(--bad-tint),var(--bad-tint)),var(--ink-2)}
+.toast.ok{border-color:rgba(124,179,66,.4);background:linear-gradient(var(--ok-tint),var(--ok-tint)),var(--ink-2)}
+.toast-body{flex:1;min-width:0;white-space:pre-line}
+.toast-x{color:var(--text-3);font-size:var(--fs-md);line-height:1;padding:0 var(--sp-1);border-radius:var(--r-xs);flex-shrink:0}
+.toast-x:hover{color:var(--text-1)}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(8px)}}
+
+/* Onboarding steps answer in place rather than through a modal dialog. */
+.step-msg{
+  display:flex;align-items:flex-start;gap:var(--sp-2);
+  margin-top:var(--sp-4);padding:var(--sp-3) var(--sp-4);
+  border-radius:var(--r-md);background:var(--bad-tint);
+  border:1px solid rgba(224,75,63,.28);color:var(--bad);
+  font-size:var(--fs-sm);line-height:var(--lh-snug);
+  animation:toastIn var(--dur-2) var(--ease-out);
+}
+
+@media (min-width:900px){
+  .toast-wrap{left:auto;right:var(--sp-8);transform:none;bottom:calc(var(--sp-8) + 72px)}
+}
