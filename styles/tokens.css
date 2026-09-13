@@ -1,0 +1,249 @@
+/* ============================================================================
+   INERTIA — DESIGN TOKENS
+   Single source of truth for the landing page, the app, and the legal pages.
+   Nothing in this file describes a component. Only primitives live here.
+   ========================================================================= */
+
+:root{
+
+  /* ── NEUTRALS ──────────────────────────────────────────────────────────
+     One family, warm-tinted throughout. Never mix in a cool grey. */
+  --ink-0:#0a0806;   /* page ground        */
+  --ink-1:#13100d;   /* flat card          */
+  --ink-2:#1c1815;   /* input, inset       */
+  --ink-3:#26211c;   /* pressed, selected  */
+  --line-1:#2a241e;  /* hairline           */
+  --line-2:#3a322a;  /* control border     */
+  --line-3:#4d4238;  /* hover border       */
+
+  --text-1:#f5f0e8;  /* primary            */
+  --text-2:#a89e93;  /* secondary          */
+  --text-3:#8a8078;  /* tertiary, hints    */
+
+  /* ── BRAND ─────────────────────────────────────────────────────────────
+     Ember is the ONLY brand hue, and it is reserved for brand and action.
+     It never encodes data. See the sport scale below for that. */
+  --ember-300:#ffc857;
+  --ember-400:#ffa32e;
+  --ember-500:#ff5e1a;   /* the accent */
+  --ember-600:#d94a12;
+  --ember-tint:rgba(255,94,26,.12);
+  --ember-tint-strong:rgba(255,94,26,.20);
+  --ember-line:rgba(255,94,26,.28);
+
+  /* ── DATA: SPORT ENCODING ──────────────────────────────────────────────
+     A categorical scale, deliberately disjoint from ember so a chart can
+     never be misread as a call to action. Four hues, all under 80% sat. */
+  --sport-swim:#4f9dc9;      /* blue   */
+  --sport-bike:#8b7fd0;      /* violet */
+  --sport-run:#e0576f;       /* rose   */
+  --sport-strength:#3f9e8c;  /* teal   */
+  --sport-rest:var(--text-3);
+
+  --sport-swim-tint:rgba(79,157,201,.15);
+  --sport-bike-tint:rgba(139,127,208,.15);
+  --sport-run-tint:rgba(224,87,111,.15);
+  --sport-strength-tint:rgba(63,158,140,.15);
+
+  /* ── DATA: MACRO ENCODING ──────────────────────────────────────────────
+     Nutrition macros never share a chart with sports, but they get their own
+     names so a change to one scale can never silently shift the other. */
+  --macro-p:#e0576f;  --macro-p-tint:rgba(224,87,111,.15);
+  --macro-c:#d9a227;  --macro-c-tint:rgba(217,162,39,.15);
+  --macro-f:#4f9dc9;  --macro-f-tint:rgba(79,157,201,.15);
+
+  /* ── DATA: HEART-RATE ZONES ────────────────────────────────────────────
+     A sequential ramp, cool to hot. Ordered perceptually, not by hue wheel. */
+  --zone-1:#5b7a8c;
+  --zone-2:#4f9dc9;
+  --zone-3:#3f9e8c;
+  --zone-4:#d9a227;
+  --zone-5:#e0576f;
+
+  /* ── SEMANTIC STATE ────────────────────────────────────────────────────*/
+  --ok:#7cb342;    --ok-tint:rgba(124,179,66,.13);
+  --warn:#d9a227;  --warn-tint:rgba(217,162,39,.13);
+  --bad:#e04b3f;   --bad-tint:rgba(224,75,63,.12);
+
+  /* ── TYPE ──────────────────────────────────────────────────────────────
+     Eleven steps replacing the 32 ad-hoc pixel values this app grew. */
+  --font:'Space Grotesk',system-ui,-apple-system,sans-serif;
+  --mono:'Space Mono',ui-monospace,SFMono-Regular,monospace;
+
+  --fs-2xs:0.6875rem;  /* 11px — mono labels          */
+  --fs-xs:0.75rem;     /* 12px — meta, captions       */
+  --fs-sm:0.8125rem;   /* 13px — dense body           */
+  --fs-base:0.875rem;  /* 14px — body                 */
+  --fs-md:1rem;        /* 16px — lead body, inputs    */
+  --fs-lg:1.125rem;    /* 18px — card titles          */
+  --fs-xl:1.375rem;    /* 22px — section titles       */
+  --fs-2xl:1.75rem;    /* 28px — screen titles        */
+  --fs-3xl:2.25rem;    /* 36px — big numbers          */
+  --fs-4xl:clamp(2.25rem,5vw,3.5rem);
+  --fs-5xl:clamp(2.75rem,8vw,5.5rem);
+
+  --w-regular:400; --w-medium:500; --w-semi:600; --w-bold:700;
+
+  --lh-tight:1.05;
+  --lh-snug:1.25;
+  --lh-body:1.6;
+  --lh-loose:1.75;
+
+  --tr-tight:-0.03em;   /* display                     */
+  --tr-snug:-0.015em;   /* headings                    */
+  --tr-wide:0.08em;     /* small caps                  */
+  --tr-caps:0.14em;     /* mono eyebrow labels         */
+
+  /* ── SPACE ─────────────────────────────────────────────────────────────
+     4px base. Every margin and pad in the product resolves to one of these. */
+  --sp-1:4px;   --sp-2:8px;   --sp-3:12px;  --sp-4:16px;
+  --sp-5:20px;  --sp-6:24px;  --sp-8:32px;  --sp-10:40px;
+  --sp-12:48px; --sp-16:64px; --sp-20:80px; --sp-24:96px; --sp-32:128px;
+
+  /* ── RADIUS ────────────────────────────────────────────────────────────
+     Six steps replacing nineteen. Inner elements tighter than containers. */
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px; --r-full:999px;
+
+  /* ── ELEVATION ─────────────────────────────────────────────────────────
+     Tinted with the page ground, never flat black. One light source, above. */
+  --el-1:0 1px 2px rgba(8,5,3,.45);
+  --el-2:0 4px 14px -3px rgba(8,5,3,.55);
+  --el-3:0 14px 34px -10px rgba(8,5,3,.65);
+  --el-4:0 28px 64px -16px rgba(8,5,3,.75);
+  --el-ember:0 10px 30px -8px rgba(255,94,26,.38);
+
+  /* ── SURFACE RECIPES ───────────────────────────────────────────────────
+     The raised-glass treatment was copy-pasted at four different alphas
+     across five components. It is defined once, here. */
+  --glass:linear-gradient(160deg,rgba(30,26,22,.70),rgba(18,15,13,.70));
+  --glass-blur:blur(9px);
+  --hairline:rgba(255,255,255,.06);
+  --wash:rgba(255,255,255,.035);
+
+  /* ── MOTION ────────────────────────────────────────────────────────────*/
+  --dur-1:120ms;   /* press feedback        */
+  --dur-2:180ms;   /* hover, colour shift   */
+  --dur-3:260ms;   /* panels, reveals       */
+  --dur-4:420ms;   /* bars, chart fills     */
+  --ease-out:cubic-bezier(.2,.7,.3,1);
+  --ease-in-out:cubic-bezier(.6,0,.3,1);
+  --ease-spring:cubic-bezier(.2,1.3,.35,1);
+
+  /* ── DEPTH ORDER ───────────────────────────────────────────────────────
+     Replaces 700/760/800/801/850/900/901/1000/2000. */
+  --z-below:-1;
+  --z-base:0;
+  --z-raised:10;
+  --z-sticky:100;
+  --z-fab:200;
+  --z-drawer:300;
+  --z-overlay:400;
+  --z-panel:500;
+  --z-modal:600;
+  --z-toast:700;
+  --z-splash:900;
+  --z-skip:1000;
+
+  /* ── LAYOUT ────────────────────────────────────────────────────────────
+     Breakpoints, for reference in @media: 640 / 900 / 1200. */
+  --col-app:560px;      /* the single-column app measure   */
+  --col-read:68ch;      /* legal + prose measure           */
+  --col-wide:1140px;    /* landing sections                */
+  --rail:236px;         /* desktop side navigation         */
+
+  --focus:0 0 0 2px var(--ink-0),0 0 0 4px var(--ember-500);
+}
+
+/* ============================================================================
+   BASE
+   ========================================================================= */
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html{-webkit-text-size-adjust:100%}
+
+body{
+  background:var(--ink-0);
+  color:var(--text-1);
+  font-family:var(--font);
+  font-size:var(--fs-base);
+  line-height:var(--lh-body);
+  min-height:100dvh;
+  overflow-x:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Ambient ground. Radial, not a flat 45° fade, and warm on all three stops
+   so the page never drifts into the purple/blue AI wash. */
+body::before{
+  content:'';position:fixed;inset:0;z-index:var(--z-below);pointer-events:none;
+  background:
+    radial-gradient(950px 620px at 12% -8%, rgba(255,94,26,.11), transparent 62%),
+    radial-gradient(820px 560px at 92% 8%,  rgba(255,163,46,.07), transparent 60%),
+    radial-gradient(900px 680px at 50% 108%,rgba(217,74,18,.06), transparent 62%),
+    linear-gradient(175deg,#12100e 0%,#0d0b0a 42%,var(--ink-0) 100%);
+}
+
+/* Grain. Breaks the digital flatness of large dark fields. */
+body::after{
+  content:'';position:fixed;inset:0;z-index:var(--z-below);pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+img,svg,video{max-width:100%;display:block}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+a{color:inherit}
+
+/* Data is read in columns. Digits must not shift width between frames. */
+.tnum,[data-num]{font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+
+/* ============================================================================
+   SHARED PRIMITIVES
+   Patterns repeated enough times across the product to belong to the system.
+   ========================================================================= */
+
+/* The mono/uppercase/tracked eyebrow. Was redeclared ~25 times. */
+.eyebrow{
+  font-family:var(--mono);
+  font-size:var(--fs-2xs);
+  text-transform:uppercase;
+  letter-spacing:var(--tr-caps);
+  color:var(--text-2);
+}
+.eyebrow-accent{color:var(--ember-500)}
+
+/* Headings own their tracking; large type needs negative, small needs none. */
+.display{font-size:var(--fs-5xl);font-weight:var(--w-bold);line-height:var(--lh-tight);letter-spacing:var(--tr-tight);text-wrap:balance}
+.h1{font-size:var(--fs-4xl);font-weight:var(--w-bold);line-height:var(--lh-tight);letter-spacing:var(--tr-tight);text-wrap:balance}
+.h2{font-size:var(--fs-2xl);font-weight:var(--w-bold);line-height:var(--lh-snug);letter-spacing:var(--tr-snug);text-wrap:balance}
+.h3{font-size:var(--fs-xl);font-weight:var(--w-semi);line-height:var(--lh-snug);letter-spacing:var(--tr-snug)}
+.prose{max-width:var(--col-read);line-height:var(--lh-body);text-wrap:pretty}
+
+/* ── FOCUS ─────────────────────────────────────────────────────────────── */
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--ember-500);outline-offset:3px;border-radius:var(--r-xs)}
+
+.skip-link{
+  position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
+  background:var(--ember-500);color:var(--ink-0);
+  padding:var(--sp-3) var(--sp-5);border-radius:0 0 var(--r-md) 0;
+  font-weight:var(--w-bold);
+}
+.skip-link:focus{left:0}
+
+.visually-hidden{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+/* ── MOTION PREFERENCE ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
