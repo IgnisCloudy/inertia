@@ -1,0 +1,76 @@
+/* ============================================================================
+   INERTIA — LEGAL PAGES
+   Privacy, terms and cookies. These three pages carried three identical
+   copies of their own private token set; they now share the product's.
+   ========================================================================= */
+
+body{padding:var(--sp-8) var(--sp-5) var(--sp-20)}
+.wrap{max-width:var(--col-read);margin:0 auto}
+
+.legal-head{
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding-bottom:var(--sp-5);margin-bottom:var(--sp-6);
+  border-bottom:1px solid var(--line-1);
+}
+.legal-head svg{width:28px;height:28px;flex-shrink:0}
+.legal-head .brand{font-size:var(--fs-lg);font-weight:var(--w-bold);letter-spacing:var(--tr-snug);color:var(--text-1)}
+.legal-head .legal-home{margin-left:auto;font-size:var(--fs-sm);color:var(--text-2);text-decoration:none}
+.legal-head .legal-home:hover{color:var(--ember-500)}
+
+main{line-height:var(--lh-loose)}
+main h2{font-size:var(--fs-2xl);font-weight:var(--w-bold);letter-spacing:var(--tr-snug);margin-bottom:var(--sp-2);text-wrap:balance}
+main h3{font-size:var(--fs-md);font-weight:var(--w-bold);margin:var(--sp-6) 0 var(--sp-2)}
+main h3.warn{color:var(--bad)}
+main p{margin-bottom:var(--sp-3);font-size:var(--fs-base);color:var(--text-1);text-wrap:pretty}
+main ul{margin:0 0 var(--sp-4) var(--sp-5)}
+main li{margin-bottom:var(--sp-2);font-size:var(--fs-base)}
+main a{color:var(--ember-500)}
+main strong{font-weight:var(--w-semi)}
+.muted{color:var(--text-2);font-size:var(--fs-xs)}
+
+.note{
+  background:var(--ink-2);border:1px solid var(--line-1);border-left:3px solid var(--ember-500);
+  border-radius:0 var(--r-md) var(--r-md) 0;
+  padding:var(--sp-4) var(--sp-5);margin:var(--sp-6) 0;font-size:var(--fs-sm);
+}
+
+.legal-nav{
+  display:flex;gap:var(--sp-5);flex-wrap:wrap;
+  margin-top:var(--sp-12);padding-top:var(--sp-5);
+  border-top:1px solid var(--line-1);font-size:var(--fs-sm);
+}
+.legal-nav a{color:var(--text-2);text-decoration:none;transition:color var(--dur-2) var(--ease-out)}
+.legal-nav a:hover{color:var(--ember-500)}
+.legal-nav a[aria-current="page"]{color:var(--text-1);font-weight:var(--w-semi)}
+
+@media (min-width:720px){
+  body{padding:var(--sp-12) var(--sp-8) var(--sp-24)}
+}
+
+/* ============================================================================
+   MESSAGE PAGES
+   404 and offline. Small, branded, and always carrying a way back out.
+   ========================================================================= */
+.msg{min-height:100dvh;display:grid;place-items:center;padding:var(--sp-8) var(--sp-5)}
+.msg-inner{max-width:44ch;text-align:center}
+.msg-code{
+  font-family:var(--mono);font-size:var(--fs-2xs);text-transform:uppercase;
+  letter-spacing:var(--tr-caps);color:var(--ember-500);margin-bottom:var(--sp-4);
+}
+.msg-mark{width:44px;height:44px;margin:0 auto var(--sp-6)}
+.msg h1{
+  font-size:var(--fs-2xl);font-weight:var(--w-bold);letter-spacing:var(--tr-snug);
+  line-height:var(--lh-snug);margin-bottom:var(--sp-3);text-wrap:balance;
+}
+.msg p{color:var(--text-2);margin-bottom:var(--sp-8);text-wrap:pretty}
+.msg-actions{display:flex;flex-wrap:wrap;gap:var(--sp-3);justify-content:center}
+.msg-actions a{
+  display:inline-flex;align-items:center;padding:var(--sp-3) var(--sp-6);
+  border-radius:var(--r-md);font-size:var(--fs-base);font-weight:var(--w-bold);text-decoration:none;
+  transition:background var(--dur-2) var(--ease-out),border-color var(--dur-2) var(--ease-out),transform var(--dur-1) var(--ease-out);
+}
+.msg-actions a:active{transform:translateY(1px)}
+.msg-actions .go{background:var(--ember-500);color:var(--ink-0)}
+.msg-actions .go:hover{background:var(--ember-400)}
+.msg-actions .alt{border:1px solid var(--line-2);color:var(--text-1);font-weight:var(--w-semi)}
+.msg-actions .alt:hover{border-color:var(--line-3);background:var(--ink-1)}
