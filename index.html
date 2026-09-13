@@ -30,6 +30,25 @@
 <link rel="stylesheet" href="/styles/tokens.css">
 <link rel="stylesheet" href="/styles/app.css">
 <link rel="stylesheet" href="/styles/landing.css">
+
+<script>
+/* An Inertia installed before this release still has start_url "/", which is
+   now the marketing page, and an installed app's manifest can take a long
+   time to refresh (on iOS, often never without a reinstall). A standalone
+   launch is unambiguously "open my app", so it goes straight through.
+   Ordinary browser tabs are left alone. /?site opts out. */
+(function () {
+  try {
+    if (new URLSearchParams(location.search).has('site')) return;
+    var standalone =
+      (window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches ||
+                             window.matchMedia('(display-mode: fullscreen)').matches ||
+                             window.matchMedia('(display-mode: minimal-ui)').matches)) ||
+      window.navigator.standalone === true;
+    if (standalone) location.replace('/app.html' + location.search);
+  } catch (e) { /* stay on the marketing page */ }
+})();
+</script>
 </head>
 
 <body>
